@@ -120,7 +120,10 @@ public interface Channel extends Entity {
         GUILD_PRIVATE_THREAD(12),
 
         /** Represents a {@link StageChannel} for hosting events with an audience. */
-        GUILD_STAGE_VOICE(13);
+        GUILD_STAGE_VOICE(13),
+
+        /** Represents a {@link ForumChannel} */
+        GUILD_FORUM(15);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -163,6 +166,56 @@ public interface Channel extends Entity {
                 case 11: return GUILD_PUBLIC_THREAD;
                 case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
+                case 15: return GUILD_FORUM;
+                default: return UNKNOWN;
+            }
+        }
+    }
+
+    /** Represents the flags of a channel. */
+    enum Flag {
+
+        /** Unknown flag. */
+        UNKNOWN(-1),
+
+        /** This thread is pinned in its parent forum channel. */
+        PINNED(2),
+
+        /** This {@link ForumChannel} requires at least one {@link ForumTag} to be set when creating a thread. */
+        REQUIRE_TAG(16);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code Channel.Flag}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Flag(int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return this.value;
+        }
+
+        /**
+         * Gets the flag from its underlying value as represented by Discord. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The flag.
+         */
+        public static Flag of(final int value) {
+            switch (value) {
+                case 2: return PINNED;
+                case 16: return REQUIRE_TAG;
                 default: return UNKNOWN;
             }
         }
