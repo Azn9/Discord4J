@@ -44,7 +44,7 @@ class TimeoutEmissionStrategy implements EmissionStrategy {
         if (timeoutNanos > 0) {
             remaining = timeoutNanos;
         }
-        for (;;) {
+        for (; ; ) {
             Sinks.EmitResult emission = sink.tryEmitNext(element);
             if (emission.isSuccess()) {
                 return true;
@@ -90,7 +90,7 @@ class TimeoutEmissionStrategy implements EmissionStrategy {
         if (timeoutNanos > 0) {
             remaining = timeoutNanos;
         }
-        for (;;) {
+        for (; ; ) {
             Sinks.EmitResult emission = resultSupplier.get();
             if (emission.isSuccess()) {
                 return true;

@@ -70,9 +70,35 @@ import static reactor.function.TupleUtils.function;
 public class Interactions {
 
     private static final Logger log = Loggers.getLogger(Interactions.class);
+    static Function<RestInteraction, InteractionHandler> NOOP_HANDLER_FUNCTION = it -> new InteractionHandler() {
+        @Override
+        public InteractionResponseData response() {
+            return it.acknowledge().response();
+        }
 
+        @Override
+        public Publisher<?> onInteractionResponse(InteractionResponse response) {
+            return Mono.empty();
+        }
+    };
+    static ApplicationCommandDefinition NOOP_DEF = new ApplicationCommandDefinition() {
+        @Override
+        public boolean test(ApplicationCommandInteractionData acid) {
+            return true;
+        }
+
+        @Override
+        public InteractionHandler createResponseHandler(RestInteraction interaction) {
+            return NOOP_HANDLER_FUNCTION.apply(interaction);
+        }
+    };
     private final List<ApplicationCommandDefinition> commands;
     private final List<ApplicationCommandRequestDefinition> createRequests;
+
+    Interactions() {
+        this.commands = new CopyOnWriteArrayList<>();
+        this.createRequests = new CopyOnWriteArrayList<>();
+    }
 
     /**
      * Create a new builder to work with Discord Interactions feature.
@@ -83,9 +109,43 @@ public class Interactions {
         return new Interactions();
     }
 
-    Interactions() {
-        this.commands = new CopyOnWriteArrayList<>();
-        this.createRequests = new CopyOnWriteArrayList<>();
+    /**
+     * Create an interaction handler that only accepts guild interactions, giving you access to methods specific to
+     * {@link GuildInteraction} instances. To create an interaction handler capable of also handling direct messages,
+     * see {@link #createHandler()}.
+     *
+     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link GuildInteraction}
+     * @return an interaction handling function, to be used in methods like
+     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
+     */
+    public static Function<RestInteraction, InteractionHandler> guild(Function<GuildInteraction, InteractionHandler> handlerFunction) {
+        return new InteractionHandlerSpec(handlerFunction, it -> NOOP_HANDLER_FUNCTION.apply(it)).build();
+    }
+
+    /**
+     * Create an interaction handler that only accepts direct message interactions, giving you access to methods
+     * specific to {@link DirectInteraction} instances. To create an interaction handler capable of also handling
+     * guild messages, see {@link #createHandler()}.
+     *
+     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link DirectInteraction}
+     * @return an interaction handling function, to be used in methods like
+     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
+     */
+    public static Function<RestInteraction, InteractionHandler> direct(Function<DirectInteraction,
+            InteractionHandler> handlerFunction) {
+        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), handlerFunction).build();
+    }
+
+    /**
+     * Start building a new interaction handling function, in order to combine guild and direct message handling. Finish
+     * the mapper function by calling {@link InteractionHandlerSpec#build()}. By default this handler does nothing and
+     * methods like {@link InteractionHandlerSpec#guild(Function)} or {@link InteractionHandlerSpec#direct(Function)}
+     * need to be called to add behavior.
+     *
+     * @return a new interaction handler builder
+     */
+    public static InteractionHandlerSpec createHandler() {
+        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), it -> NOOP_HANDLER_FUNCTION.apply(it));
     }
 
     /**
@@ -97,7 +157,8 @@ public class Interactions {
      */
     public Interactions onCommand(Snowflake id,
                                   Function<RestInteraction, InteractionHandler> action) {
-        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(Possible.of(id.asString())), action));
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(Possible.of(id.asString())),
+                action));
         return this;
     }
 
@@ -180,20 +241,6 @@ public class Interactions {
     }
 
     /**
-     * Find the first handler that matches the given {@link InteractionData}.
-     *
-     * @param interactionData an object containing all information related to a single interaction
-     * @return the detected handler, or if found nothing, a handler that does nothing.
-     */
-    public ApplicationCommandDefinition findHandler(InteractionData interactionData) {
-        return interactionData.data().toOptional()
-                .flatMap(acid -> commands.stream()
-                        .filter(it -> it.test(acid))
-                        .findFirst())
-                .orElse(NOOP_DEF);
-    }
-
-    /**
      * Create a Reactor Netty {@link HttpServer} handler to be applied to a single route using a method like
      * {@link HttpServer#route(Consumer)}. This route will accept interactions from Discord when working in endpoint
      * mode.
@@ -216,11 +263,12 @@ public class Interactions {
      * Currently, no signature validation signature is implemented yet in D4J but you may provide your own
      * implementation of {@link InteractionValidator}
      *
-     * @param restClient           the web client used to interact with Discord API
+     * @param restClient the web client used to interact with Discord API
      * @param interactionValidator the validator used to validate incoming requests
      * @return a Reactor Netty server route to handle endpoint-based interactions
      */
-    public ReactorNettyServerHandler buildReactorNettyHandler(RestClient restClient, InteractionValidator interactionValidator) {
+    public ReactorNettyServerHandler buildReactorNettyHandler(RestClient restClient,
+                                                              InteractionValidator interactionValidator) {
         return (serverRequest, serverResponse) -> serverRequest.receive()
                 .aggregate()
                 .asString()
@@ -272,42 +320,17 @@ public class Interactions {
     }
 
     /**
-     * Create an interaction handler that only accepts guild interactions, giving you access to methods specific to
-     * {@link GuildInteraction} instances. To create an interaction handler capable of also handling direct messages,
-     * see {@link #createHandler()}.
+     * Find the first handler that matches the given {@link InteractionData}.
      *
-     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link GuildInteraction}
-     * @return an interaction handling function, to be used in methods like
-     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
+     * @param interactionData an object containing all information related to a single interaction
+     * @return the detected handler, or if found nothing, a handler that does nothing.
      */
-    public static Function<RestInteraction, InteractionHandler> guild(Function<GuildInteraction, InteractionHandler> handlerFunction) {
-        return new InteractionHandlerSpec(handlerFunction, it -> NOOP_HANDLER_FUNCTION.apply(it)).build();
-    }
-
-    /**
-     * Create an interaction handler that only accepts direct message interactions, giving you access to methods
-     * specific to {@link DirectInteraction} instances. To create an interaction handler capable of also handling
-     * guild messages, see {@link #createHandler()}.
-     *
-     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link DirectInteraction}
-     * @return an interaction handling function, to be used in methods like
-     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
-     */
-    public static Function<RestInteraction, InteractionHandler> direct(Function<DirectInteraction,
-            InteractionHandler> handlerFunction) {
-        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), handlerFunction).build();
-    }
-
-    /**
-     * Start building a new interaction handling function, in order to combine guild and direct message handling. Finish
-     * the mapper function by calling {@link InteractionHandlerSpec#build()}. By default this handler does nothing and
-     * methods like {@link InteractionHandlerSpec#guild(Function)} or {@link InteractionHandlerSpec#direct(Function)}
-     * need to be called to add behavior.
-     *
-     * @return a new interaction handler builder
-     */
-    public static InteractionHandlerSpec createHandler() {
-        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), it -> NOOP_HANDLER_FUNCTION.apply(it));
+    public ApplicationCommandDefinition findHandler(InteractionData interactionData) {
+        return interactionData.data().toOptional()
+                .flatMap(acid -> commands.stream()
+                        .filter(it -> it.test(acid))
+                        .findFirst())
+                .orElse(NOOP_DEF);
     }
 
     /**
@@ -318,6 +341,7 @@ public class Interactions {
     }
 
     interface ApplicationCommandRequestDefinition {
+
         ApplicationCommandRequest getRequest();
     }
 
@@ -396,30 +420,6 @@ public class Interactions {
             return action.apply((GuildInteraction) interaction);
         }
     }
-
-    static ApplicationCommandDefinition NOOP_DEF = new ApplicationCommandDefinition() {
-        @Override
-        public boolean test(ApplicationCommandInteractionData acid) {
-            return true;
-        }
-
-        @Override
-        public InteractionHandler createResponseHandler(RestInteraction interaction) {
-            return NOOP_HANDLER_FUNCTION.apply(interaction);
-        }
-    };
-
-    static Function<RestInteraction, InteractionHandler> NOOP_HANDLER_FUNCTION = it -> new InteractionHandler() {
-        @Override
-        public InteractionResponseData response() {
-            return it.acknowledge().response();
-        }
-
-        @Override
-        public Publisher<?> onInteractionResponse(InteractionResponse response) {
-            return Mono.empty();
-        }
-    };
 
     private static class NoopInteractionValidator implements InteractionValidator {
 

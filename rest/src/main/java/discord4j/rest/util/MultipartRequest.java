@@ -70,7 +70,7 @@ public class MultipartRequest<T> {
         return (MessageCreateRequest) jsonPayload;
     }
 
-    public T getJsonPayload() { return jsonPayload; }
+    public T getJsonPayload() {return jsonPayload;}
 
     public List<Tuple2<String, InputStream>> getFiles() {
         return files;

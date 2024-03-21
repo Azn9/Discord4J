@@ -27,7 +27,6 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildScheduledEventUserData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -59,7 +58,7 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
         return Mono.from(store.execute(ReadActions.getStickerById(guildId.asLong(), stickerId.asLong())))
-            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -141,34 +140,34 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getStickersInGuild(guildId.asLong())))
-            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getAutoModRulesInGuild(guildId.asLong())))
-            .map(data -> new AutoModRule(gateway, data));
+                .map(data -> new AutoModRule(gateway, data));
     }
 
     @Override
     public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
         return Mono.from(store.execute(ReadActions.getScheduledEventById(guildId.asLong(), eventId.asLong())))
-            .map(data -> new ScheduledEvent(gateway, data));
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     @Override
     public Flux<ScheduledEvent> getScheduledEvents(Snowflake guildId) {
         return Flux.from(store.execute(ReadActions.getScheduledEventsInGuild(guildId.asLong())))
-            .map(data -> new ScheduledEvent(gateway, data));
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return Flux.from(store.execute(ReadActions.getScheduledEventsUsers(guildId.asLong(), eventId.asLong())))
-            .flatMap(id -> Mono.from(store.execute(ReadActions.getUserById(id.asLong()))))
-            .map(userData -> new ScheduledEventUser(gateway, GuildScheduledEventUserData.builder()
-                .user(userData)
-                .guildScheduledEventId(eventId.asLong())
-                .build(), guildId));
+                .flatMap(id -> Mono.from(store.execute(ReadActions.getUserById(id.asLong()))))
+                .map(userData -> new ScheduledEventUser(gateway, GuildScheduledEventUserData.builder()
+                        .user(userData)
+                        .guildScheduledEventId(eventId.asLong())
+                        .build(), guildId));
     }
 }

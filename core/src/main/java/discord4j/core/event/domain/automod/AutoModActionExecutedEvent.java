@@ -28,7 +28,8 @@ public class AutoModActionExecutedEvent extends Event {
     private final AutoModActionExecution data;
     private final AutoModRuleAction autoModRuleAction;
 
-    public AutoModActionExecutedEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, AutoModActionExecution autoModActionExecution) {
+    public AutoModActionExecutedEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
+                                      AutoModActionExecution autoModActionExecution) {
         super(gateway, shardInfo);
         this.data = autoModActionExecution;
         this.autoModRuleAction = new AutoModRuleAction(gateway, autoModActionExecution.action());
@@ -44,40 +45,12 @@ public class AutoModActionExecutedEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(this.data.guildId());
-    }
-
-    /**
-     * Requests to retrieve the {@link Guild} involved in the event.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
-    }
-
-    /**
      * Gets the automod rule action involved in the event.
      *
      * @return The action of the automod rule.
      */
     public AutoModRuleAction getAction() {
         return autoModRuleAction;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link AutoModRule} related to this event.
-     *
-     * @return The ID of the {@link AutoModRule} related to this event.
-     */
-    public Snowflake getAutoModRuleId() {
-        return Snowflake.of(this.data.ruleId());
     }
 
     /**
@@ -91,21 +64,40 @@ public class AutoModActionExecutedEvent extends Event {
     }
 
     /**
+     * Requests to retrieve the {@link Guild} involved in the event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(this.data.guildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link AutoModRule} related to this event.
+     *
+     * @return The ID of the {@link AutoModRule} related to this event.
+     */
+    public Snowflake getAutoModRuleId() {
+        return Snowflake.of(this.data.ruleId());
+    }
+
+    /**
      * Gets the trigger type of rule which was triggered
      *
      * @return The trigger type of the automod rule.
      */
     public AutoModRule.TriggerType getTriggerType() {
         return AutoModRule.TriggerType.of(this.data.ruleTriggerType());
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link User} who's generated the content which triggered the rule.
-     *
-     * @return The ID of the {@link User} who's triggered the rule.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(this.data.userId());
     }
 
     /**
@@ -119,6 +111,15 @@ public class AutoModActionExecutedEvent extends Event {
     }
 
     /**
+     * Gets the {@link Snowflake} ID of the {@link User} who's generated the content which triggered the rule.
+     *
+     * @return The ID of the {@link User} who's triggered the rule.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(this.data.userId());
+    }
+
+    /**
      * Requests to retrieve the {@link Member} object of the {@link User} involved in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Member} involved in this event.
@@ -126,16 +127,6 @@ public class AutoModActionExecutedEvent extends Event {
      */
     public Mono<Member> getMember() {
         return getClient().getMemberById(getGuildId(), getUserId());
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} involved in this event, if present.
-     * {@link discord4j.core.object.entity.Message} is in.
-     *
-     * @return The ID of the {@link MessageChannel} involved, if present.
-     */
-    public Optional<Snowflake> getChannelId() {
-        return this.data.channelId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -153,10 +144,10 @@ public class AutoModActionExecutedEvent extends Event {
      * Gets the {@link Snowflake} ID of the {@link MessageChannel} involved in this event, if present.
      * {@link discord4j.core.object.entity.Message} is in.
      *
-     * @return the ID of the {@link MessageChannel} involved, if present.
+     * @return The ID of the {@link MessageChannel} involved, if present.
      */
-    public Optional<Snowflake> getMessageId() {
-        return this.data.messageId().toOptional().map(Snowflake::of);
+    public Optional<Snowflake> getChannelId() {
+        return this.data.channelId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -170,6 +161,16 @@ public class AutoModActionExecutedEvent extends Event {
             return Mono.empty();
         }
         return getClient().getMessageById(this.getChannelId().get(), this.getMessageId().get());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} involved in this event, if present.
+     * {@link discord4j.core.object.entity.Message} is in.
+     *
+     * @return the ID of the {@link MessageChannel} involved, if present.
+     */
+    public Optional<Snowflake> getMessageId() {
+        return this.data.messageId().toOptional().map(Snowflake::of);
     }
 
     /**

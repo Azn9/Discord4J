@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.VoiceChannel;
@@ -24,7 +25,6 @@ import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -89,7 +89,8 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
      * @return This spec.
      */
     public LegacyVoiceChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) : Possible.of(Optional.of(parentId.asString())));
+        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) :
+                Possible.of(Optional.of(parentId.asString())));
         return this;
     }
 
@@ -142,15 +143,15 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
     }
 
     @Override
-    public LegacyVoiceChannelEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyVoiceChannelEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

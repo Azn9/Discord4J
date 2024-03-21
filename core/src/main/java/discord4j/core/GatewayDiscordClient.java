@@ -124,26 +124,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Access the parent {@link DiscordClient} capable of performing direct REST API requests and REST entities.
-     *
-     * @return the {@link DiscordClient} that created this {@link GatewayDiscordClient}
-     */
-    public DiscordClient rest() {
-        return discordClient;
-    }
-
-    /**
-     * Returns the set of resources essential to operate on a {@link DiscordClient} for entity manipulation,
-     * scheduling and API communication, like the {@link RestClient}, {@link JacksonResources} and
-     * {@link ReactorResources}.
-     *
-     * @return the {@link RestResources} for the parent {@link DiscordClient}
-     */
-    public CoreResources getCoreResources() {
-        return discordClient.getCoreResources();
-    }
-
-    /**
      * Returns the set of resources essential to build {@link GatewayClient} instances and manage multiple Discord
      * Gateway connections.
      *
@@ -151,17 +131,6 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public GatewayResources getGatewayResources() {
         return gatewayResources;
-    }
-
-    /**
-     * Distributes events to subscribers. Starting from v3.1, the {@link EventDispatcher} is capable of distributing
-     * events from all {@link GatewayClient} connections (shards) that were specified when this
-     * {@link GatewayDiscordClient} was created.
-     *
-     * @return the {@link EventDispatcher} tied to this {@link GatewayDiscordClient}
-     */
-    public EventDispatcher getEventDispatcher() {
-        return gatewayResources.getEventDispatcher();
     }
 
     /**
@@ -205,15 +174,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Returns the {@link RestClient} used to execute REST API requests.
-     *
-     * @return the {@link RestClient} tied to this Gateway client.
-     */
-    public RestClient getRestClient() {
-        return rest();
-    }
-
-    /**
      * Requests to retrieve the webhook represented by the supplied ID. The bot must have the MANAGE_WEBHOOKS
      * permission in the webhook's channel.
      *
@@ -225,6 +185,24 @@ public class GatewayDiscordClient implements EntityRetriever {
         return getRestClient().getWebhookService()
                 .getWebhook(webhookId.asLong())
                 .map(data -> new Webhook(this, data));
+    }
+
+    /**
+     * Returns the {@link RestClient} used to execute REST API requests.
+     *
+     * @return the {@link RestClient} tied to this Gateway client.
+     */
+    public RestClient getRestClient() {
+        return rest();
+    }
+
+    /**
+     * Access the parent {@link DiscordClient} capable of performing direct REST API requests and REST entities.
+     *
+     * @return the {@link DiscordClient} that created this {@link GatewayDiscordClient}
+     */
+    public DiscordClient rest() {
+        return discordClient;
     }
 
     /**
@@ -242,7 +220,6 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .getWebhookWithToken(webhookId.asLong(), token)
                 .map(data -> new Webhook(this, data));
     }
-
 
     /**
      * Requests to retrieve the application info.
@@ -301,6 +278,17 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Returns the set of resources essential to operate on a {@link DiscordClient} for entity manipulation,
+     * scheduling and API communication, like the {@link RestClient}, {@link JacksonResources} and
+     * {@link ReactorResources}.
+     *
+     * @return the {@link RestResources} for the parent {@link DiscordClient}
+     */
+    public CoreResources getCoreResources() {
+        return discordClient.getCoreResources();
+    }
+
+    /**
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildCreateSpec} to be operated on.
@@ -312,37 +300,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Deprecated
     public Mono<Guild> createGuild(final Consumer<? super LegacyGuildCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildCreateSpec mutatedSpec = new LegacyGuildCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
-                })
-                .map(data -> new Guild(this, toGuildData(data)));
-    }
-
-    /**
-     * Requests to create a guild. Properties specifying how to create the guild can be set via the {@code withXxx}
-     * methods of the returned {@link GuildCreateMono}.
-     *
-     * @param name   the name of the guild to create
-     * @param region the region of the guild to create
-     * @return A {@link GuildCreateMono} where, upon successful completion, emits the created {@link Guild}. If an error
-     * is received, it is emitted through the {@code GuildCreateMono}.
-     */
-    public GuildCreateMono createGuild(String name, Region region) {
-        return GuildCreateMono.of(name, region, this);
-    }
-
-    /**
-     * Requests to create a guild.
-     *
-     * @param spec an immutable object that specifies how to create the guild
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> createGuild(GuildCreateSpec spec) {
-        Objects.requireNonNull(spec);
-        return Mono.defer(() -> getRestClient().getGuildService().createGuild(spec.asRequest()))
+                        () -> {
+                            LegacyGuildCreateSpec mutatedSpec = new LegacyGuildCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
+                        })
                 .map(data -> new Guild(this, toGuildData(data)));
     }
 
@@ -363,6 +325,32 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .large(false)
                 .memberCount(1)
                 .build();
+    }
+
+    /**
+     * Requests to create a guild. Properties specifying how to create the guild can be set via the {@code withXxx}
+     * methods of the returned {@link GuildCreateMono}.
+     *
+     * @param name the name of the guild to create
+     * @param region the region of the guild to create
+     * @return A {@link GuildCreateMono} where, upon successful completion, emits the created {@link Guild}. If an error
+     * is received, it is emitted through the {@code GuildCreateMono}.
+     */
+    public GuildCreateMono createGuild(String name, Region region) {
+        return GuildCreateMono.of(name, region, this);
+    }
+
+    /**
+     * Requests to create a guild.
+     *
+     * @param spec an immutable object that specifies how to create the guild
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> createGuild(GuildCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(() -> getRestClient().getGuildService().createGuild(spec.asRequest()))
+                .map(data -> new Guild(this, toGuildData(data)));
     }
 
     /**
@@ -434,11 +422,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Deprecated
     public Mono<User> edit(final Consumer<? super LegacyUserEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyUserEditSpec mutatedSpec = new LegacyUserEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
-                })
+                        () -> {
+                            LegacyUserEditSpec mutatedSpec = new LegacyUserEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
+                        })
                 .map(data -> new User(this, data));
     }
 
@@ -522,6 +510,17 @@ public class GatewayDiscordClient implements EntityRetriever {
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         return getEventDispatcher().on(eventClass)
                 .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+    }
+
+    /**
+     * Distributes events to subscribers. Starting from v3.1, the {@link EventDispatcher} is capable of distributing
+     * events from all {@link GatewayClient} connections (shards) that were specified when this
+     * {@link GatewayDiscordClient} was created.
+     *
+     * @return the {@link EventDispatcher} tied to this {@link GatewayDiscordClient}
+     */
+    public EventDispatcher getEventDispatcher() {
+        return gatewayResources.getEventDispatcher();
     }
 
     /**
@@ -618,27 +617,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Return a set of {@link Member members} from the given {@link Guild guildId} using the current Gateway connection.
-     * This method performs a check to validate whether the given guild's data can be obtained from this
-     * {@link GatewayDiscordClient}.
-     *
-     * @param guildId the {@link Snowflake} of the guild to obtain members from
-     * @param userIds the {@link Snowflake} set of users to request
-     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
-     * the {@link Flux}.
-     */
-    public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
-        return Flux.fromIterable(userIds)
-                .map(Snowflake::asString)
-                .buffer(100)
-                .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
-                        .guildId(guildId.asString())
-                        .userIds(userIdBuffer)
-                        .limit(0)
-                        .build()));
-    }
-
-    /**
      * Submit a {@link RequestGuildMembers} payload using the current Gateway connection and wait for its completion,
      * delivering {@link Member} elements asynchronously through a {@link Flux}. This method performs a check to
      * validate whether the given guild's data can be obtained from this {@link GatewayDiscordClient}.
@@ -690,10 +668,10 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
         return Flux.deferContextual(ctx -> getGuildById(guildId)
                 .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
-                        RequestGuildMembers.builder()
-                                .from(request)
-                                .nonce(nonce)
-                                .build(), shardId))
+                                RequestGuildMembers.builder()
+                                        .from(request)
+                                        .nonce(nonce)
+                                        .build(), shardId))
                         .then(Mono.fromRunnable(() -> {
                             if (request.query().toOptional().map(String::isEmpty).orElse(false)
                                     && request.limit() == 0) {
@@ -702,6 +680,27 @@ public class GatewayDiscordClient implements EntityRetriever {
                         })))
                 .thenMany(Flux.defer(incomingMembers))
                 .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request)));
+    }
+
+    /**
+     * Return a set of {@link Member members} from the given {@link Guild guildId} using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param guildId the {@link Snowflake} of the guild to obtain members from
+     * @param userIds the {@link Snowflake} set of users to request
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
+        return Flux.fromIterable(userIds)
+                .map(Snowflake::asString)
+                .buffer(100)
+                .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
+                        .guildId(guildId.asString())
+                        .userIds(userIdBuffer)
+                        .limit(0)
+                        .build()));
     }
 
     /**

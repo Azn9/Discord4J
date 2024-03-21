@@ -35,14 +35,14 @@ public class DispatchContext<D, S> {
     private final StatefulDispatch<D, S> statefulDispatch;
     private final GatewayDiscordClient gateway;
 
-    public static <D, S> DispatchContext<D, S> of(StatefulDispatch<D, S> statefulDispatch,
-                                                  GatewayDiscordClient gateway) {
-        return new DispatchContext<>(statefulDispatch, gateway);
-    }
-
     private DispatchContext(StatefulDispatch<D, S> statefulDispatch, GatewayDiscordClient gateway) {
         this.statefulDispatch = statefulDispatch;
         this.gateway = gateway;
+    }
+
+    public static <D, S> DispatchContext<D, S> of(StatefulDispatch<D, S> statefulDispatch,
+                                                  GatewayDiscordClient gateway) {
+        return new DispatchContext<>(statefulDispatch, gateway);
     }
 
     public GatewayDiscordClient getGateway() {

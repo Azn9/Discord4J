@@ -38,6 +38,12 @@ import java.util.function.Function;
  */
 public class ClientPresence {
 
+    private final StatusUpdate statusUpdate;
+
+    private ClientPresence(StatusUpdate statusUpdate) {
+        this.statusUpdate = statusUpdate;
+    }
+
     /**
      * Creates an {@link Status#ONLINE online} presence.
      *
@@ -45,6 +51,27 @@ public class ClientPresence {
      */
     public static ClientPresence online() {
         return of(Status.ONLINE, null);
+    }
+
+    /**
+     * Creates a presence with the given status and activity.
+     *
+     * @param status The status to be shown.
+     * @param activity The activity to be shown.
+     * @return A presence with the given status and activity.
+     */
+    public static ClientPresence of(Status status, @Nullable ClientActivity activity) {
+        List<ActivityUpdateRequest> activities = Optional.ofNullable(activity)
+                .map(ClientActivity::getActivityUpdateRequest)
+                .map(Collections::singletonList)
+                .orElse(Collections.emptyList());
+
+        return new ClientPresence(StatusUpdate.builder()
+                .status(status.getValue())
+                .activities(activities)
+                .afk(false) // doesn't do anything
+                .since(0) // doesn't do anything
+                .build());
     }
 
     /**
@@ -102,33 +129,6 @@ public class ClientPresence {
      */
     public static ClientPresence invisible() {
         return of(Status.INVISIBLE, null);
-    }
-
-    /**
-     * Creates a presence with the given status and activity.
-     *
-     * @param status The status to be shown.
-     * @param activity The activity to be shown.
-     * @return A presence with the given status and activity.
-     */
-    public static ClientPresence of(Status status, @Nullable ClientActivity activity) {
-        List<ActivityUpdateRequest> activities = Optional.ofNullable(activity)
-                .map(ClientActivity::getActivityUpdateRequest)
-                .map(Collections::singletonList)
-                .orElse(Collections.emptyList());
-
-        return new ClientPresence(StatusUpdate.builder()
-                .status(status.getValue())
-                .activities(activities)
-                .afk(false) // doesn't do anything
-                .since(0) // doesn't do anything
-                .build());
-    }
-
-    private final StatusUpdate statusUpdate;
-
-    private ClientPresence(StatusUpdate statusUpdate) {
-        this.statusUpdate = statusUpdate;
     }
 
     /**

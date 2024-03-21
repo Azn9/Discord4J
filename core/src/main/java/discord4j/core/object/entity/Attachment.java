@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.discordjson.json.AttachmentData;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.AttachmentData;
 import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
@@ -75,15 +75,6 @@ public final class Attachment implements Entity {
     }
 
     /**
-     * Gets the name of the file attached.
-     *
-     * @return The name of the file attached.
-     */
-    public String getFilename() {
-        return data.filename();
-    }
-
-    /**
      * Gets the size of the file in bytes.
      *
      * @return The size of the file in bytes.
@@ -117,8 +108,8 @@ public final class Attachment implements Entity {
      */
     public OptionalInt getHeight() {
         return Possible.flatOpt(data.height())
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
     /**
@@ -128,8 +119,8 @@ public final class Attachment implements Entity {
      */
     public OptionalInt getWidth() {
         return Possible.flatOpt(data.width())
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
     /**
@@ -139,6 +130,15 @@ public final class Attachment implements Entity {
      */
     public boolean isSpoiler() {
         return getFilename().startsWith(SPOILER_PREFIX);
+    }
+
+    /**
+     * Gets the name of the file attached.
+     *
+     * @return The name of the file attached.
+     */
+    public String getFilename() {
+        return data.filename();
     }
 
     /**
@@ -180,13 +180,13 @@ public final class Attachment implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public boolean equals(@Nullable final Object obj) {
+        return EntityUtil.equals(this, obj);
     }
 
     @Override
@@ -217,15 +217,6 @@ public final class Attachment implements Entity {
         }
 
         /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getValue() {
-            return this.value;
-        }
-
-        /**
          * Gets the flags of the attachment. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -244,6 +235,15 @@ public final class Attachment implements Entity {
             }
 
             return flags;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getValue() {
+            return this.value;
         }
     }
 }

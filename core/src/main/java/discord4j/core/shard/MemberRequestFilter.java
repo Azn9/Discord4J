@@ -17,8 +17,8 @@
 
 package discord4j.core.shard;
 
-import discord4j.discordjson.json.GuildCreateData;
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.GuildCreateData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -79,16 +79,6 @@ public interface MemberRequestFilter {
     static MemberRequestFilter withGuilds(Snowflake... guildIds) {
         return data -> Flux.fromArray(guildIds).hasElement(Snowflake.of(data.id()));
     }
-
-    /**
-     * Obtain a {@link Mono} of {@link Boolean} for the given {@link GuildCreateData}. If the resulting sequence
-     * contains {@code true}, then members will be requested through the Gateway for this guild.
-     *
-     * @param guildCreateData the guild triggering this filter
-     * @return a {@link Mono} indicating if a guild should have their members requested
-     */
-    Mono<Boolean> apply(GuildCreateData guildCreateData);
-
     /**
      * Transform this current {@link MemberRequestFilter} by applying the given {@link Function} to derive a new
      * {@link Mono} of {@code boolean}.
@@ -99,4 +89,12 @@ public interface MemberRequestFilter {
     default MemberRequestFilter as(Function<Mono<Boolean>, Mono<Boolean>> transformer) {
         return data -> apply(data).as(transformer);
     }
+    /**
+     * Obtain a {@link Mono} of {@link Boolean} for the given {@link GuildCreateData}. If the resulting sequence
+     * contains {@code true}, then members will be requested through the Gateway for this guild.
+     *
+     * @param guildCreateData the guild triggering this filter
+     * @return a {@link Mono} indicating if a guild should have their members requested
+     */
+    Mono<Boolean> apply(GuildCreateData guildCreateData);
 }

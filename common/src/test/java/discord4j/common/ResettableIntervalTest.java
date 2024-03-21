@@ -17,8 +17,8 @@
 package discord4j.common;
 
 import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
 import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
 
 import java.time.Duration;
 
@@ -28,7 +28,7 @@ public class ResettableIntervalTest {
     public void test() {
         ResettableInterval interval = new ResettableInterval(Schedulers.elastic());
         StepVerifier.withVirtualTime(() -> interval.ticks()
-                .doOnSubscribe(s -> interval.start(Duration.ZERO, Duration.ofSeconds(1))))
+                        .doOnSubscribe(s -> interval.start(Duration.ZERO, Duration.ofSeconds(1))))
                 .expectSubscription()
                 .expectNoEvent(Duration.ofSeconds(1))
                 .expectNext(0L)

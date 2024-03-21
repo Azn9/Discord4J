@@ -60,15 +60,6 @@ public class ScheduledEventUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return the ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return current.getGuildId();
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} where a scheduled event was updated.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -76,6 +67,15 @@ public class ScheduledEventUpdateEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return the ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return current.getGuildId();
     }
 
     @Override

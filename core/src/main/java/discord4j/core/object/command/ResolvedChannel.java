@@ -54,7 +54,7 @@ public class ResolvedChannel implements DiscordObject {
      * Constructs a {@code ResolvedChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
     public ResolvedChannel(final GatewayDiscordClient gateway, final ResolvedChannelData data) {
         this.gateway = Objects.requireNonNull(gateway);
@@ -68,15 +68,6 @@ public class ResolvedChannel implements DiscordObject {
      */
     public ResolvedChannelData getData() {
         return data;
-    }
-
-    /**
-     * Gets the id of the channel.
-     *
-     * @return The id of the channel.
-     */
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
     }
 
     /**
@@ -114,6 +105,15 @@ public class ResolvedChannel implements DiscordObject {
      */
     public Mono<Channel> asFullChannel() {
         return gateway.getChannelById(getId());
+    }
+
+    /**
+     * Gets the id of the channel.
+     *
+     * @return The id of the channel.
+     */
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
     }
 
     /**

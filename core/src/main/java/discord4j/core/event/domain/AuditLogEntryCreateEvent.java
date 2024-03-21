@@ -13,26 +13,19 @@ import reactor.core.publisher.Mono;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create">Guild Audit Log Entry Create</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create">Guild Audit Log Entry Create</a>
  */
 public class AuditLogEntryCreateEvent extends GuildEvent {
 
     private final long guildId;
     private final AuditLogEntry auditLogEntry;
 
-    public AuditLogEntryCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, AuditLogEntry auditLogEntry) {
+    public AuditLogEntryCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId,
+                                    AuditLogEntry auditLogEntry) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.auditLogEntry = auditLogEntry;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -45,6 +38,14 @@ public class AuditLogEntryCreateEvent extends GuildEvent {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
 
     /**
      * Get the {@link AuditLogEntry} related to this event.

@@ -143,9 +143,10 @@ public enum Permission {
     /** Allows management and editing of emojis, stickers, and soundboard sounds. */
     MANAGE_GUILD_EXPRESSIONS(0x40000000, true),
 
-    /** Allows members to use slash commands in text channels.
+    /**
+     * Allows members to use slash commands in text channels.
      *
-     *  @deprecated Deprecated in favor of {@link Permission#USE_APPLICATION_COMMANDS}
+     * @deprecated Deprecated in favor of {@link Permission#USE_APPLICATION_COMMANDS}
      */
     @Deprecated
     USE_SLASH_COMMANDS(0x80000000L, false),
@@ -181,7 +182,8 @@ public enum Permission {
     USE_EMBEDDED_ACTIVITIES(0x0000008000000000L, false),
 
     /**
-     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels.
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from
+     * speaking in voice and stage channels.
      */
     MODERATE_MEMBERS(0x0000010000000000L, false),
 

@@ -98,16 +98,6 @@ public final class Message implements Entity {
                 Snowflake.of(data.id()));
     }
 
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
      * Gets the data of the message.
      *
@@ -132,42 +122,17 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the ID of the channel the message was sent in.
+     * Requests to retrieve the author of this message as a {@link Member member} of the guild in which it was sent.
      *
-     * @return The ID of the channel the message was sent in.
+     * @return A {@link Mono} where, upon successful completion, emits the author of this message as a
+     * {@link Member member} of the guild in which it was sent, if present. If an error is received, it is emitted
+     * through the {@code Mono}.
      */
-    public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId());
-    }
-
-    /**
-     * Requests to retrieve the channel the message was sent in.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} the message
-     * was sent in. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<MessageChannel> getChannel() {
-        return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the channel the message was sent in, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} the message
-     * was sent in. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<MessageChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(getChannelId()).cast(MessageChannel.class);
-    }
-
-    /**
-     * Gets the ID the webhook that generated this message, if present.
-     *
-     * @return The ID of the webhook that generated this message, if present.
-     */
-    public Optional<Snowflake> getWebhookId() {
-        return data.webhookId().toOptional().map(Snowflake::of);
+    public Mono<Member> getAuthorAsMember() {
+        return Mono.justOrEmpty(getAuthor())
+                .flatMap(author -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(author::asMember));
     }
 
     /**
@@ -181,17 +146,32 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to retrieve the author of this message as a {@link Member member} of the guild in which it was sent.
+     * Requests to retrieve the guild this message is associated to, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the author of this message as a
-     * {@link Member member} of the guild in which it was sent, if present. If an error is received, it is emitted
-     * through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Member> getAuthorAsMember() {
-        return Mono.justOrEmpty(getAuthor())
-                .flatMap(author -> getGuild()
-                        .map(Guild::getId)
-                        .flatMap(author::asMember));
+    public Mono<Guild> getGuild() {
+        return getChannel().ofType(GuildChannel.class).flatMap(GuildChannel::getGuild);
+    }
+
+    /**
+     * Requests to retrieve the channel the message was sent in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} the message
+     * was sent in. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageChannel> getChannel() {
+        return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel the message was sent in.
+     *
+     * @return The ID of the channel the message was sent in.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(data.channelId());
     }
 
     /**
@@ -277,8 +257,8 @@ public final class Message implements Entity {
         }
         long guildId = data.guildId().get().asLong();
         return data.mentions().stream()
-            .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
-            .collect(Collectors.toList());
+                .map(data -> new PartialMember(gateway, data, data.member().get(), guildId))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -295,19 +275,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same order
-     * as in the message.
-     *
-     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
-     * as in the message.
-     */
-    public List<Snowflake> getRoleMentionIds() {
-        return data.mentionRoles().stream()
-                .map(Snowflake::of)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Requests to retrieve the roles specifically mentioned in this message.
      *
      * @return A {@link Flux} that continually emits {@link Role roles} specifically mentioned in this message. If an
@@ -318,6 +285,19 @@ public final class Message implements Entity {
                 .flatMap(roleId -> getGuild()
                         .map(Guild::getId)
                         .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
+    }
+
+    /**
+     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     *
+     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
+     */
+    public List<Snowflake> getRoleMentionIds() {
+        return data.mentionRoles().stream()
+                .map(Snowflake::of)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -389,6 +369,11 @@ public final class Message implements Entity {
                 .map(data -> new User(gateway, data));
     }
 
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
     /**
      * Gets whether this message is pinned.
      *
@@ -406,6 +391,15 @@ public final class Message implements Entity {
      */
     public Mono<Webhook> getWebhook() {
         return Mono.justOrEmpty(getWebhookId()).flatMap(gateway::getWebhookById);
+    }
+
+    /**
+     * Gets the ID the webhook that generated this message, if present.
+     *
+     * @return The ID of the webhook that generated this message, if present.
+     */
+    public Optional<Snowflake> getWebhookId() {
+        return data.webhookId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -440,16 +434,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to retrieve the guild this message is associated to, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,
-     * if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return getChannel().ofType(GuildChannel.class).flatMap(GuildChannel::getGuild);
-    }
-
-    /**
      * Requests to retrieve the guild this message is associated to, if present, using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the guild
@@ -459,6 +443,17 @@ public final class Message implements Entity {
     public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
         return getChannel(retrievalStrategy).ofType(GuildChannel.class)
                 .flatMap(guildChannel -> guildChannel.getGuild(retrievalStrategy));
+    }
+
+    /**
+     * Requests to retrieve the channel the message was sent in, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} the message
+     * was sent in. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -478,10 +473,10 @@ public final class Message implements Entity {
     @Experimental
     public List<PartialSticker> getStickersItems() {
         return data.stickerItems().toOptional()
-            .map(partialStickers -> partialStickers.stream()
-                .map(data -> new PartialSticker(gateway, data))
-                .collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
+                .map(partialStickers -> partialStickers.stream()
+                        .map(data -> new PartialSticker(gateway, data))
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /**
@@ -546,17 +541,22 @@ public final class Message implements Entity {
     @Deprecated
     public Mono<Message> edit(final Consumer<? super LegacyMessageEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
-                    getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(),
-                                    MultipartRequest.ofRequest(mutatedSpec.asRequest()));
-                })
+                        () -> {
+                            LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
+                            getClient().getRestClient().getRestResources()
+                                    .getAllowedMentions()
+                                    .ifPresent(mutatedSpec::setAllowedMentions);
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getChannelService()
+                                    .editMessage(getChannelId().asLong(), getId().asLong(),
+                                            MultipartRequest.ofRequest(mutatedSpec.asRequest()));
+                        })
                 .map(data -> new Message(gateway, data));
+    }
+
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     /**
@@ -572,15 +572,15 @@ public final class Message implements Entity {
     public Mono<Message> edit(MessageEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
-                            .map(spec::withAllowedMentionsOrNull)
-                            .orElse(spec);
-                    return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
-                })
+                        () -> {
+                            MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                                    .getAllowedMentions()
+                                    .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
+                                    .map(spec::withAllowedMentionsOrNull)
+                                    .orElse(spec);
+                            return gateway.getRestClient().getChannelService()
+                                    .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
+                        })
                 .map(data -> new Message(gateway, data));
     }
 
@@ -657,12 +657,12 @@ public final class Message implements Entity {
      * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
      * can undo the suppressed embeds.
      *
-     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
-     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
      * @param suppress Determine if you need suppress or not the embeds.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
      * completed. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
+     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
+     * https://discord.com/developers/docs/change-log#april-28-2021</a>
      */
     @Deprecated
     public Mono<Void> suppressEmbeds(final boolean suppress) {
@@ -769,13 +769,20 @@ public final class Message implements Entity {
     }
 
     @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
+    }
+
+    @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public String toString() {
+        return "Message{" +
+                "data=" + data +
+                '}';
     }
 
     /**
@@ -835,24 +842,6 @@ public final class Message implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -868,6 +857,24 @@ public final class Message implements Entity {
                 }
             }
             return messageFlags;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -960,7 +967,8 @@ public final class Message implements Entity {
         GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
 
         /**
-         * A message created when a Thread is started ( <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
+         * A message created when a Thread is started (
+         * <a href="https://support.discord.com/hc/es/articles/4403205878423-Threads">Threads</a> )
          */
         THREAD_CREATED(18),
 
@@ -971,10 +979,11 @@ public final class Message implements Entity {
         APPLICATION_COMMAND(20),
 
         /**
-         * The first message in a thread pointing to a related message in the parent channel from which the thread was started
+         * The first message in a thread pointing to a related message in the parent channel from which the thread
+         * was started
          * <br>
          * <b>Note: </b> Only supported from v9 of API
-        **/
+         **/
         THREAD_STARTER_MESSAGE(21),
 
         /** A message created for notice the servers owners about invite new users (only in new servers) **/
@@ -1010,15 +1019,6 @@ public final class Message implements Entity {
          */
         Type(final int value) {
             this.value = value;
-        }
-
-        /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
         }
 
         /**
@@ -1064,12 +1064,14 @@ public final class Message implements Entity {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "Message{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

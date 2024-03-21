@@ -7,6 +7,7 @@ import discord4j.rest.RestClient;
 import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -78,7 +79,8 @@ public class RestSticker {
     }
 
     /**
-     * Modify this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns the updated sticker
+     * Modify this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns the
+     * updated sticker
      * object on success.
      *
      * @param request the guild sticker modify request
@@ -91,7 +93,8 @@ public class RestSticker {
     }
 
     /**
-     * Delete this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns empty on success.
+     * Delete this guild sticker. Requires the {@link Permission#MANAGE_EMOJIS_AND_STICKERS} permission. Returns
+     * empty on success.
      *
      * @param reason an optional reason for the audit log
      * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it
@@ -102,15 +105,19 @@ public class RestSticker {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestSticker restSticker = (RestSticker) o;
-        return guildId == restSticker.guildId && id == restSticker.id;
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(guildId, id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestSticker restSticker = (RestSticker) o;
+        return guildId == restSticker.guildId && id == restSticker.id;
     }
 }

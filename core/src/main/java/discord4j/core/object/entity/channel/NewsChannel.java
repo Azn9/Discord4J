@@ -55,12 +55,12 @@ public final class NewsChannel extends BaseTopLevelGuildMessageChannel {
     @Deprecated
     public Mono<NewsChannel> edit(final Consumer<? super LegacyNewsChannelEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyNewsChannelEditSpec mutatedSpec = new LegacyNewsChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyNewsChannelEditSpec mutatedSpec = new LegacyNewsChannelEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(NewsChannel.class);
     }
@@ -86,8 +86,8 @@ public final class NewsChannel extends BaseTopLevelGuildMessageChannel {
     public Mono<NewsChannel> edit(NewsChannelEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(NewsChannel.class);
     }

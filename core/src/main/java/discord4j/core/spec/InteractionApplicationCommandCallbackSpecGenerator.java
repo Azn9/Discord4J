@@ -39,28 +39,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<MultipartRequest<InteractionApplicationCommandCallbackData>> {
 
-    Possible<String> content();
-
-    Possible<Boolean> tts();
-
-    Possible<Boolean> ephemeral();
-
-    Possible<List<EmbedCreateSpec>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<List<LayoutComponent>> components();
-
     @Override
     default MultipartRequest<InteractionApplicationCommandCallbackData> asRequest() {
         InteractionApplicationCommandCallbackData json = InteractionApplicationCommandCallbackData.builder()
@@ -79,6 +57,20 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<String> content();
+    Possible<Boolean> tts();
+    Possible<Boolean> ephemeral();
+    Possible<List<EmbedCreateSpec>> embeds();
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    Possible<AllowedMentions> allowedMentions();
+    Possible<List<LayoutComponent>> components();
 }
 
 @SuppressWarnings("immutables:subtype")
@@ -86,12 +78,12 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Multip
 abstract class InteractionApplicationCommandCallbackReplyMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().reply(InteractionApplicationCommandCallbackSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();
@@ -102,12 +94,12 @@ abstract class InteractionApplicationCommandCallbackReplyMonoGenerator extends M
 abstract class InteractionApplicationCommandCallbackEditMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
 
-    abstract ComponentInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().edit(InteractionApplicationCommandCallbackSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract ComponentInteractionEvent event();
 
     @Override
     public abstract String toString();

@@ -34,6 +34,10 @@ import java.util.stream.StreamSupport;
  */
 public class SelectMenu extends ActionComponent {
 
+    SelectMenu(ComponentData data) {
+        super(data);
+    }
+
     /**
      * Creates a string select menu.
      *
@@ -43,6 +47,25 @@ public class SelectMenu extends ActionComponent {
      */
     public static SelectMenu of(String customId, Option... options) {
         return of(Type.SELECT_MENU, customId, Arrays.asList(options), null);
+    }
+
+    private static SelectMenu of(Type type, String customId, @Nullable List<Option> options,
+                                 @Nullable List<Channel.Type> channelTypes) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(type.getValue())
+                .customId(customId);
+
+        if (options != null) {
+            builder.options(options.stream().map(opt -> opt.data).collect(Collectors.toList()));
+        }
+
+        if (channelTypes != null) {
+            builder.channelTypes(channelTypes.stream()
+                    .map(Channel.Type::getValue)
+                    .collect(Collectors.toList()));
+        }
+
+        return new SelectMenu(builder.build());
     }
 
     /**
@@ -107,28 +130,6 @@ public class SelectMenu extends ActionComponent {
      */
     public static SelectMenu ofChannel(String customId, List<Channel.Type> channelTypes) {
         return of(Type.SELECT_MENU_CHANNEL, customId, null, channelTypes);
-    }
-
-    private static SelectMenu of(Type type, String customId, @Nullable List<Option> options, @Nullable List<Channel.Type> channelTypes) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
-                .type(type.getValue())
-                .customId(customId);
-
-        if (options != null) {
-            builder.options(options.stream().map(opt -> opt.data).collect(Collectors.toList()));
-        }
-
-        if (channelTypes != null) {
-            builder.channelTypes(channelTypes.stream()
-                    .map(Channel.Type::getValue)
-                    .collect(Collectors.toList()));
-        }
-
-        return new SelectMenu(builder.build());
-    }
-
-    SelectMenu(ComponentData data) {
-        super(data);
     }
 
     /**
@@ -270,7 +271,8 @@ public class SelectMenu extends ActionComponent {
      */
     public SelectMenu withAllowedChannelTypes(Iterable<Channel.Type> types) {
         if (getType() != Type.SELECT_MENU_CHANNEL) {
-            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types restriction");
+            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types " +
+                    "restriction");
         }
 
         return new SelectMenu(ComponentData.builder().from(getData())
@@ -288,7 +290,8 @@ public class SelectMenu extends ActionComponent {
      */
     public SelectMenu withAllowedChannelTypes(Channel.Type... types) {
         if (getType() != Type.SELECT_MENU_CHANNEL) {
-            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types restriction");
+            throw new IllegalArgumentException("Select menu with type " + getType() + " can't have channel types " +
+                    "restriction");
         }
 
         return new SelectMenu(ComponentData.builder().from(getData())
@@ -303,6 +306,12 @@ public class SelectMenu extends ActionComponent {
      */
     public static class Option {
 
+        private final SelectOptionData data;
+
+        Option(SelectOptionData data) {
+            this.data = data;
+        }
+
         /**
          * Creates a select menu option.
          *
@@ -312,6 +321,14 @@ public class SelectMenu extends ActionComponent {
          */
         public static Option of(String label, String value) {
             return of(label, value, false);
+        }
+
+        private static Option of(String label, String value, boolean isDefault) {
+            return new Option(SelectOptionData.builder()
+                    .label(label)
+                    .value(value)
+                    .isDefault(isDefault)
+                    .build());
         }
 
         /**
@@ -325,20 +342,6 @@ public class SelectMenu extends ActionComponent {
          */
         public static Option ofDefault(String label, String value) {
             return of(label, value, true);
-        }
-
-        private static Option of(String label, String value, boolean isDefault) {
-            return new Option(SelectOptionData.builder()
-                    .label(label)
-                    .value(value)
-                    .isDefault(isDefault)
-                    .build());
-        }
-
-        private final SelectOptionData data;
-
-        Option(SelectOptionData data) {
-            this.data = data;
         }
 
         /**

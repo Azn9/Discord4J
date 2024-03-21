@@ -26,8 +26,7 @@ import discord4j.gateway.ShardInfo;
  * Dispatched when an integration is updated.
  * This event is dispatched by Discord.
  *
- * @see
- * <a href="https://discord.com/developers/docs/topics/gateway#integration-update">Integration Update</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#integration-update">Integration Update</a>
  */
 public class IntegrationUpdateEvent extends Event {
 

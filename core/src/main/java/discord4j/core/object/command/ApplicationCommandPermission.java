@@ -107,6 +107,13 @@ public class ApplicationCommandPermission implements DiscordObject {
         return gateway;
     }
 
+    @Override
+    public String toString() {
+        return "ApplicationCommandPermission{" +
+                "data=" + data +
+                '}';
+    }
+
     /**
      * Represents the various types of application command permissions.
      */
@@ -147,15 +154,6 @@ public class ApplicationCommandPermission implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of permission. It is guaranteed that invoking {@link #getValue()} from the returned enum will
          * be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -170,12 +168,14 @@ public class ApplicationCommandPermission implements DiscordObject {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "ApplicationCommandPermission{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

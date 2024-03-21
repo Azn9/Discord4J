@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.reaction;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
@@ -40,39 +40,6 @@ public abstract class ReactionEmoji {
      */
     public static Custom custom(GuildEmoji emoji) {
         return new Custom(emoji.getId().asLong(), emoji.getName(), emoji.isAnimated());
-    }
-
-    /**
-     * Constructs a {@code ReactionEmoji} for a custom emoji using the given information.
-     *
-     * @param id The ID of the custom emoji.
-     * @param name The name of the custom emoji.
-     * @param isAnimated Whether the custom emoji is animated.
-     * @return A reaction emoji using the given information.
-     */
-    public static Custom custom(Snowflake id, String name, boolean isAnimated) {
-        return new Custom(id.asLong(), name, isAnimated);
-    }
-
-    /**
-     * Constructs a {@code ReactionEmoji} for a unicode emoji.
-     * <p>
-     * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
-     * <pre>
-     * ReactionEmoji.unicode("&#92;u2764") // "heart"
-     * ReactionEmoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
-     * ReactionEmoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
-     * </pre>
-     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
-     * <p>
-     * This method does <i>not</i> accept the "U+" notation for codepoints. For that, use
-     * {@link #codepoints(String...)}.
-     *
-     * @param raw The raw unicode string for the emoji.
-     * @return A reaction emoji using the given information.
-     */
-    public static Unicode unicode(String raw) {
-        return new Unicode(raw);
     }
 
     /**
@@ -99,6 +66,27 @@ public abstract class ReactionEmoji {
     }
 
     /**
+     * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     * <p>
+     * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
+     * <pre>
+     * ReactionEmoji.unicode("&#92;u2764") // "heart"
+     * ReactionEmoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
+     * ReactionEmoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
+     * </pre>
+     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
+     * <p>
+     * This method does <i>not</i> accept the "U+" notation for codepoints. For that, use
+     * {@link #codepoints(String...)}.
+     *
+     * @param raw The raw unicode string for the emoji.
+     * @return A reaction emoji using the given information.
+     */
+    public static Unicode unicode(String raw) {
+        return new Unicode(raw);
+    }
+
+    /**
      * Constructs a {@code ReactionEmoji} for generic emoji information.
      *
      * @param id The ID of the custom emoji OR null if the emoji is a unicode emoji.
@@ -108,6 +96,18 @@ public abstract class ReactionEmoji {
      */
     public static ReactionEmoji of(@Nullable Long id, String name, boolean isAnimated) {
         return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
+    }
+
+    /**
+     * Constructs a {@code ReactionEmoji} for a custom emoji using the given information.
+     *
+     * @param id The ID of the custom emoji.
+     * @param name The name of the custom emoji.
+     * @param isAnimated Whether the custom emoji is animated.
+     * @return A reaction emoji using the given information.
+     */
+    public static Custom custom(Snowflake id, String name, boolean isAnimated) {
+        return new Custom(id.asLong(), name, isAnimated);
     }
 
     /**
@@ -172,6 +172,24 @@ public abstract class ReactionEmoji {
             this.isAnimated = isAnimated;
         }
 
+        @Override
+        public EmojiData asEmojiData() {
+            return EmojiData.builder()
+                    .id(id)
+                    .name(name)
+                    .animated(isAnimated)
+                    .build();
+        }
+
+        /**
+         * Gets the formatted version of this emoji (i.e., to display in the client).
+         *
+         * @return The formatted version of this emoji (i.e., to display in the client).
+         */
+        public String asFormat() {
+            return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
+        }
+
         /**
          * Gets the id of the emoji.
          *
@@ -200,30 +218,8 @@ public abstract class ReactionEmoji {
         }
 
         @Override
-        public EmojiData asEmojiData() {
-            return EmojiData.builder()
-                    .id(id)
-                    .name(name)
-                    .animated(isAnimated)
-                    .build();
-        }
-
-        /**
-         * Gets the formatted version of this emoji (i.e., to display in the client).
-         *
-         * @return The formatted version of this emoji (i.e., to display in the client).
-         */
-        public String asFormat() {
-            return '<' + (this.isAnimated() ? "a" : "") + ':' + this.getName() + ':' + this.getId().asString() + '>';
-        }
-
-        @Override
-        public String toString() {
-            return "ReactionEmoji.Custom{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    ", isAnimated=" + isAnimated +
-                    "} " + super.toString();
+        public int hashCode() {
+            return Objects.hash(id);
         }
 
         @Override
@@ -239,8 +235,12 @@ public abstract class ReactionEmoji {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(id);
+        public String toString() {
+            return "ReactionEmoji.Custom{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", isAnimated=" + isAnimated +
+                    "} " + super.toString();
         }
     }
 
@@ -264,10 +264,8 @@ public abstract class ReactionEmoji {
         }
 
         @Override
-        public String toString() {
-            return "ReactionEmoji.Unicode{" +
-                    "raw='" + raw + '\'' +
-                    "} " + super.toString();
+        public int hashCode() {
+            return raw.hashCode();
         }
 
         @Override
@@ -283,8 +281,10 @@ public abstract class ReactionEmoji {
         }
 
         @Override
-        public int hashCode() {
-            return raw.hashCode();
+        public String toString() {
+            return "ReactionEmoji.Unicode{" +
+                    "raw='" + raw + '\'' +
+                    "} " + super.toString();
         }
     }
 

@@ -16,8 +16,8 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.RegionData;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
@@ -168,16 +168,6 @@ public final class Region implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        @Nullable
-        public String getValue() {
-            return value;
-        }
-
-        /**
          * Gets the enum associated with the value. It is guaranteed that invoking {@link #getValue()} from the returned
          * enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -185,7 +175,7 @@ public final class Region implements DiscordObject {
          * @return The region id.
          */
         public static Region.Id of(@Nullable final String value) {
-            if(value == null) {
+            if (value == null) {
                 return AUTOMATIC;
             }
 
@@ -205,6 +195,16 @@ public final class Region implements DiscordObject {
                 case "india": return INDIA;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        @Nullable
+        public String getValue() {
+            return value;
         }
     }
 }

@@ -29,6 +29,17 @@ import reactor.util.Loggers;
  */
 public class ExampleCustomOptionsBot {
 
+    public static void main(String[] args) {
+        DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .setExtraOptions(options -> new CustomOptions(options, "bar"))
+                .login(CustomGatewayClient::new)
+                .blockOptional()
+                .orElseThrow(RuntimeException::new)
+                .onDisconnect()
+                .block();
+    }
+
     static class CustomOptions extends GatewayOptions {
 
         private final String foo;
@@ -61,16 +72,5 @@ public class ExampleCustomOptionsBot {
             log.info("Connecting with foo value: {}", foo);
             return super.execute(gatewayUrl);
         }
-    }
-
-    public static void main(String[] args) {
-        DiscordClient.create(System.getenv("token"))
-                .gateway()
-                .setExtraOptions(options -> new CustomOptions(options, "bar"))
-                .login(CustomGatewayClient::new)
-                .blockOptional()
-                .orElseThrow(RuntimeException::new)
-                .onDisconnect()
-                .block();
     }
 }

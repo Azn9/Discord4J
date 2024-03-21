@@ -16,6 +16,7 @@
  */
 package discord4j.rest.service;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserModifyRequest;
 import discord4j.rest.RestTests;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import discord4j.common.util.Snowflake;
 
 import java.util.Collections;
 
@@ -63,8 +63,8 @@ public class UserServiceTest {
     @Test
     public void testModifyCurrentUser() {
         UserModifyRequest req = UserModifyRequest.builder()
-            .username("D4J 3 Test Bot")
-            .build();
+                .username("D4J 3 Test Bot")
+                .build();
         userService.modifyCurrentUser(req).block();
     }
 

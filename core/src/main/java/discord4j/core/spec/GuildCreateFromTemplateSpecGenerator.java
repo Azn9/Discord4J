@@ -26,14 +26,10 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable
 interface GuildCreateFromTemplateSpecGenerator extends Spec<TemplateCreateGuildRequest> {
-
-    String name();
-
-    Possible<Image> icon();
 
     @Override
     default TemplateCreateGuildRequest asRequest() {
@@ -42,6 +38,8 @@ interface GuildCreateFromTemplateSpecGenerator extends Spec<TemplateCreateGuildR
                 .icon(mapPossible(icon(), Image::getDataUri))
                 .build();
     }
+    String name();
+    Possible<Image> icon();
 }
 
 @SuppressWarnings("immutables:subtype")
@@ -49,12 +47,12 @@ interface GuildCreateFromTemplateSpecGenerator extends Spec<TemplateCreateGuildR
 abstract class GuildCreateFromTemplateMonoGenerator extends Mono<Guild>
         implements GuildCreateFromTemplateSpecGenerator {
 
-    abstract GuildTemplate guildTemplate();
-
     @Override
     public void subscribe(CoreSubscriber<? super Guild> actual) {
         guildTemplate().createGuild(GuildCreateFromTemplateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GuildTemplate guildTemplate();
 
     @Override
     public abstract String toString();

@@ -35,18 +35,6 @@ import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 
 @Value.Immutable(singleton = true)
 interface AuditLogQuerySpecGenerator extends Spec<Map<String, Object>> {
-    
-    @Nullable
-    Snowflake userId();
-    
-    @Nullable
-    ActionType actionType();
-    
-    @Nullable
-    Snowflake before();
-    
-    @Nullable
-    Integer limit();
 
     @Override
     default Map<String, Object> asRequest() {
@@ -57,18 +45,30 @@ interface AuditLogQuerySpecGenerator extends Spec<Map<String, Object>> {
         putIfNotNull(request, "limit", limit());
         return request;
     }
+
+    @Nullable
+    Snowflake userId();
+
+    @Nullable
+    ActionType actionType();
+
+    @Nullable
+    Snowflake before();
+
+    @Nullable
+    Integer limit();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class AuditLogQueryFluxGenerator extends Flux<AuditLogPart> implements AuditLogQuerySpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super AuditLogPart> actual) {
         guild().getAuditLog(AuditLogQuerySpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

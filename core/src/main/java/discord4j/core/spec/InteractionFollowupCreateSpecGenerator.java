@@ -38,38 +38,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<FollowupMessageRequest>> {
 
-    Possible<String> content();
-
-    Possible<String> username();
-
-    Possible<String> avatarUrl();
-
-    @Value.Default
-    default boolean tts() {
-        return false;
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<EmbedCreateSpec> embeds() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<List<LayoutComponent>> components();
-
-    Possible<Boolean> ephemeral();
-
     @Override
     default MultipartRequest<FollowupMessageRequest> asRequest() {
         FollowupMessageRequest request = FollowupMessageRequest.builder()
@@ -88,18 +56,40 @@ interface InteractionFollowupCreateSpecGenerator extends Spec<MultipartRequest<F
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<String> content();
+    Possible<String> username();
+    Possible<String> avatarUrl();
+    @Value.Default
+    default boolean tts() {
+        return false;
+    }
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<EmbedCreateSpec> embeds() {
+        return Collections.emptyList();
+    }
+    Possible<AllowedMentions> allowedMentions();
+    Possible<List<LayoutComponent>> components();
+    Possible<Boolean> ephemeral();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class InteractionFollowupCreateMonoGenerator extends Mono<Message> implements InteractionFollowupCreateSpecGenerator {
 
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         event().createFollowup(InteractionFollowupCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();

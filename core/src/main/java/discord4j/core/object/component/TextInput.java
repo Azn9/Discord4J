@@ -30,6 +30,10 @@ import java.util.Optional;
  */
 public class TextInput extends ActionComponent {
 
+    TextInput(ComponentData data) {
+        super(data);
+    }
+
     /**
      * Creates a {@link TextInput.Style#SHORT short} button.
      *
@@ -38,6 +42,36 @@ public class TextInput extends ActionComponent {
      */
     public static TextInput small(String customId) {
         return of(Style.SHORT, customId, null, null, null, null, null);
+    }
+
+    private static TextInput of(Style style, String customId, @Nullable String label, @Nullable Integer minLength,
+                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(MessageComponent.Type.TEXT_INPUT.getValue())
+                .style(style.getValue())
+                .customId(customId);
+
+        if (label != null) {
+            builder.label(label);
+        }
+
+        if (minLength != null) {
+            builder.minLength(minLength);
+        }
+
+        if (maxLength != null) {
+            builder.maxLength(maxLength);
+        }
+
+        if (value != null) {
+            builder.value(value);
+        }
+
+        if (placeholder != null) {
+            builder.placeholder(placeholder);
+        }
+
+        return new TextInput(builder.build());
     }
 
     /**
@@ -120,40 +154,6 @@ public class TextInput extends ActionComponent {
      */
     public static TextInput paragraph(String customId, String label, int minLength, int maxLength) {
         return of(Style.PARAGRAPH, customId, label, minLength, maxLength, null, null);
-    }
-
-    private static TextInput of(Style style, String customId, @Nullable String label, @Nullable Integer minLength,
-                                @Nullable Integer maxLength, @Nullable String value, @Nullable String placeholder) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
-                .type(MessageComponent.Type.TEXT_INPUT.getValue())
-                .style(style.getValue())
-                .customId(customId);
-
-        if (label != null) {
-            builder.label(label);
-        }
-
-        if (minLength != null) {
-            builder.minLength(minLength);
-        }
-
-        if (maxLength != null) {
-            builder.maxLength(maxLength);
-        }
-
-        if (value != null) {
-            builder.value(value);
-        }
-
-        if (placeholder != null) {
-            builder.placeholder(placeholder);
-        }
-
-        return new TextInput(builder.build());
-    }
-
-    TextInput(ComponentData data) {
-        super(data);
     }
 
     /**
@@ -274,7 +274,8 @@ public class TextInput extends ActionComponent {
     /**
      * A text input's style is what determines its size and behavior
      *
-     * @see <a href="https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles">Text Input Styles</a>
+     * @see
+     * <a href="https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles">Text Input Styles</a>
      */
     public enum Style {
         UNKNOWN(-1),
@@ -287,16 +288,16 @@ public class TextInput extends ActionComponent {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static Style of(int value) {
             switch (value) {
                 case 1: return SHORT;
                 case 2: return PARAGRAPH;
                 default: return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 }

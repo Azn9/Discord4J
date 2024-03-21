@@ -32,7 +32,7 @@ class ParkEmissionStrategy implements EmissionStrategy {
 
     @Override
     public <T> boolean emitNext(Sinks.Many<T> sink, T element) {
-        for (;;) {
+        for (; ; ) {
             Sinks.EmitResult emission = sink.tryEmitNext(element);
             if (emission.isSuccess()) {
                 return true;
@@ -64,7 +64,7 @@ class ParkEmissionStrategy implements EmissionStrategy {
     }
 
     private <T> boolean emitTerminal(Supplier<Sinks.EmitResult> resultSupplier) {
-        for (;;) {
+        for (; ; ) {
             Sinks.EmitResult emission = resultSupplier.get();
             if (emission.isSuccess()) {
                 return true;

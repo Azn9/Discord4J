@@ -68,19 +68,6 @@ public interface MessageChannel extends Channel {
      * @return When the last pinned message was pinned, if present.
      */
     Optional<Instant> getLastPinTimestamp();
-
-    /**
-     * Requests to create a message.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     * @deprecated use {@link #createMessage(MessageCreateSpec)} or {@link #createMessage(String)} which offer an
-     * immutable approach to build specs
-     */
-    @Deprecated
-    Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec);
-
     /**
      * Requests to create a message.
      *
@@ -90,7 +77,6 @@ public interface MessageChannel extends Channel {
      * @see MessageCreateSpec#builder()
      */
     Mono<Message> createMessage(MessageCreateSpec spec);
-
     /**
      * Requests to create a message with a content. Other properties specifying how to create the message can be set via
      * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
@@ -103,7 +89,6 @@ public interface MessageChannel extends Channel {
     default MessageCreateMono createMessage(String message) {
         return MessageCreateMono.of(this).withContent(message);
     }
-
     /**
      * Requests to create a message with embeds. Other properties specifying how to create the message can be set via
      * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
@@ -116,7 +101,6 @@ public interface MessageChannel extends Channel {
     default MessageCreateMono createMessage(EmbedCreateSpec... embeds) {
         return MessageCreateMono.of(this).withEmbeds(embeds);
     }
-
     /**
      * Requests to create a message with an embed.
      *
@@ -129,7 +113,17 @@ public interface MessageChannel extends Channel {
     default Mono<Message> createEmbed(final Consumer<? super LegacyEmbedCreateSpec> spec) {
         return createMessage(messageSpec -> messageSpec.setEmbed(spec));
     }
-
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createMessage(MessageCreateSpec)} or {@link #createMessage(String)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec);
     /**
      * Requests to create a message with an embed. Other properties specifying how to create the message can be set via
      * the {@code withXxx} methods of the returned {@link MessageCreateMono}.
@@ -178,7 +172,6 @@ public interface MessageChannel extends Channel {
      * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
      * @return A {@link Flux} which continually emits each time the typing indicator is triggered and completes when it
      * will no longer be triggered. If an error is received, it is emitted through the {@code Flux}.
-     * @implNote The default implementation actually sends a typing request every 8 seconds so it appears continuous.
      */
     Flux<Long> typeUntil(Publisher<?> until);
 
@@ -193,7 +186,7 @@ public interface MessageChannel extends Channel {
      * getMessagesBefore(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) >= 0)}
      *
      * @param messageId The ID of the <i>newest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
-     *                  time-based ID.
+     * time-based ID.
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>before</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
@@ -210,7 +203,7 @@ public interface MessageChannel extends Channel {
      * getMessagesAfter(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) <= 0)}
      *
      * @param messageId The ID of the <i>oldest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
-     *                  time-based ID.
+     * time-based ID.
      * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>after</i> the specified ID.
      * If an error is received, it is emitted through the {@code Flux}.
      */
@@ -228,7 +221,7 @@ public interface MessageChannel extends Channel {
     /**
      * Requests to retrieve the message as represented by the supplied ID, using the given retrieval strategy.
      *
-     * @param id                The ID of the message.
+     * @param id The ID of the message.
      * @param retrievalStrategy the strategy to use to get the message
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.

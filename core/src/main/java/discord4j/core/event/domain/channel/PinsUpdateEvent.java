@@ -16,11 +16,11 @@
  */
 package discord4j.core.event.domain.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -43,21 +43,12 @@ public class PinsUpdateEvent extends ChannelEvent {
     @Nullable
     private final Instant lastPinTimestamp;
 
-    public PinsUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Long guildId, @Nullable Instant lastPinTimestamp) {
+    public PinsUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Long guildId,
+                           @Nullable Instant lastPinTimestamp) {
         super(gateway, shardInfo);
         this.channelId = channelId;
         this.guildId = guildId;
         this.lastPinTimestamp = lastPinTimestamp;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the pinned/unpinned
-     * {@link discord4j.core.object.entity.Message} is in.
-     *
-     * @return the ID of the {@link MessageChannel} involved.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
     }
 
     /**
@@ -72,14 +63,13 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the pinned/unpinned
-     * {@link discord4j.core.object.entity.Message} is in, if this happened in a guild.
-     * This may not be available if the {@code Message} is in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in.
      *
-     * @return The ID of the {@link Guild} involved, if present.
+     * @return the ID of the {@link MessageChannel} involved.
      */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -95,9 +85,20 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in, if this happened in a guild.
+     * This may not be available if the {@code Message} is in a private channel.
+     *
+     * @return The ID of the {@link Guild} involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    /**
      * Gets the ISO8601 timestamp of when the last pinned {@link discord4j.core.object.entity.Message} w
      * as pinned, if present. This is NOT the timestamp of when the {@code Message} was created.
-     * 
+     *
      * @return The timestamp of the when the last pinned {@link discord4j.core.object.entity.Message} was pinned,
      * if present.
      */

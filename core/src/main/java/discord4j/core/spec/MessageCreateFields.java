@@ -38,15 +38,12 @@ public final class MessageCreateFields {
         static File of(String name, InputStream inputStream) {
             return ImmutableMessageCreateFields.File.of(name, inputStream);
         }
-
-        String name();
-
-        InputStream inputStream();
-
         @Override
         default Tuple2<String, InputStream> asRequest() {
             return Tuples.of(name(), inputStream());
         }
+        String name();
+        InputStream inputStream();
     }
 
     @SuppressWarnings("immutables:subtype")

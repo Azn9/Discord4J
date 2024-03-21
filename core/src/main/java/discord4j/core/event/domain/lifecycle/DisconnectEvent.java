@@ -30,11 +30,13 @@ import java.util.Optional;
  * This event is dispatched by Discord4J.
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
+
     private final CloseStatus status;
     @Nullable
     private final Throwable cause;
 
-    public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, CloseStatus status, @Nullable Throwable cause) {
+    public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, CloseStatus status,
+                           @Nullable Throwable cause) {
         super(gateway, shardInfo);
         this.status = status;
         this.cause = cause;

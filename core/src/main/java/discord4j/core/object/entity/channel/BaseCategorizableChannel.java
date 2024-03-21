@@ -52,7 +52,7 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     @Override
     public Optional<Snowflake> getCategoryId() {
         return Possible.flatOpt(getData().parentId())
-            .map(Snowflake::of);
+                .map(Snowflake::of);
     }
 
     @Override
@@ -70,12 +70,13 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     @Override
     public Mono<ExtendedInvite> createInvite(Consumer<? super LegacyInviteCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyInviteCreateSpec mutatedSpec = new LegacyInviteCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyInviteCreateSpec mutatedSpec = new LegacyInviteCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> new ExtendedInvite(getClient(), data));
     }
 
@@ -83,8 +84,8 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .createChannelInvite(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .createChannelInvite(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new ExtendedInvite(getClient(), data));
     }
 

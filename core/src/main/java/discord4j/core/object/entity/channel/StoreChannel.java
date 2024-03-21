@@ -52,12 +52,12 @@ public final class StoreChannel extends BaseCategorizableChannel {
     @Deprecated
     public Mono<StoreChannel> edit(final Consumer<? super LegacyStoreChannelEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyStoreChannelEditSpec mutatedSpec = new LegacyStoreChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyStoreChannelEditSpec mutatedSpec = new LegacyStoreChannelEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(StoreChannel.class);
     }
@@ -83,8 +83,8 @@ public final class StoreChannel extends BaseCategorizableChannel {
     public Mono<StoreChannel> edit(StoreChannelEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(StoreChannel.class);
     }

@@ -21,6 +21,7 @@ import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 
 public class ClosingStateChange extends GatewayStateChange {
+
     private final DisconnectBehavior behavior;
     private final CloseStatus status;
 

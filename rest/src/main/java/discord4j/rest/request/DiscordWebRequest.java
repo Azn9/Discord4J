@@ -22,7 +22,10 @@ import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import reactor.util.annotation.Nullable;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -151,6 +154,17 @@ public class DiscordWebRequest {
     }
 
     /**
+     * Adds the given names and values as request query parameters.
+     *
+     * @param params a map of query parameter names to values
+     * @return this request
+     */
+    public DiscordWebRequest query(Map<String, Object> params) {
+        params.forEach(this::query);
+        return this;
+    }
+
+    /**
      * Add the given name and value as a request query parameter.
      *
      * @param key the query parameter name
@@ -166,17 +180,6 @@ public class DiscordWebRequest {
     }
 
     /**
-     * Adds the given names and values as request query parameters.
-     *
-     * @param params a map of query parameter names to values
-     * @return this request
-     */
-    public DiscordWebRequest query(Map<String, Object> params) {
-        params.forEach(this::query);
-        return this;
-    }
-
-    /**
      * Add the given names and values as request query parameters.
      *
      * @param params a map of query parameter names to values
@@ -185,6 +188,18 @@ public class DiscordWebRequest {
     public DiscordWebRequest query(Multimap<String, Object> params) {
         params.forEachElement(this::query);
         return this;
+    }
+
+    /**
+     * Adds the given key and value to the headers of this request
+     * if and only if {@code value} is not {@code null}.
+     *
+     * @param key the header key
+     * @param value the header value
+     * @return this request
+     */
+    public DiscordWebRequest optionalHeader(String key, @Nullable String value) {
+        return (value == null) ? this : header(key, value);
     }
 
     /**
@@ -199,16 +214,11 @@ public class DiscordWebRequest {
         return this;
     }
 
-    /**
-     * Adds the given key and value to the headers of this request
-     * if and only if {@code value} is not {@code null}.
-     *
-     * @param key the header key
-     * @param value the header value
-     * @return this request
-     */
-    public DiscordWebRequest optionalHeader(String key, @Nullable String value) {
-        return (value == null) ? this : header(key, value);
+    private Map<String, Set<String>> initHeaders() {
+        if (headers == null) {
+            headers = new LinkedHashMap<>();
+        }
+        return headers;
     }
 
     /**
@@ -244,13 +254,6 @@ public class DiscordWebRequest {
         this.authorizationScheme = AuthorizationScheme.NONE;
         this.authorizationValue = null;
         return this;
-    }
-
-    private Map<String, Set<String>> initHeaders() {
-        if (headers == null) {
-            headers = new LinkedHashMap<>();
-        }
-        return headers;
     }
 
     boolean matchesVariables(Predicate<Map<String, String>> matcher) {

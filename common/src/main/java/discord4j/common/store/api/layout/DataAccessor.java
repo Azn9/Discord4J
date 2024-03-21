@@ -19,7 +19,17 @@ package discord4j.common.store.api.layout;
 
 import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildScheduledEventData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -345,7 +355,7 @@ public interface DataAccessor {
      * Retrieves data for the member corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return A {@link Mono} emitting the member, or empty if not found
      */
     Mono<MemberData> getMemberById(long guildId, long userId);
@@ -393,7 +403,7 @@ public interface DataAccessor {
      * Retrieves data for the presence corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return A {@link Mono} emitting the presence, or empty if not found
      */
     Mono<PresenceData> getPresenceById(long guildId, long userId);
@@ -417,7 +427,7 @@ public interface DataAccessor {
      * Retrieves data for the role corresponding to the given guild ID and role ID.
      *
      * @param guildId the guild ID
-     * @param roleId  the role ID
+     * @param roleId the role ID
      * @return A {@link Mono} emitting the role, or empty if not found
      */
     Mono<RoleData> getRoleById(long guildId, long roleId);
@@ -465,7 +475,7 @@ public interface DataAccessor {
      * Retrieves data for the voice state corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return A {@link Mono} emitting the voice state, or empty if not found
      */
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);

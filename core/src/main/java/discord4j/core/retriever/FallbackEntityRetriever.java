@@ -16,12 +16,12 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -47,7 +47,8 @@ public class FallbackEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
-        return first.getGuildStickerById(guildId, stickerId).switchIfEmpty(fallback.getGuildStickerById(guildId, stickerId));
+        return first.getGuildStickerById(guildId, stickerId).switchIfEmpty(fallback.getGuildStickerById(guildId,
+                stickerId));
     }
 
     @Override
@@ -122,7 +123,8 @@ public class FallbackEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<ScheduledEvent> getScheduledEventById(Snowflake guildId, Snowflake eventId) {
-        return first.getScheduledEventById(guildId, eventId).switchIfEmpty(fallback.getScheduledEventById(guildId, eventId));
+        return first.getScheduledEventById(guildId, eventId).switchIfEmpty(fallback.getScheduledEventById(guildId,
+                eventId));
     }
 
     @Override
@@ -132,6 +134,7 @@ public class FallbackEntityRetriever implements EntityRetriever {
 
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
-        return first.getScheduledEventUsers(guildId, eventId).switchIfEmpty(fallback.getScheduledEventUsers(guildId, eventId));
+        return first.getScheduledEventUsers(guildId, eventId).switchIfEmpty(fallback.getScheduledEventUsers(guildId,
+                eventId));
     }
 }

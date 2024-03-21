@@ -62,22 +62,6 @@ public class VoiceGatewayRetrySpec extends Retry {
         return new VoiceGatewayRetrySpec(reconnectOptions, reconnectContext, doPreRetry.andThen(doBeforeRetry));
     }
 
-    private boolean isRetryable(@Nullable Throwable t) {
-        if (t instanceof CloseException) {
-            CloseException closeException = (CloseException) t;
-            return !NON_RETRYABLE_STATUS_CODES.contains(closeException.getCode());
-        }
-        return !(t instanceof PartialDisconnectException);
-    }
-
-    private boolean canResume(Throwable t) {
-        if (t instanceof CloseException) {
-            CloseException closeException = (CloseException) t;
-            return closeException.getCode() < 4000;
-        }
-        return !(t instanceof VoiceGatewayReconnectException);
-    }
-
     @Override
     public Flux<Long> generateCompanion(Flux<RetrySignal> t) {
         return t.concatMap(retryWhenState -> {
@@ -142,6 +126,22 @@ public class VoiceGatewayRetrySpec extends Retry {
                     Mono.delay(effectiveBackoff, reconnectOptions.getBackoffScheduler()),
                     doPreRetry);
         });
+    }
+
+    private boolean isRetryable(@Nullable Throwable t) {
+        if (t instanceof CloseException) {
+            CloseException closeException = (CloseException) t;
+            return !NON_RETRYABLE_STATUS_CODES.contains(closeException.getCode());
+        }
+        return !(t instanceof PartialDisconnectException);
+    }
+
+    private boolean canResume(Throwable t) {
+        if (t instanceof CloseException) {
+            CloseException closeException = (CloseException) t;
+            return closeException.getCode() < 4000;
+        }
+        return !(t instanceof VoiceGatewayReconnectException);
     }
 
     static long computeJitter(Duration nextBackoff, Duration minBackoff, Duration maxBackoff, double factor) {

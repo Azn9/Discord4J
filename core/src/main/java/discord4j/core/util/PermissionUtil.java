@@ -16,10 +16,10 @@
  */
 package discord4j.core.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -33,7 +33,6 @@ public final class PermissionUtil {
      * @param everyonePerms The permissions granted by the everyone role.
      * @param rolePerms The list of permissions granted by each of the member's other roles.
      * @return The combined permissions of everyonePerms and rolePerms.
-     *
      * @see discord4j.core.object.entity.Member#getBasePermissions() Member#getBasePermissions()
      */
     public static PermissionSet computeBasePermissions(PermissionSet everyonePerms, List<PermissionSet> rolePerms) {
@@ -48,7 +47,6 @@ public final class PermissionUtil {
      * @param roleOverwrites The overwrites applied to every other role in the channel.
      * @param memberOverwrite The overwrite applied to the member in the channel.
      * @return The permissions with overwrites taken into account.
-     *
      * @see discord4j.core.object.entity.channel.GuildChannel#getEffectivePermissions(Snowflake)
      * GuildChannel#getEffectivePermissions(Snowflake)
      */
@@ -60,11 +58,16 @@ public final class PermissionUtil {
         }
 
         List<PermissionOverwrite> allOverwrites = new ArrayList<>();
-        if (everyoneOverwrite != null) allOverwrites.add(everyoneOverwrite);
+        if (everyoneOverwrite != null) {
+            allOverwrites.add(everyoneOverwrite);
+        }
         allOverwrites.addAll(roleOverwrites);
-        if (memberOverwrite != null) allOverwrites.add(memberOverwrite);
+        if (memberOverwrite != null) {
+            allOverwrites.add(memberOverwrite);
+        }
 
-        return allOverwrites.stream().reduce(base, PermissionUtil::applyOverwrite, PermissionSet::or); // combiner is never used
+        return allOverwrites.stream().reduce(base, PermissionUtil::applyOverwrite, PermissionSet::or); // combiner is
+        // never used
     }
 
     private static PermissionSet applyOverwrite(PermissionSet base, PermissionOverwrite overwrite) {

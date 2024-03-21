@@ -80,13 +80,13 @@ public class ScheduledEventUser implements DiscordObject {
      */
     public Optional<PartialMember> getMember() {
         return data.member().toOptional()
-            .map(memberData -> new PartialMember(gateway, data.user(), memberData, guildId.asLong()));
+                .map(memberData -> new PartialMember(gateway, data.user(), memberData, guildId.asLong()));
     }
 
     @Override
     public String toString() {
-        return "ScheduledEventUser{"+
-            "data=" + data +
-            '}';
+        return "ScheduledEventUser{" +
+                "data=" + data +
+                '}';
     }
 }

@@ -54,6 +54,11 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
+    public String toString() {
+        return "BaseMessageChannel{} " + super.toString();
+    }
+
+    @Override
     public final Optional<Snowflake> getLastMessageId() {
         return Possible.flatOpt(getData().lastMessageId()).map(Snowflake::of);
     }
@@ -78,14 +83,14 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyMessageCreateSpec mutatedSpec = new LegacyMessageCreateSpec();
-                    getClient().getRestClient().getRestResources()
-                            .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
-                    return getRestChannel().createMessage(mutatedSpec.asRequest());
-                })
+                        () -> {
+                            LegacyMessageCreateSpec mutatedSpec = new LegacyMessageCreateSpec();
+                            getClient().getRestClient().getRestResources()
+                                    .getAllowedMentions()
+                                    .ifPresent(mutatedSpec::setAllowedMentions);
+                            spec.accept(mutatedSpec);
+                            return getRestChannel().createMessage(mutatedSpec.asRequest());
+                        })
                 .map(data -> new Message(getClient(), data));
     }
 
@@ -93,15 +98,15 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     public Mono<Message> createMessage(MessageCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    MessageCreateSpec actualSpec = getClient().getRestClient()
-                            .getRestResources()
-                            .getAllowedMentions()
-                            .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
-                            .map(spec::withAllowedMentions)
-                            .orElse(spec);
-                    return getRestChannel().createMessage(actualSpec.asRequest());
-                })
+                        () -> {
+                            MessageCreateSpec actualSpec = getClient().getRestClient()
+                                    .getRestResources()
+                                    .getAllowedMentions()
+                                    .filter(allowedMentions -> !spec.isAllowedMentionsPresent())
+                                    .map(spec::withAllowedMentions)
+                                    .orElse(spec);
+                            return getRestChannel().createMessage(actualSpec.asRequest());
+                        })
                 .map(data -> new Message(getClient(), data));
     }
 
@@ -164,8 +169,5 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 .map(data -> new Message(getClient(), data));
     }
 
-    @Override
-    public String toString() {
-        return "BaseMessageChannel{} " + super.toString();
-    }
+
 }

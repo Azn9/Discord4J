@@ -56,9 +56,9 @@ public class ExampleStore {
                 .setJacksonResources(jackson)
                 .build()
                 .gateway()
-//                .setStoreService(MappingStoreService.create()
-//                        .setMapping(new NoOpStoreService(), MessageData.class)
-//                        .setFallback(new JdkStoreService()))
+                //                .setStoreService(MappingStoreService.create()
+                //                        .setMapping(new NoOpStoreService(), MessageData.class)
+                //                        .setFallback(new JdkStoreService()))
                 .setStore(Store.fromLayout(LocalStoreLayout.create()))
                 .setMemberRequestFilter(MemberRequestFilter.all())
                 .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.GUILD_MEMBERS)))
@@ -95,10 +95,10 @@ public class ExampleStore {
                                 (req, res) -> {
                                     Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(Mono.from(store.execute(countUsers()))),
-                                            Mono.just("members").zipWith(Mono.from(store.execute(countMembers()))),
-                                            Mono.just("guilds").zipWith(Mono.from(store.execute(countGuilds()))),
-                                            Mono.just("messages").zipWith(Mono.from(store.execute(countMessages()))))
+                                                    Mono.just("users").zipWith(Mono.from(store.execute(countUsers()))),
+                                                    Mono.just("members").zipWith(Mono.from(store.execute(countMembers()))),
+                                                    Mono.just("guilds").zipWith(Mono.from(store.execute(countGuilds()))),
+                                                    Mono.just("messages").zipWith(Mono.from(store.execute(countMessages()))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
                                             .map(map -> {
                                                 try {

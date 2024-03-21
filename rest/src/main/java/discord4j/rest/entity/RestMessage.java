@@ -181,7 +181,8 @@ public class RestMessage {
 
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
-     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
+     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the
+     * 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      *
      * @return A {@link Mono} where, upon successful completion, emits the published {@link MessageData}
      * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
@@ -192,15 +193,19 @@ public class RestMessage {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestMessage that = (RestMessage) o;
-        return channelId == that.channelId && id == that.id;
+    public int hashCode() {
+        return Objects.hash(channelId, id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(channelId, id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestMessage that = (RestMessage) o;
+        return channelId == that.channelId && id == that.id;
     }
 }

@@ -30,16 +30,10 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable
 interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
-
-    String name();
-
-    Possible<Integer> position();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     @Override
     default ChannelCreateRequest asRequest() {
@@ -52,18 +46,24 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
                         .collect(Collectors.toList())))
                 .build();
     }
+
+    String name();
+
+    Possible<Integer> position();
+
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class CategoryCreateMonoGenerator extends Mono<Category> implements CategoryCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super Category> actual) {
         guild().createCategory(CategoryCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

@@ -99,15 +99,19 @@ public class RestInvite {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestInvite that = (RestInvite) o;
-        return code.equals(that.code);
+    public int hashCode() {
+        return Objects.hash(code);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(code);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestInvite that = (RestInvite) o;
+        return code.equals(that.code);
     }
 }

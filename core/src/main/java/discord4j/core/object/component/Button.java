@@ -30,6 +30,10 @@ import java.util.Optional;
  */
 public class Button extends ActionComponent {
 
+    Button(ComponentData data) {
+        super(data);
+    }
+
     /**
      * Creates a {@link Button.Style#PRIMARY primary} button.
      *
@@ -39,6 +43,31 @@ public class Button extends ActionComponent {
      */
     public static Button primary(String customId, String label) {
         return of(Button.Style.PRIMARY, customId, null, label, null);
+    }
+
+    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji,
+                             @Nullable String label, @Nullable String url) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(MessageComponent.Type.BUTTON.getValue())
+                .style(style.getValue());
+
+        if (customId != null) {
+            builder.customId(customId);
+        }
+
+        if (emoji != null) {
+            builder.emoji(emoji.asEmojiData());
+        }
+
+        if (label != null) {
+            builder.label(label);
+        }
+
+        if (url != null) {
+            builder.url(url);
+        }
+
+        return new Button(builder.build());
     }
 
     /**
@@ -200,30 +229,6 @@ public class Button extends ActionComponent {
         return of(Button.Style.LINK, null, emoji, label, url);
     }
 
-    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji, @Nullable String label, @Nullable String url) {
-        ImmutableComponentData.Builder builder = ComponentData.builder()
-                .type(MessageComponent.Type.BUTTON.getValue())
-                .style(style.getValue());
-
-        if (customId != null)
-            builder.customId(customId);
-
-        if (emoji != null)
-            builder.emoji(emoji.asEmojiData());
-
-        if (label != null)
-            builder.label(label);
-
-        if (url != null)
-            builder.url(url);
-
-        return new Button(builder.build());
-    }
-
-    Button(ComponentData data) {
-        super(data);
-    }
-
     /**
      * Gets the button's style.
      *
@@ -289,11 +294,11 @@ public class Button extends ActionComponent {
     public Button disabled() {
         return disabled(true);
     }
-    
+
     /**
      * Creates a new button with the same data as this one, but depending on the value param it may be disabled or not.
      *
-     * @param value True if the button should be disabled otherwise False.  
+     * @param value True if the button should be disabled otherwise False.
      * @return A new possibly disabled button with the same data as this one.
      */
     public Button disabled(boolean value) {
@@ -303,7 +308,8 @@ public class Button extends ActionComponent {
     /**
      * A button's style is what determines its color and whether it has a custom id or a url.
      *
-     * @see <a href="https://discord.com/developers/docs/interactions/message-components#buttons-button-styles">Button Styles</a>
+     * @see
+     * <a href="https://discord.com/developers/docs/interactions/message-components#buttons-button-styles">Button Styles</a>
      */
     public enum Style {
         UNKNOWN(-1),
@@ -319,10 +325,6 @@ public class Button extends ActionComponent {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static Style of(int value) {
             switch (value) {
                 case 1: return PRIMARY;
@@ -332,6 +334,10 @@ public class Button extends ActionComponent {
                 case 5: return LINK;
                 default: return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 }

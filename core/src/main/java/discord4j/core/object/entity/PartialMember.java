@@ -46,11 +46,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -101,28 +97,12 @@ public class PartialMember extends User {
     }
 
     /**
-     * Gets the user's guild roles' IDs.
+     * Gets the ID of the guild this user is associated to.
      *
-     * @return The user's guild roles' IDs.
+     * @return The ID of the guild this user is associated to.
      */
-    public Set<Snowflake> getRoleIds() {
-        return data.roles().stream()
-            .map(Snowflake::of)
-            .collect(Collectors.toSet());
-    }
-
-    /**
-     * Requests to retrieve the user's guild roles.
-     * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
-     * to consistently order roles.
-     *
-     * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
-     * emitted through the {@code Flux}.
-     */
-    public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds())
-            .flatMap(id -> getClient().getRoleById(getGuildId(), id));
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -137,7 +117,18 @@ public class PartialMember extends User {
      */
     public Flux<Role> getRoles(EntityRetrievalStrategy retrievalStrategy) {
         return Flux.fromIterable(getRoleIds())
-            .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id));
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Gets the user's guild roles' IDs.
+     *
+     * @return The user's guild roles' IDs.
+     */
+    public Set<Snowflake> getRoleIds() {
+        return data.roles().stream()
+                .map(Snowflake::of)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -151,7 +142,7 @@ public class PartialMember extends User {
      */
     public Mono<Role> getHighestRole() {
         return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
-            OrderUtil.ROLE_ORDER);
+                OrderUtil.ROLE_ORDER);
     }
 
     /**
@@ -166,9 +157,9 @@ public class PartialMember extends User {
      */
     public Mono<Role> getHighestRole(EntityRetrievalStrategy retrievalStrategy) {
         return MathFlux.max(Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(),
-                    id)),
-            OrderUtil.ROLE_ORDER);
+                        .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(),
+                                id)),
+                OrderUtil.ROLE_ORDER);
     }
 
     /**
@@ -187,7 +178,7 @@ public class PartialMember extends User {
      */
     public Optional<Instant> getPremiumTime() {
         return Possible.flatOpt(data.premiumSince())
-            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
@@ -197,26 +188,7 @@ public class PartialMember extends User {
      */
     public Optional<Instant> getCommunicationDisabledUntil() {
         return Possible.flatOpt(data.communicationDisabledUntil())
-            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
-    }
-
-    /**
-     * Gets the ID of the guild this user is associated to.
-     *
-     * @return The ID of the guild this user is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
-     * Requests to retrieve the guild this user is associated to.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
-     * to. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
@@ -259,13 +231,16 @@ public class PartialMember extends User {
     }
 
     /**
-     * Gets if the member's guild avatar is animated.
+     * Gets the member's guild avatar. This is the avatar at the url given by {@link #getGuildAvatarUrl(Image.Format)}.
+     * </p>
+     * If the member does not have a guild avatar, this method emits {@code Mono.empty()}.
      *
-     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
+     * @param format The format for the avatar.
+     * @return a {@link Mono} where, upon successful completion, emotes the {@link Image guild avatar} of the member.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
-    public final boolean hasAnimatedGuildAvatar() {
-        final String avatar = data.avatar().orElse(null);
-        return (avatar != null) && avatar.startsWith("a_");
+    public Mono<Image> getGuildAvatar(final Image.Format format) {
+        return Mono.justOrEmpty(getGuildAvatarUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -280,6 +255,16 @@ public class PartialMember extends User {
     }
 
     /**
+     * Gets the member's effective avatar. This is the avatar at the url given by {@link #getEffectiveAvatarUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getEffectiveAvatar() {
+        return Image.ofUrl(getEffectiveAvatarUrl());
+    }
+
+    /**
      * Gets the member's effective avatar URL.
      * If the member does not have a guild avatar, this defaults to the user's global avatar.
      *
@@ -291,26 +276,13 @@ public class PartialMember extends User {
     }
 
     /**
-     * Gets the member's guild avatar. This is the avatar at the url given by {@link #getGuildAvatarUrl(Image.Format)}.
-     * </p>
-     * If the member does not have a guild avatar, this method emits {@code Mono.empty()}.
+     * Gets if the member's guild avatar is animated.
      *
-     * @param format The format for the avatar.
-     * @return a {@link Mono} where, upon successful completion, emotes the {@link Image guild avatar} of the member.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
-    public Mono<Image> getGuildAvatar(final Image.Format format) {
-        return Mono.justOrEmpty(getGuildAvatarUrl(format)).flatMap(Image::ofUrl);
-    }
-
-    /**
-     * Gets the member's effective avatar. This is the avatar at the url given by {@link #getEffectiveAvatarUrl()}.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<Image> getEffectiveAvatar() {
-        return Image.ofUrl(getEffectiveAvatarUrl());
+    public final boolean hasAnimatedGuildAvatar() {
+        final String avatar = data.avatar().orElse(null);
+        return (avatar != null) && avatar.startsWith("a_");
     }
 
     /**
@@ -321,8 +293,8 @@ public class PartialMember extends User {
      */
     public Mono<VoiceState> getVoiceState() {
         return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
-            .map(bean -> new VoiceState(getClient(), bean));
+                        .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
+                .map(bean -> new VoiceState(getClient(), bean));
     }
 
     /**
@@ -338,26 +310,27 @@ public class PartialMember extends User {
         if (getClient().getSelfId().equals(getId())) {
             return Mono.defer(() -> {
                 final ImmutableRequestGuildMembers request = RequestGuildMembers.builder()
-                    .guildId(getGuildId().asString())
-                    .addUserId(getId().asString())
-                    .presences(true)
-                    .limit(1)
-                    .build();
+                        .guildId(getGuildId().asString())
+                        .addUserId(getId().asString())
+                        .presences(true)
+                        .limit(1)
+                        .build();
 
                 return getClient().requestMemberChunks(request)
-                    .singleOrEmpty()
-                    .flatMap(chunk -> Mono.justOrEmpty(chunk.presences().toOptional())
-                        .flatMapIterable(list -> list)
-                        .next()
-                        .map(Presence::new))
-                    // IllegalArgumentException can be thrown during request validation if intents are not matching the request
-                    .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
+                        .singleOrEmpty()
+                        .flatMap(chunk -> Mono.justOrEmpty(chunk.presences().toOptional())
+                                .flatMapIterable(list -> list)
+                                .next()
+                                .map(Presence::new))
+                        // IllegalArgumentException can be thrown during request validation if intents are not
+                        // matching the request
+                        .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
             });
         }
 
         return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
-            .map(Presence::new);
+                        .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
+                .map(Presence::new);
     }
 
     /**
@@ -379,7 +352,7 @@ public class PartialMember extends User {
      */
     public Mono<Void> kick(@Nullable final String reason) {
         return getClient().getRestClient().getGuildService()
-            .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
+                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -403,7 +376,7 @@ public class PartialMember extends User {
      */
     public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
         return getClient().getRestClient().getGuildService()
-            .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
+                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
@@ -427,7 +400,7 @@ public class PartialMember extends User {
      */
     public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
         return getClient().getRestClient().getGuildService()
-            .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
+                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
@@ -441,8 +414,47 @@ public class PartialMember extends User {
         Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
 
         return getIsOwner.filter(Predicate.isEqual(Boolean.TRUE))
-            .flatMap(ignored -> Mono.just(PermissionSet.all()))
-            .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
+                .flatMap(ignored -> Mono.just(PermissionSet.all()))
+                .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
+    }
+
+    /**
+     * Requests to retrieve the user's guild roles.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
+     *
+     * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoles() {
+        return Flux.fromIterable(getRoleIds())
+                .flatMap(id -> getClient().getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Requests to retrieve the guild this user is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to determine if this member is higher in the role hierarchy than the member as represented
+     * by the supplied ID or signal IllegalArgumentException if the member as represented by the supplied ID is in
+     * a different guild than this member.
+     * This is determined by the positions of each of the members' highest roles.
+     *
+     * @param id The ID of the member to compare in the role hierarchy with this member.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role
+     * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Boolean> isHigher(Snowflake id) {
+        return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
     }
 
     /**
@@ -466,32 +478,17 @@ public class PartialMember extends User {
         }
 
         return getGuild().map(Guild::getOwnerId)
-            .flatMap(ownerId -> {
-                // the owner of the guild is higher in the role hierarchy than everyone
-                if (ownerId.equals(getId())) {
-                    return Mono.just(true);
-                }
-                if (ownerId.equals(otherMember.getId())) {
-                    return Mono.just(false);
-                }
+                .flatMap(ownerId -> {
+                    // the owner of the guild is higher in the role hierarchy than everyone
+                    if (ownerId.equals(getId())) {
+                        return Mono.just(true);
+                    }
+                    if (ownerId.equals(otherMember.getId())) {
+                        return Mono.just(false);
+                    }
 
-                return hasHigherRoles(otherMember.getRoleIds());
-            });
-    }
-
-    /**
-     * Requests to determine if this member is higher in the role hierarchy than the member as represented
-     * by the supplied ID or signal IllegalArgumentException if the member as represented by the supplied ID is in
-     * a different guild than this member.
-     * This is determined by the positions of each of the members' highest roles.
-     *
-     * @param id The ID of the member to compare in the role hierarchy with this member.
-     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role
-     * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received,
-     * it is emitted through the {@code Mono}.
-     */
-    public Mono<Boolean> isHigher(Snowflake id) {
-        return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+                    return hasHigherRoles(otherMember.getRoleIds());
+                });
     }
 
     /**
@@ -507,30 +504,30 @@ public class PartialMember extends User {
      */
     public Mono<Boolean> hasHigherRoles(Set<Snowflake> otherRoles) {
         return getGuild()
-            .flatMapMany(Guild::getRoles)
-            .transform(OrderUtil::orderRoles)
-            .collectList()
-            .map(guildRoles -> { // Get the sorted list of guild roles
-                Set<Snowflake> thisRoleIds = getRoleIds();
+                .flatMapMany(Guild::getRoles)
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(guildRoles -> { // Get the sorted list of guild roles
+                    Set<Snowflake> thisRoleIds = getRoleIds();
 
-                // Get the position of this member's highest role by finding the maximum element in guildRoles which
-                // the member has and then finding its index in the sorted list of guild roles (the role's actual
-                // position). The @everyone role is not included, so if we end up with empty, that is their only
-                // role which is always at position 0.
-                int thisHighestRolePos = guildRoles.stream()
-                    .filter(role -> thisRoleIds.contains(role.getId()))
-                    .max(OrderUtil.ROLE_ORDER)
-                    .map(guildRoles::indexOf)
-                    .orElse(0);
+                    // Get the position of this member's highest role by finding the maximum element in guildRoles which
+                    // the member has and then finding its index in the sorted list of guild roles (the role's actual
+                    // position). The @everyone role is not included, so if we end up with empty, that is their only
+                    // role which is always at position 0.
+                    int thisHighestRolePos = guildRoles.stream()
+                            .filter(role -> thisRoleIds.contains(role.getId()))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0);
 
-                int otherHighestPos = guildRoles.stream()
-                    .filter(role -> otherRoles.contains(role.getId()))
-                    .max(OrderUtil.ROLE_ORDER)
-                    .map(guildRoles::indexOf)
-                    .orElse(0);
+                    int otherHighestPos = guildRoles.stream()
+                            .filter(role -> otherRoles.contains(role.getId()))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0);
 
-                return thisHighestRolePos > otherHighestPos;
-            });
+                    return thisHighestRolePos > otherHighestPos;
+                });
     }
 
     /**
@@ -543,8 +540,8 @@ public class PartialMember extends User {
         Flux<Role> rolesWithColor = getRoles().filter(it -> !it.getColor().equals(Role.DEFAULT_COLOR));
 
         return MathFlux.max(rolesWithColor, OrderUtil.ROLE_ORDER)
-            .map(Role::getColor)
-            .defaultIfEmpty(Role.DEFAULT_COLOR);
+                .map(Role::getColor)
+                .defaultIfEmpty(Role.DEFAULT_COLOR);
     }
 
     /**
@@ -571,13 +568,13 @@ public class PartialMember extends User {
     @Deprecated
     public Mono<Void> ban(final Consumer<? super LegacyBanQuerySpec> spec) {
         return Mono.defer(
-            () -> {
-                LegacyBanQuerySpec mutatedSpec = new LegacyBanQuerySpec();
-                spec.accept(mutatedSpec);
-                return getClient().getRestClient().getGuildService()
-                    .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                        mutatedSpec.getReason());
-            });
+                () -> {
+                    LegacyBanQuerySpec mutatedSpec = new LegacyBanQuerySpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
     }
 
     /**
@@ -601,8 +598,8 @@ public class PartialMember extends User {
     public Mono<Void> ban(BanQuerySpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-            () -> getClient().getRestClient().getGuildService()
-                .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason()));
+                () -> getClient().getRestClient().getGuildService()
+                        .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason()));
     }
 
     /**
@@ -624,7 +621,7 @@ public class PartialMember extends User {
      */
     public Mono<Void> unban(@Nullable final String reason) {
         return getClient().getRestClient().getGuildService()
-            .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
+                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -639,14 +636,14 @@ public class PartialMember extends User {
     @Deprecated
     public Mono<Member> edit(final Consumer<? super LegacyGuildMemberEditSpec> spec) {
         return Mono.defer(
-            () -> {
-                LegacyGuildMemberEditSpec mutatedSpec = new LegacyGuildMemberEditSpec();
-                spec.accept(mutatedSpec);
-                return getClient().getRestClient().getGuildService()
-                    .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                        mutatedSpec.getReason())
-                    .map(data -> new Member(getClient(), data, getGuildId().asLong()));
-            });
+                () -> {
+                    LegacyGuildMemberEditSpec mutatedSpec = new LegacyGuildMemberEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason())
+                            .map(data -> new Member(getClient(), data, getGuildId().asLong()));
+                });
     }
 
     /**
@@ -670,21 +667,24 @@ public class PartialMember extends User {
     public Mono<Member> edit(GuildMemberEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-            () -> getClient().getRestClient().getGuildService()
-                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
-                .map(data -> new Member(getClient(), data, getGuildId().asLong())));
+                () -> getClient().getRestClient().getGuildService()
+                        .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
+                        .map(data -> new Member(getClient(), data, getGuildId().asLong())));
     }
 
     @Override
     public String toString() {
         return "PartialMember{" +
-            "data=" + data +
-            ", guildId=" + guildId +
-            "} " + super.toString();
+                "data=" + data +
+                ", guildId=" + guildId +
+                "} " + super.toString();
     }
 
-    /** Describes the flags of a member in a guild.
-     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
+    /**
+     * Describes the flags of a member in a guild.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
      **/
     public enum Flag {
         /**
@@ -698,7 +698,8 @@ public class PartialMember extends User {
         /**
          * Member has completed onboarding
          * <br>
-         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a server.
+         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
+         * server.
          */
         BYPASSES_VERIFICATION(2),
         /**
@@ -721,24 +722,6 @@ public class PartialMember extends User {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of member. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -754,6 +737,24 @@ public class PartialMember extends User {
                 }
             }
             return memberFlags;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

@@ -75,6 +75,11 @@ public class ShardInfo {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(index, count);
+    }
+
+    @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
@@ -87,8 +92,11 @@ public class ShardInfo {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(index, count);
+    public String toString() {
+        return "ShardInfo{" +
+                "index=" + index +
+                ", count=" + count +
+                '}';
     }
 
     /**
@@ -98,13 +106,5 @@ public class ShardInfo {
      */
     public String format() {
         return index + "," + count;
-    }
-
-    @Override
-    public String toString() {
-        return "ShardInfo{" +
-                "index=" + index +
-                ", count=" + count +
-                '}';
     }
 }

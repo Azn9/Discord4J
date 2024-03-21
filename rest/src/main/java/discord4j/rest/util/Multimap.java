@@ -58,6 +58,15 @@ public class Multimap<K, V> implements Map<K, List<V>> {
     }
 
     /**
+     * Add all values from the given {@link Multimap} to the current ones.
+     *
+     * @param values the values to add
+     */
+    public void addAll(Multimap<K, V> values) {
+        values.forEach(this::addAll);
+    }
+
+    /**
      * Add multiple values to the list of values under the given key.
      *
      * @param key the key
@@ -68,12 +77,12 @@ public class Multimap<K, V> implements Map<K, List<V>> {
     }
 
     /**
-     * Add all values from the given {@link Multimap} to the current ones.
+     * Set multiple values under the given key, replacing any existing single or multiple values.
      *
-     * @param values the values to add
+     * @param values the values to set
      */
-    public void addAll(Multimap<K, V> values) {
-        values.forEach(this::addAll);
+    public void setAll(Map<K, V> values) {
+        values.forEach(this::set);
     }
 
     /**
@@ -86,15 +95,6 @@ public class Multimap<K, V> implements Map<K, List<V>> {
         List<V> list = new LinkedList<>();
         list.add(value);
         map.put(key, list);
-    }
-
-    /**
-     * Set multiple values under the given key, replacing any existing single or multiple values.
-     *
-     * @param values the values to set
-     */
-    public void setAll(Map<K, V> values) {
-        values.forEach(this::set);
     }
 
     /**

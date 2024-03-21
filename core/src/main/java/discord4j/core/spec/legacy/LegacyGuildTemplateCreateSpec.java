@@ -56,8 +56,8 @@ public class LegacyGuildTemplateCreateSpec implements LegacySpec<TemplateCreateR
     @Override
     public TemplateCreateRequest asRequest() {
         return TemplateCreateRequest.builder()
-            .name(name)
-            .description(description)
-            .build();
+                .name(name)
+                .description(description)
+                .build();
     }
 }

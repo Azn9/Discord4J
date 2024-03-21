@@ -188,7 +188,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * Sets the id of the channel where guild notices such as welcome messages and boost events are posted.
      *
      * @param systemChannelId The id of the channel where guild notices such as welcome messages and boost events
-     *                        are posted.
+     * are posted.
      * @return This spec.
      */
     public LegacyGuildEditSpec setSystemChannelId(@Nullable Snowflake systemChannelId) {
@@ -241,12 +241,12 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * Sets the id of the channel where admins and moderators of Community guilds receive notices from Discord.
      *
      * @param publicUpdatesChannelId The id of the channel where admins and moderators of Community guilds receive
-     *                               notices from Discord.
+     * notices from Discord.
      * @return This spec.
      */
     public LegacyGuildEditSpec setPublicUpdatesChannelId(@Nullable Snowflake publicUpdatesChannelId) {
         requestBuilder.publicUpdatesChannelId(Possible.of(Optional.ofNullable(publicUpdatesChannelId)
-            .map(Snowflake::asString)));
+                .map(Snowflake::asString)));
         return this;
     }
 
@@ -254,7 +254,8 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * Sets the preferred locale of a Community guild used in server discovery and notices from Discord;
      * defaults to "en-US".
      *
-     * @param preferredLocale The preferred locale of a Community guild used in server discovery and notices from Discord.
+     * @param preferredLocale The preferred locale of a Community guild used in server discovery and notices from
+     * Discord.
      * @return This spec.
      */
     public LegacyGuildEditSpec setPreferredLocale(@Nullable Locale preferredLocale) {
@@ -288,15 +289,15 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
     }
 
     @Override
-    public LegacyGuildEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyGuildEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

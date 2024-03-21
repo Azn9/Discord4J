@@ -28,8 +28,7 @@ import java.util.Optional;
  * Dispatched when an integration is deleted.
  * This event is dispatched by Discord.
  *
- * @see
- * <a href="https://discord.com/developers/docs/topics/gateway#integration-delete">Integration Delete</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#integration-delete">Integration Delete</a>
  */
 public class IntegrationDeleteEvent extends Event {
 

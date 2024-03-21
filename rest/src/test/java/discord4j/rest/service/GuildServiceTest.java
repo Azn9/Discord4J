@@ -16,13 +16,13 @@
  */
 package discord4j.rest.service;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import discord4j.common.util.Snowflake;
 
 import java.util.Collections;
 
@@ -58,8 +58,8 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuild() {
         GuildModifyRequest req = GuildModifyRequest.builder()
-            .regionOrNull("us-south")
-            .build();
+                .regionOrNull("us-south")
+                .build();
         guildService.modifyGuild(guild, req, null).block();
     }
 
@@ -77,20 +77,20 @@ public class GuildServiceTest {
     public void testCreateGuildChannel() {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ChannelCreateRequest.builder()
-            .name(randomName)
-            .parentId(Snowflake.asString(trashCategory))
-            .build();
+                .name(randomName)
+                .parentId(Snowflake.asString(trashCategory))
+                .build();
         guildService.createGuildChannel(guild, req, null).block();
     }
 
     @Test
     public void testDeleteGuildChannels() {
         guildService.getGuildChannels(guild)
-            .filter(data -> data.parentId().get().map(parentId -> Snowflake.asLong(parentId) == trashCategory).orElse(false))
-            .map(ChannelData::id)
-            .flatMap(id -> channelService.deleteChannel(Snowflake.asLong(id), null))
-            .then()
-            .block();
+                .filter(data -> data.parentId().get().map(parentId -> Snowflake.asLong(parentId) == trashCategory).orElse(false))
+                .map(ChannelData::id)
+                .flatMap(id -> channelService.deleteChannel(Snowflake.asLong(id), null))
+                .then()
+                .block();
     }
 
     @Test
@@ -116,8 +116,8 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildMember() {
         GuildMemberModifyRequest req = GuildMemberModifyRequest.builder()
-            .nickOrNull("nickname")
-            .build();
+                .nickOrNull("nickname")
+                .build();
         guildService.modifyGuildMember(guild, member, req, null).block();
     }
 
@@ -171,8 +171,8 @@ public class GuildServiceTest {
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         RoleCreateRequest req = RoleCreateRequest.builder()
-            .name(randomName)
-            .build();
+                .name(randomName)
+                .build();
         guildService.createGuildRole(guild, req, null).block();
     }
 
@@ -184,18 +184,18 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildRole() {
         RoleModifyRequest req = RoleModifyRequest.builder()
-            .permissions(0L)
-            .build();
+                .permissions(0L)
+                .build();
         guildService.modifyGuildRole(guild, permanentRole, req, null).block();
     }
 
     @Test
     public void testDeleteGuildRole() {
         guildService.getGuildRoles(guild)
-            .filter(role -> role.name().startsWith("test_") || role.name().startsWith("3f"))
-            .limitRequest(5)
-            .flatMap(role -> guildService.deleteGuildRole(guild, Snowflake.asLong(role.id()), null))
-            .blockLast();
+                .filter(role -> role.name().startsWith("test_") || role.name().startsWith("3f"))
+                .limitRequest(5)
+                .flatMap(role -> guildService.deleteGuildRole(guild, Snowflake.asLong(role.id()), null))
+                .blockLast();
     }
 
     @Test

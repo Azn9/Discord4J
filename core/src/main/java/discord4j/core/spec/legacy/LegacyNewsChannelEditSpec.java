@@ -16,13 +16,13 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -32,7 +32,8 @@ import java.util.stream.Collectors;
 
 /**
  * LegacySpec used to modify a guild {@link NewsChannel} settings.
- *G
+ * G
+ *
  * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyRequest> {
@@ -112,15 +113,15 @@ public class LegacyNewsChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
     }
 
     @Override
-    public LegacyNewsChannelEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyNewsChannelEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

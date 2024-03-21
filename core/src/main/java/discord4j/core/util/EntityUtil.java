@@ -16,20 +16,18 @@
  */
 package discord4j.core.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ChannelData;
-import discord4j.common.util.Snowflake;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 /** A utility class for entity processing. */
 public final class EntityUtil {
-
-    private static final Logger log = Loggers.getLogger(EntityUtil.class);
 
     /**
      * The UNIX time that represents Discord's epoch (January 1, 2015).
@@ -38,6 +36,9 @@ public final class EntityUtil {
      */
     @Deprecated
     public static final long DISCORD_EPOCH = 1420070400000L;
+    private static final Logger log = Loggers.getLogger(EntityUtil.class);
+
+    private EntityUtil() {}
 
     public static String getEmojiString(ReactionEmoji emoji) {
         if (emoji instanceof ReactionEmoji.Unicode) {
@@ -106,6 +107,4 @@ public final class EntityUtil {
     public static int hashCode(final Entity entity) {
         return entity.getId().hashCode();
     }
-
-    private EntityUtil() {}
 }

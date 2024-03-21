@@ -18,8 +18,95 @@
 package discord4j.common.store;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.common.store.action.gateway.*;
-import discord4j.common.store.action.read.*;
+import discord4j.common.store.action.gateway.ChannelCreateAction;
+import discord4j.common.store.action.gateway.ChannelDeleteAction;
+import discord4j.common.store.action.gateway.ChannelUpdateAction;
+import discord4j.common.store.action.gateway.CompleteGuildMembersAction;
+import discord4j.common.store.action.gateway.GuildCreateAction;
+import discord4j.common.store.action.gateway.GuildDeleteAction;
+import discord4j.common.store.action.gateway.GuildEmojisUpdateAction;
+import discord4j.common.store.action.gateway.GuildMemberAddAction;
+import discord4j.common.store.action.gateway.GuildMemberRemoveAction;
+import discord4j.common.store.action.gateway.GuildMemberUpdateAction;
+import discord4j.common.store.action.gateway.GuildMembersChunkAction;
+import discord4j.common.store.action.gateway.GuildRoleCreateAction;
+import discord4j.common.store.action.gateway.GuildRoleDeleteAction;
+import discord4j.common.store.action.gateway.GuildRoleUpdateAction;
+import discord4j.common.store.action.gateway.GuildScheduledEventCreateAction;
+import discord4j.common.store.action.gateway.GuildScheduledEventDeleteAction;
+import discord4j.common.store.action.gateway.GuildScheduledEventUpdateAction;
+import discord4j.common.store.action.gateway.GuildScheduledEventUserAddAction;
+import discord4j.common.store.action.gateway.GuildScheduledEventUserRemoveAction;
+import discord4j.common.store.action.gateway.GuildStickersUpdateAction;
+import discord4j.common.store.action.gateway.GuildUpdateAction;
+import discord4j.common.store.action.gateway.InvalidateShardAction;
+import discord4j.common.store.action.gateway.MessageCreateAction;
+import discord4j.common.store.action.gateway.MessageDeleteAction;
+import discord4j.common.store.action.gateway.MessageDeleteBulkAction;
+import discord4j.common.store.action.gateway.MessageReactionAddAction;
+import discord4j.common.store.action.gateway.MessageReactionRemoveAction;
+import discord4j.common.store.action.gateway.MessageReactionRemoveAllAction;
+import discord4j.common.store.action.gateway.MessageReactionRemoveEmojiAction;
+import discord4j.common.store.action.gateway.MessageUpdateAction;
+import discord4j.common.store.action.gateway.PresenceUpdateAction;
+import discord4j.common.store.action.gateway.ReadyAction;
+import discord4j.common.store.action.gateway.UserUpdateAction;
+import discord4j.common.store.action.gateway.VoiceStateUpdateDispatchAction;
+import discord4j.common.store.action.read.CountChannelsInGuildAction;
+import discord4j.common.store.action.read.CountEmojisInGuildAction;
+import discord4j.common.store.action.read.CountExactMembersInGuildAction;
+import discord4j.common.store.action.read.CountInGuildAction;
+import discord4j.common.store.action.read.CountMembersInGuildAction;
+import discord4j.common.store.action.read.CountMessagesInChannelAction;
+import discord4j.common.store.action.read.CountPresencesInGuildAction;
+import discord4j.common.store.action.read.CountRolesInGuildAction;
+import discord4j.common.store.action.read.CountStickersInGuildAction;
+import discord4j.common.store.action.read.CountTotalAction;
+import discord4j.common.store.action.read.CountTotalChannelsAction;
+import discord4j.common.store.action.read.CountTotalEmojisAction;
+import discord4j.common.store.action.read.CountTotalGuildsAction;
+import discord4j.common.store.action.read.CountTotalMembersAction;
+import discord4j.common.store.action.read.CountTotalMessagesAction;
+import discord4j.common.store.action.read.CountTotalPresencesAction;
+import discord4j.common.store.action.read.CountTotalRolesAction;
+import discord4j.common.store.action.read.CountTotalStickersAction;
+import discord4j.common.store.action.read.CountTotalUsersAction;
+import discord4j.common.store.action.read.CountTotalVoiceStatesAction;
+import discord4j.common.store.action.read.CountVoiceStatesInChannelAction;
+import discord4j.common.store.action.read.CountVoiceStatesInGuildAction;
+import discord4j.common.store.action.read.GetChannelByIdAction;
+import discord4j.common.store.action.read.GetChannelsAction;
+import discord4j.common.store.action.read.GetChannelsInGuildAction;
+import discord4j.common.store.action.read.GetEmojiByIdAction;
+import discord4j.common.store.action.read.GetEmojisAction;
+import discord4j.common.store.action.read.GetEmojisInGuildAction;
+import discord4j.common.store.action.read.GetExactMembersInGuildAction;
+import discord4j.common.store.action.read.GetGuildByIdAction;
+import discord4j.common.store.action.read.GetGuildScheduledEventByIdAction;
+import discord4j.common.store.action.read.GetGuildScheduledEventUsersInEventAction;
+import discord4j.common.store.action.read.GetGuildScheduledEventsInGuildAction;
+import discord4j.common.store.action.read.GetGuildsAction;
+import discord4j.common.store.action.read.GetMemberByIdAction;
+import discord4j.common.store.action.read.GetMembersAction;
+import discord4j.common.store.action.read.GetMembersInGuildAction;
+import discord4j.common.store.action.read.GetMessageByIdAction;
+import discord4j.common.store.action.read.GetMessagesAction;
+import discord4j.common.store.action.read.GetMessagesInChannelAction;
+import discord4j.common.store.action.read.GetPresenceByIdAction;
+import discord4j.common.store.action.read.GetPresencesAction;
+import discord4j.common.store.action.read.GetPresencesInGuildAction;
+import discord4j.common.store.action.read.GetRoleByIdAction;
+import discord4j.common.store.action.read.GetRolesAction;
+import discord4j.common.store.action.read.GetRolesInGuildAction;
+import discord4j.common.store.action.read.GetStickerByIdAction;
+import discord4j.common.store.action.read.GetStickersAction;
+import discord4j.common.store.action.read.GetStickersInGuildAction;
+import discord4j.common.store.action.read.GetUserByIdAction;
+import discord4j.common.store.action.read.GetUsersAction;
+import discord4j.common.store.action.read.GetVoiceStateByIdAction;
+import discord4j.common.store.action.read.GetVoiceStatesAction;
+import discord4j.common.store.action.read.GetVoiceStatesInChannelAction;
+import discord4j.common.store.action.read.GetVoiceStatesInGuildAction;
 import discord4j.common.store.api.ActionMapper;
 import discord4j.common.store.api.StoreAction;
 import discord4j.common.store.api.StoreFlag;
@@ -41,8 +128,7 @@ import java.util.stream.Collectors;
  * {@link Store#execute(StoreAction)} method. Actions are in charge of encoding all information needed for the store
  * to operate on the data accordingly.
  *
- * <p>
- * A {@link Store} is constructed by passing a {@link StoreLayout}, which defines handlers for the different types of
+ * <p>A {@link Store} is constructed by passing a {@link StoreLayout}, which defines handlers for the different types of
  * actions, whether they are Discord4J-specific or user-defined. The layout interface allows to enforce support for a
  * minimal set of actions in order to fulfill the caching expectations of the Discord client.
  *
@@ -77,24 +163,10 @@ public final class Store {
         return new Store(layoutToMapper(layout));
     }
 
-    /**
-     * Creates a new {@link Store} that will merge actions from multiple layouts. Overlapping
-     * {@link StoreAction StoreActions} from each layout will be merged by keeping the <strong>first</strong> layout
-     * that declared it.
-     *
-     * @param layouts a {@link StoreLayout} array
-     * @return a new {@link Store}
-     */
-    @Experimental
-    public static Store fromLayouts(StoreLayout... layouts) {
-        return new Store(ActionMapper.mergeFirst(Arrays.stream(layouts)
-                        .map(Store::layoutToMapper)
-                        .collect(Collectors.toList())));
-    }
-
     private static ActionMapper layoutToMapper(StoreLayout layout) {
         ActionMapper dataAccessorMapper = dataAccessorToMapper(layout.getDataAccessor(), layout.getEnabledFlags());
-        ActionMapper gatewayDataUpdaterMapper = gatewayDataUpdaterToMapper(layout.getGatewayDataUpdater(), layout.getEnabledFlags());
+        ActionMapper gatewayDataUpdaterMapper = gatewayDataUpdaterToMapper(layout.getGatewayDataUpdater(),
+                layout.getEnabledFlags());
         ActionMapper customMapper = layout.getCustomActionMapper();
         return ActionMapper.aggregate(dataAccessorMapper, gatewayDataUpdaterMapper, customMapper);
     }
@@ -159,7 +231,8 @@ public final class Store {
         if (enabled.contains(StoreFlag.CHANNEL)) {
             builder = builder
                     .map(CountTotalChannelsAction.class, action -> dataAccessor.countChannels())
-                    .map(CountChannelsInGuildAction.class, action -> dataAccessor.countChannelsInGuild(action.getGuildId()))
+                    .map(CountChannelsInGuildAction.class,
+                            action -> dataAccessor.countChannelsInGuild(action.getGuildId()))
                     .map(GetChannelsAction.class, action -> dataAccessor.getChannels())
                     .map(GetChannelsInGuildAction.class, action -> dataAccessor.getChannelsInGuild(action.getGuildId()))
                     .map(GetChannelByIdAction.class, action -> dataAccessor.getChannelById(action.getChannelId()));
@@ -171,7 +244,8 @@ public final class Store {
                     .map(CountEmojisInGuildAction.class, action -> dataAccessor.countEmojisInGuild(action.getGuildId()))
                     .map(GetEmojisAction.class, action -> dataAccessor.getEmojis())
                     .map(GetEmojisInGuildAction.class, action -> dataAccessor.getEmojisInGuild(action.getGuildId()))
-                    .map(GetEmojiByIdAction.class, action -> dataAccessor.getEmojiById(action.getGuildId(), action.getEmojiId()));
+                    .map(GetEmojiByIdAction.class, action -> dataAccessor.getEmojiById(action.getGuildId(),
+                            action.getEmojiId()));
         }
 
         if (enabled.contains(StoreFlag.GUILD)) {
@@ -184,30 +258,40 @@ public final class Store {
         if (enabled.contains(StoreFlag.MEMBER)) {
             builder = builder
                     .map(CountTotalMembersAction.class, action -> dataAccessor.countMembers())
-                    .map(CountMembersInGuildAction.class, action -> dataAccessor.countMembersInGuild(action.getGuildId()))
-                    .map(CountExactMembersInGuildAction.class, action -> dataAccessor.countExactMembersInGuild(action.getGuildId()))
+                    .map(CountMembersInGuildAction.class,
+                            action -> dataAccessor.countMembersInGuild(action.getGuildId()))
+                    .map(CountExactMembersInGuildAction.class,
+                            action -> dataAccessor.countExactMembersInGuild(action.getGuildId()))
                     .map(GetMembersAction.class, action -> dataAccessor.getMembers())
                     .map(GetMembersInGuildAction.class, action -> dataAccessor.getMembersInGuild(action.getGuildId()))
-                    .map(GetExactMembersInGuildAction.class, action -> dataAccessor.getExactMembersInGuild(action.getGuildId()))
-                    .map(GetMemberByIdAction.class, action -> dataAccessor.getMemberById(action.getGuildId(), action.getUserId()));
+                    .map(GetExactMembersInGuildAction.class,
+                            action -> dataAccessor.getExactMembersInGuild(action.getGuildId()))
+                    .map(GetMemberByIdAction.class, action -> dataAccessor.getMemberById(action.getGuildId(),
+                            action.getUserId()));
         }
 
         if (enabled.contains(StoreFlag.MESSAGE)) {
             builder = builder
                     .map(CountTotalMessagesAction.class, action -> dataAccessor.countMessages())
-                    .map(CountMessagesInChannelAction.class, action -> dataAccessor.countMessagesInChannel(action.getChannelId()))
+                    .map(CountMessagesInChannelAction.class,
+                            action -> dataAccessor.countMessagesInChannel(action.getChannelId()))
                     .map(GetMessagesAction.class, action -> dataAccessor.getMessages())
-                    .map(GetMessagesInChannelAction.class, action -> dataAccessor.getMessagesInChannel(action.getChannelId()))
-                    .map(GetMessageByIdAction.class, action -> dataAccessor.getMessageById(action.getChannelId(), action.getMessageId()));
+                    .map(GetMessagesInChannelAction.class,
+                            action -> dataAccessor.getMessagesInChannel(action.getChannelId()))
+                    .map(GetMessageByIdAction.class, action -> dataAccessor.getMessageById(action.getChannelId(),
+                            action.getMessageId()));
         }
 
         if (enabled.contains(StoreFlag.PRESENCE)) {
             builder = builder
                     .map(CountTotalPresencesAction.class, action -> dataAccessor.countPresences())
-                    .map(CountPresencesInGuildAction.class, action -> dataAccessor.countPresencesInGuild(action.getGuildId()))
+                    .map(CountPresencesInGuildAction.class,
+                            action -> dataAccessor.countPresencesInGuild(action.getGuildId()))
                     .map(GetPresencesAction.class, action -> dataAccessor.getPresences())
-                    .map(GetPresencesInGuildAction.class, action -> dataAccessor.getPresencesInGuild(action.getGuildId()))
-                    .map(GetPresenceByIdAction.class, action -> dataAccessor.getPresenceById(action.getGuildId(), action.getUserId()));
+                    .map(GetPresencesInGuildAction.class,
+                            action -> dataAccessor.getPresencesInGuild(action.getGuildId()))
+                    .map(GetPresenceByIdAction.class, action -> dataAccessor.getPresenceById(action.getGuildId(),
+                            action.getUserId()));
         }
 
         if (enabled.contains(StoreFlag.ROLE)) {
@@ -216,7 +300,8 @@ public final class Store {
                     .map(CountRolesInGuildAction.class, action -> dataAccessor.countRolesInGuild(action.getGuildId()))
                     .map(GetRolesAction.class, action -> dataAccessor.getRoles())
                     .map(GetRolesInGuildAction.class, action -> dataAccessor.getRolesInGuild(action.getGuildId()))
-                    .map(GetRoleByIdAction.class, action -> dataAccessor.getRoleById(action.getGuildId(), action.getRoleId()));
+                    .map(GetRoleByIdAction.class, action -> dataAccessor.getRoleById(action.getGuildId(),
+                            action.getRoleId()));
         }
 
         if (enabled.contains(StoreFlag.USER)) {
@@ -229,28 +314,40 @@ public final class Store {
         if (enabled.contains(StoreFlag.VOICE_STATE)) {
             builder = builder
                     .map(CountTotalVoiceStatesAction.class, action -> dataAccessor.countVoiceStates())
-                    .map(CountVoiceStatesInGuildAction.class, action -> dataAccessor.countVoiceStatesInGuild(action.getGuildId()))
-                    .map(CountVoiceStatesInChannelAction.class, action -> dataAccessor.countVoiceStatesInChannel(action.getGuildId(), action.getChannelId()))
+                    .map(CountVoiceStatesInGuildAction.class,
+                            action -> dataAccessor.countVoiceStatesInGuild(action.getGuildId()))
+                    .map(CountVoiceStatesInChannelAction.class,
+                            action -> dataAccessor.countVoiceStatesInChannel(action.getGuildId(),
+                                    action.getChannelId()))
                     .map(GetVoiceStatesAction.class, action -> dataAccessor.getVoiceStates())
-                    .map(GetVoiceStatesInChannelAction.class, action -> dataAccessor.getVoiceStatesInChannel(action.getGuildId(), action.getChannelId()))
-                    .map(GetVoiceStatesInGuildAction.class, action -> dataAccessor.getVoiceStatesInGuild(action.getGuildId()))
-                    .map(GetVoiceStateByIdAction.class, action -> dataAccessor.getVoiceStateById(action.getGuildId(), action.getUserId()));
+                    .map(GetVoiceStatesInChannelAction.class,
+                            action -> dataAccessor.getVoiceStatesInChannel(action.getGuildId(), action.getChannelId()))
+                    .map(GetVoiceStatesInGuildAction.class,
+                            action -> dataAccessor.getVoiceStatesInGuild(action.getGuildId()))
+                    .map(GetVoiceStateByIdAction.class, action -> dataAccessor.getVoiceStateById(action.getGuildId(),
+                            action.getUserId()));
         }
 
         if (enabled.contains(StoreFlag.STICKER)) {
             builder = builder
                     .map(CountTotalStickersAction.class, action -> dataAccessor.countStickers())
-                    .map(CountStickersInGuildAction.class, action -> dataAccessor.countStickersInGuild(action.getGuildId()))
+                    .map(CountStickersInGuildAction.class,
+                            action -> dataAccessor.countStickersInGuild(action.getGuildId()))
                     .map(GetStickersAction.class, action -> dataAccessor.getStickers())
                     .map(GetStickersInGuildAction.class, action -> dataAccessor.getStickersInGuild(action.getGuildId()))
-                    .map(GetStickerByIdAction.class, action -> dataAccessor.getStickerById(action.getGuildId(), action.getStickerId()));
+                    .map(GetStickerByIdAction.class, action -> dataAccessor.getStickerById(action.getGuildId(),
+                            action.getStickerId()));
         }
 
         if (enabled.contains(StoreFlag.SCHEDULED_EVENT)) {
             builder = builder
-                    .map(GetGuildScheduledEventsInGuildAction.class, action -> dataAccessor.getScheduledEventsInGuild(action.getGuildId()))
-                    .map(GetGuildScheduledEventByIdAction.class, action -> dataAccessor.getScheduledEventById(action.getGuildId(), action.getEventId()))
-                    .map(GetGuildScheduledEventUsersInEventAction.class, action -> dataAccessor.getScheduledEventUsersInEvent(action.getGuildId(), action.getEventId()));
+                    .map(GetGuildScheduledEventsInGuildAction.class,
+                            action -> dataAccessor.getScheduledEventsInGuild(action.getGuildId()))
+                    .map(GetGuildScheduledEventByIdAction.class,
+                            action -> dataAccessor.getScheduledEventById(action.getGuildId(), action.getEventId()))
+                    .map(GetGuildScheduledEventUsersInEventAction.class,
+                            action -> dataAccessor.getScheduledEventUsersInEvent(action.getGuildId(),
+                                    action.getEventId()));
         }
 
         return builder.build();
@@ -262,85 +359,160 @@ public final class Store {
 
         ActionMapper.Builder builder = ActionMapper.builder()
                 .map(ReadyAction.class, action -> gatewayDataUpdater.onReady(action.getReady()))
-                .map(InvalidateShardAction.class, action -> gatewayDataUpdater.onShardInvalidation(action.getShardIndex(), action.getCause()));
+                .map(InvalidateShardAction.class,
+                        action -> gatewayDataUpdater.onShardInvalidation(action.getShardIndex(), action.getCause()));
 
         if (enabled.contains(StoreFlag.CHANNEL)) {
             builder = builder
-                    .map(ChannelCreateAction.class, action -> gatewayDataUpdater.onChannelCreate(action.getShardIndex(), action.getChannelCreate()))
-                    .map(ChannelDeleteAction.class, action -> gatewayDataUpdater.onChannelDelete(action.getShardIndex(), action.getChannelDelete()))
-                    .map(ChannelUpdateAction.class, action -> gatewayDataUpdater.onChannelUpdate(action.getShardIndex(), action.getChannelUpdate()));
+                    .map(ChannelCreateAction.class,
+                            action -> gatewayDataUpdater.onChannelCreate(action.getShardIndex(),
+                                    action.getChannelCreate()))
+                    .map(ChannelDeleteAction.class,
+                            action -> gatewayDataUpdater.onChannelDelete(action.getShardIndex(),
+                                    action.getChannelDelete()))
+                    .map(ChannelUpdateAction.class,
+                            action -> gatewayDataUpdater.onChannelUpdate(action.getShardIndex(),
+                                    action.getChannelUpdate()));
         }
 
         if (enabled.contains(StoreFlag.EMOJI)) {
             builder = builder
-                    .map(GuildEmojisUpdateAction.class, action -> gatewayDataUpdater.onGuildEmojisUpdate(action.getShardIndex(), action.getGuildEmojisUpdate()));
+                    .map(GuildEmojisUpdateAction.class,
+                            action -> gatewayDataUpdater.onGuildEmojisUpdate(action.getShardIndex(),
+                                    action.getGuildEmojisUpdate()));
         }
 
         if (enabled.contains(StoreFlag.GUILD)) {
             builder = builder
-                    .map(GuildCreateAction.class, action -> gatewayDataUpdater.onGuildCreate(action.getShardIndex(), action.getGuildCreate()))
-                    .map(GuildDeleteAction.class, action -> gatewayDataUpdater.onGuildDelete(action.getShardIndex(), action.getGuildDelete()))
-                    .map(GuildUpdateAction.class, action -> gatewayDataUpdater.onGuildUpdate(action.getShardIndex(), action.getGuildUpdate()));
+                    .map(GuildCreateAction.class, action -> gatewayDataUpdater.onGuildCreate(action.getShardIndex(),
+                            action.getGuildCreate()))
+                    .map(GuildDeleteAction.class, action -> gatewayDataUpdater.onGuildDelete(action.getShardIndex(),
+                            action.getGuildDelete()))
+                    .map(GuildUpdateAction.class, action -> gatewayDataUpdater.onGuildUpdate(action.getShardIndex(),
+                            action.getGuildUpdate()));
         }
 
         if (enabled.contains(StoreFlag.MEMBER)) {
             builder = builder
-                    .map(GuildMemberAddAction.class, action -> gatewayDataUpdater.onGuildMemberAdd(action.getShardIndex(), action.getGuildMemberAdd()))
-                    .map(GuildMemberRemoveAction.class, action -> gatewayDataUpdater.onGuildMemberRemove(action.getShardIndex(), action.getGuildMemberRemove()))
-                    .map(GuildMembersChunkAction.class, action -> gatewayDataUpdater.onGuildMembersChunk(action.getShardIndex(), action.getGuildMembersChunk()))
-                    .map(GuildMemberUpdateAction.class, action -> gatewayDataUpdater.onGuildMemberUpdate(action.getShardIndex(), action.getGuildMemberUpdate()))
-                    .map(CompleteGuildMembersAction.class, action -> gatewayDataUpdater.onGuildMembersCompletion(action.getGuildId()));
+                    .map(GuildMemberAddAction.class,
+                            action -> gatewayDataUpdater.onGuildMemberAdd(action.getShardIndex(),
+                                    action.getGuildMemberAdd()))
+                    .map(GuildMemberRemoveAction.class,
+                            action -> gatewayDataUpdater.onGuildMemberRemove(action.getShardIndex(),
+                                    action.getGuildMemberRemove()))
+                    .map(GuildMembersChunkAction.class,
+                            action -> gatewayDataUpdater.onGuildMembersChunk(action.getShardIndex(),
+                                    action.getGuildMembersChunk()))
+                    .map(GuildMemberUpdateAction.class,
+                            action -> gatewayDataUpdater.onGuildMemberUpdate(action.getShardIndex(),
+                                    action.getGuildMemberUpdate()))
+                    .map(CompleteGuildMembersAction.class,
+                            action -> gatewayDataUpdater.onGuildMembersCompletion(action.getGuildId()));
         }
 
         if (enabled.contains(StoreFlag.MESSAGE)) {
             builder = builder
-                    .map(MessageCreateAction.class, action -> gatewayDataUpdater.onMessageCreate(action.getShardIndex(), action.getMessageCreate()))
-                    .map(MessageDeleteAction.class, action -> gatewayDataUpdater.onMessageDelete(action.getShardIndex(), action.getMessageDelete()))
-                    .map(MessageDeleteBulkAction.class, action -> gatewayDataUpdater.onMessageDeleteBulk(action.getShardIndex(), action.getMessageDeleteBulk()))
-                    .map(MessageReactionAddAction.class, action -> gatewayDataUpdater.onMessageReactionAdd(action.getShardIndex(), action.getMessageReactionAdd()))
-                    .map(MessageReactionRemoveAction.class, action -> gatewayDataUpdater.onMessageReactionRemove(action.getShardIndex(), action.getMessageReactionRemove()))
-                    .map(MessageReactionRemoveAllAction.class, action -> gatewayDataUpdater.onMessageReactionRemoveAll(action.getShardIndex(), action.getMessageReactionRemoveAll()))
-                    .map(MessageReactionRemoveEmojiAction.class, action -> gatewayDataUpdater.onMessageReactionRemoveEmoji(action.getShardIndex(), action.getMessageReactionRemoveEmoji()))
-                    .map(MessageUpdateAction.class, action -> gatewayDataUpdater.onMessageUpdate(action.getShardIndex(), action.getMessageUpdate()));
+                    .map(MessageCreateAction.class,
+                            action -> gatewayDataUpdater.onMessageCreate(action.getShardIndex(),
+                                    action.getMessageCreate()))
+                    .map(MessageDeleteAction.class,
+                            action -> gatewayDataUpdater.onMessageDelete(action.getShardIndex(),
+                                    action.getMessageDelete()))
+                    .map(MessageDeleteBulkAction.class,
+                            action -> gatewayDataUpdater.onMessageDeleteBulk(action.getShardIndex(),
+                                    action.getMessageDeleteBulk()))
+                    .map(MessageReactionAddAction.class,
+                            action -> gatewayDataUpdater.onMessageReactionAdd(action.getShardIndex(),
+                                    action.getMessageReactionAdd()))
+                    .map(MessageReactionRemoveAction.class,
+                            action -> gatewayDataUpdater.onMessageReactionRemove(action.getShardIndex(),
+                                    action.getMessageReactionRemove()))
+                    .map(MessageReactionRemoveAllAction.class,
+                            action -> gatewayDataUpdater.onMessageReactionRemoveAll(action.getShardIndex(),
+                                    action.getMessageReactionRemoveAll()))
+                    .map(MessageReactionRemoveEmojiAction.class,
+                            action -> gatewayDataUpdater.onMessageReactionRemoveEmoji(action.getShardIndex(),
+                                    action.getMessageReactionRemoveEmoji()))
+                    .map(MessageUpdateAction.class,
+                            action -> gatewayDataUpdater.onMessageUpdate(action.getShardIndex(),
+                                    action.getMessageUpdate()));
         }
 
         if (enabled.contains(StoreFlag.PRESENCE)) {
             builder = builder
-                    .map(PresenceUpdateAction.class, action -> gatewayDataUpdater.onPresenceUpdate(action.getShardIndex(), action.getPresenceUpdate()));
+                    .map(PresenceUpdateAction.class,
+                            action -> gatewayDataUpdater.onPresenceUpdate(action.getShardIndex(),
+                                    action.getPresenceUpdate()));
         }
 
         if (enabled.contains(StoreFlag.ROLE)) {
             builder = builder
-                    .map(GuildRoleCreateAction.class, action -> gatewayDataUpdater.onGuildRoleCreate(action.getShardIndex(), action.getGuildRoleCreate()))
-                    .map(GuildRoleDeleteAction.class, action -> gatewayDataUpdater.onGuildRoleDelete(action.getShardIndex(), action.getGuildRoleDelete()))
-                    .map(GuildRoleUpdateAction.class, action -> gatewayDataUpdater.onGuildRoleUpdate(action.getShardIndex(), action.getGuildRoleUpdate()));
+                    .map(GuildRoleCreateAction.class,
+                            action -> gatewayDataUpdater.onGuildRoleCreate(action.getShardIndex(),
+                                    action.getGuildRoleCreate()))
+                    .map(GuildRoleDeleteAction.class,
+                            action -> gatewayDataUpdater.onGuildRoleDelete(action.getShardIndex(),
+                                    action.getGuildRoleDelete()))
+                    .map(GuildRoleUpdateAction.class,
+                            action -> gatewayDataUpdater.onGuildRoleUpdate(action.getShardIndex(),
+                                    action.getGuildRoleUpdate()));
         }
 
         if (enabled.contains(StoreFlag.USER)) {
             builder = builder
-                    .map(UserUpdateAction.class, action -> gatewayDataUpdater.onUserUpdate(action.getShardIndex(), action.getUserUpdate()));
+                    .map(UserUpdateAction.class, action -> gatewayDataUpdater.onUserUpdate(action.getShardIndex(),
+                            action.getUserUpdate()));
         }
 
         if (enabled.contains(StoreFlag.VOICE_STATE)) {
             builder = builder
-                    .map(VoiceStateUpdateDispatchAction.class, action -> gatewayDataUpdater.onVoiceStateUpdateDispatch(action.getShardIndex(), action.getVoiceStateUpdateDispatch()));
+                    .map(VoiceStateUpdateDispatchAction.class,
+                            action -> gatewayDataUpdater.onVoiceStateUpdateDispatch(action.getShardIndex(),
+                                    action.getVoiceStateUpdateDispatch()));
         }
 
         if (enabled.contains(StoreFlag.STICKER)) {
             builder = builder
-                    .map(GuildStickersUpdateAction.class, action -> gatewayDataUpdater.onGuildStickersUpdate(action.getShardIndex(), action.getGuildStickersUpdate()));
+                    .map(GuildStickersUpdateAction.class,
+                            action -> gatewayDataUpdater.onGuildStickersUpdate(action.getShardIndex(),
+                                    action.getGuildStickersUpdate()));
         }
 
         if (enabled.contains(StoreFlag.SCHEDULED_EVENT)) {
             builder = builder
-                    .map(GuildScheduledEventCreateAction.class, action -> gatewayDataUpdater.onGuildScheduledEventCreate(action.getShardIndex(), action.getGuildScheduledEventCreate()))
-                    .map(GuildScheduledEventUpdateAction.class, action -> gatewayDataUpdater.onGuildScheduledEventUpdate(action.getShardIndex(), action.getGuildScheduledEventUpdate()))
-                    .map(GuildScheduledEventDeleteAction.class, action -> gatewayDataUpdater.onGuildScheduledEventDelete(action.getShardIndex(), action.getGuildScheduledEventDelete()))
-                    .map(GuildScheduledEventUserAddAction.class, actions -> gatewayDataUpdater.onGuildScheduledEventUserAdd(actions.getShardIndex(), actions.getUserAdd()))
-                    .map(GuildScheduledEventUserRemoveAction.class, actions -> gatewayDataUpdater.onGuildScheduledEventUserRemove(actions.getShardIndex(), actions.getUserRemove()));
+                    .map(GuildScheduledEventCreateAction.class,
+                            action -> gatewayDataUpdater.onGuildScheduledEventCreate(action.getShardIndex(),
+                                    action.getGuildScheduledEventCreate()))
+                    .map(GuildScheduledEventUpdateAction.class,
+                            action -> gatewayDataUpdater.onGuildScheduledEventUpdate(action.getShardIndex(),
+                                    action.getGuildScheduledEventUpdate()))
+                    .map(GuildScheduledEventDeleteAction.class,
+                            action -> gatewayDataUpdater.onGuildScheduledEventDelete(action.getShardIndex(),
+                                    action.getGuildScheduledEventDelete()))
+                    .map(GuildScheduledEventUserAddAction.class,
+                            actions -> gatewayDataUpdater.onGuildScheduledEventUserAdd(actions.getShardIndex(),
+                                    actions.getUserAdd()))
+                    .map(GuildScheduledEventUserRemoveAction.class,
+                            actions -> gatewayDataUpdater.onGuildScheduledEventUserRemove(actions.getShardIndex(),
+                                    actions.getUserRemove()));
         }
 
         return builder.build();
+    }
+
+    /**
+     * Creates a new {@link Store} that will merge actions from multiple layouts. Overlapping
+     * {@link StoreAction StoreActions} from each layout will be merged by keeping the <strong>first</strong> layout
+     * that declared it.
+     *
+     * @param layouts a {@link StoreLayout} array
+     * @return a new {@link Store}
+     */
+    @Experimental
+    public static Store fromLayouts(StoreLayout... layouts) {
+        return new Store(ActionMapper.mergeFirst(Arrays.stream(layouts)
+                .map(Store::layoutToMapper)
+                .collect(Collectors.toList())));
     }
 
     /**
@@ -349,7 +521,7 @@ public final class Store {
      * and no custom mapping was defined for it, it will return empty.
      *
      * @param action the action to execute
-     * @param <R>    the type of data returned by the action
+     * @param <R> the type of data returned by the action
      * @return a {@link Publisher} where, upon successful completion, emits the result(s) produced by the execution of
      * the action, if any. If an error is received, it is emitted through the {@link Publisher}.
      */

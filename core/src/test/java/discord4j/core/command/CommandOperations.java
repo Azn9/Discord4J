@@ -56,11 +56,6 @@ class CommandOperations implements CommandContext {
     }
 
     @Override
-    public MessageCreateEvent event() {
-        return event;
-    }
-
-    @Override
     public String command() {
         return command;
     }
@@ -78,6 +73,11 @@ class CommandOperations implements CommandContext {
     @Override
     public Mono<PrivateChannel> getPrivateChannel() {
         return Mono.justOrEmpty(event.getMessage().getAuthor()).flatMap(User::getPrivateChannel);
+    }
+
+    @Override
+    public MessageCreateEvent event() {
+        return event;
     }
 
     @Override

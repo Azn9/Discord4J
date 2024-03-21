@@ -360,7 +360,7 @@ public class ReadActions {
      * Creates an action to retrieve data for the member corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return a new {@link GetMemberByIdAction}
      */
     public static GetMemberByIdAction getMemberById(long guildId, long userId) {
@@ -420,7 +420,7 @@ public class ReadActions {
      * Creates an action to retrieve data for the presence corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return a new {@link GetPresenceByIdAction}
      */
     public static GetPresenceByIdAction getPresenceById(long guildId, long userId) {
@@ -450,7 +450,7 @@ public class ReadActions {
      * Creates an action to retrieve data for the role corresponding to the given guild ID and role ID.
      *
      * @param guildId the guild ID
-     * @param roleId  the role ID
+     * @param roleId the role ID
      * @return a new {@link GetRoleByIdAction}
      */
     public static GetRoleByIdAction getRoleById(long guildId, long roleId) {
@@ -479,7 +479,8 @@ public class ReadActions {
     }
 
     /**
-     * Creates an action to retrieve data for the scheduled event users corresponding to the given guild ID and event ID.
+     * Creates an action to retrieve data for the scheduled event users corresponding to the given guild ID and event
+     * ID.
      *
      * @param guildId the guild ID
      * @param eventId the event ID
@@ -542,7 +543,7 @@ public class ReadActions {
      * Creates an action to retrieve data for the voice state corresponding to the given guild ID and user ID.
      *
      * @param guildId the guild ID
-     * @param userId  the user ID
+     * @param userId the user ID
      * @return a new {@link GetVoiceStateByIdAction}
      */
     public static GetVoiceStateByIdAction getVoiceStateById(long guildId, long userId) {

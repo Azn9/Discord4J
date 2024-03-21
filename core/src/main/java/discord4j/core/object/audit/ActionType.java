@@ -19,7 +19,7 @@ package discord4j.core.object.audit;
 /**
  * Represents the various type of audit log action.
  * See <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events">
- *     Audit Log Events</a>
+ * Audit Log Events</a>
  */
 public enum ActionType {
 
@@ -69,6 +69,18 @@ public enum ActionType {
     AUTO_MODERATION_FLAG_TO_CHANNEL(144),
     AUTO_MODERATION_USER_COMMUNICATION_DISABLED(145);
 
+
+    /** The underlying value as represented by Discord. */
+    private final int value;
+
+    /**
+     * Constructs an {@code ActionType}.
+     *
+     * @param value The underlying value as represented by Discord.
+     */
+    ActionType(final int value) {
+        this.value = value;
+    }
 
     /**
      * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
@@ -125,18 +137,6 @@ public enum ActionType {
             case 145: return AUTO_MODERATION_USER_COMMUNICATION_DISABLED;
             default: return UNKNOWN;
         }
-    }
-
-    /** The underlying value as represented by Discord. */
-    private final int value;
-
-    /**
-     * Constructs an {@code ActionType}.
-     *
-     * @param value The underlying value as represented by Discord.
-     */
-    ActionType(final int value) {
-        this.value = value;
     }
 
     /**

@@ -16,9 +16,9 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
@@ -41,7 +41,8 @@ public class GuildDeleteEvent extends GuildEvent {
     private final Guild guild;
     private final boolean unavailable;
 
-    public GuildDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable Guild guild, boolean unavailable) {
+    public GuildDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable Guild guild,
+                            boolean unavailable) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.guild = guild;

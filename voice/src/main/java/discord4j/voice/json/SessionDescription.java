@@ -20,12 +20,12 @@ public class SessionDescription extends VoiceGatewayPayload<SessionDescription.D
 
     public static final int OP = 4;
 
-    public SessionDescription(Data data) {
-        super(OP, data);
-    }
-
     public SessionDescription(String mode, byte[] secretKey) {
         this(new Data(mode, secretKey));
+    }
+
+    public SessionDescription(Data data) {
+        super(OP, data);
     }
 
     public static class Data {

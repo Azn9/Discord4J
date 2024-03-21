@@ -31,6 +31,12 @@ import java.util.Optional;
  */
 public class ClientActivity {
 
+    private final ActivityUpdateRequest activityUpdateRequest;
+
+    private ClientActivity(ActivityUpdateRequest activityUpdateRequest) {
+        this.activityUpdateRequest = activityUpdateRequest;
+    }
+
     /**
      * Creates a {@link Activity.Type#PLAYING playing} activity.
      *
@@ -39,6 +45,37 @@ public class ClientActivity {
      */
     public static ClientActivity playing(String name) {
         return of(Activity.Type.PLAYING, name, null);
+    }
+
+    /**
+     * Creates an activity with the given type, name, and url.
+     *
+     * @param type the type of the activity
+     * @param name the name of the activity
+     * @param url the url of the activity (only valid for {@link Activity.Type#STREAMING streaming} activities)
+     * @return an activity with the given type, name, and url
+     */
+    public static ClientActivity of(Activity.Type type, String name, @Nullable String url) {
+        return of(type, name, url, null);
+    }
+
+    /**
+     * Creates an activity with the given type, name, url and state.
+     *
+     * @param type the type of the activity
+     * @param name the name of the activity
+     * @param url the url of the activity if the type is {@link Activity.Type#STREAMING STREAMING}
+     * @param state the status if the type is {@link Activity.Type#CUSTOM CUSTOM}, or shown as additional data under an
+     * activity's name for other types
+     * @return an activity with the given type, name, url and state
+     */
+    public static ClientActivity of(Activity.Type type, String name, @Nullable String url, @Nullable String state) {
+        return new ClientActivity(ActivityUpdateRequest.builder()
+                .type(type.getValue())
+                .name(name)
+                .url(Optional.ofNullable(url))
+                .state(Optional.ofNullable(state))
+                .build());
     }
 
     /**
@@ -90,43 +127,6 @@ public class ClientActivity {
      */
     public static ClientActivity custom(String name) {
         return of(Activity.Type.CUSTOM, "Custom Status", null, Objects.requireNonNull(name));
-    }
-
-    /**
-     * Creates an activity with the given type, name, and url.
-     *
-     * @param type the type of the activity
-     * @param name the name of the activity
-     * @param url the url of the activity (only valid for {@link Activity.Type#STREAMING streaming} activities)
-     * @return an activity with the given type, name, and url
-     */
-    public static ClientActivity of(Activity.Type type, String name, @Nullable String url) {
-        return of(type, name, url, null);
-    }
-
-    /**
-     * Creates an activity with the given type, name, url and state.
-     *
-     * @param type the type of the activity
-     * @param name the name of the activity
-     * @param url the url of the activity if the type is {@link Activity.Type#STREAMING STREAMING}
-     * @param state the status if the type is {@link Activity.Type#CUSTOM CUSTOM}, or shown as additional data under an
-     * activity's name for other types
-     * @return an activity with the given type, name, url and state
-     */
-    public static ClientActivity of(Activity.Type type, String name, @Nullable String url, @Nullable String state) {
-        return new ClientActivity(ActivityUpdateRequest.builder()
-                .type(type.getValue())
-                .name(name)
-                .url(Optional.ofNullable(url))
-                .state(Optional.ofNullable(state))
-                .build());
-    }
-
-    private final ActivityUpdateRequest activityUpdateRequest;
-
-    private ClientActivity(ActivityUpdateRequest activityUpdateRequest) {
-        this.activityUpdateRequest = activityUpdateRequest;
     }
 
     /**

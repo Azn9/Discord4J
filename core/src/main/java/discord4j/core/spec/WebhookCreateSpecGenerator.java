@@ -33,10 +33,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable
 interface WebhookCreateSpecGenerator extends AuditSpec<WebhookCreateRequest> {
 
-    String name();
-
-    Possible<Optional<Image>> avatar();
-
     @Override
     default WebhookCreateRequest asRequest() {
         return WebhookCreateRequest.builder()
@@ -44,18 +40,20 @@ interface WebhookCreateSpecGenerator extends AuditSpec<WebhookCreateRequest> {
                 .avatar(mapPossibleOptional(avatar(), Image::getDataUri))
                 .build();
     }
+    String name();
+    Possible<Optional<Image>> avatar();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class WebhookCreateMonoGenerator extends Mono<Webhook> implements WebhookCreateSpecGenerator {
 
-    abstract GuildMessageChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super Webhook> actual) {
         channel().createWebhook(WebhookCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GuildMessageChannel channel();
 
     @Override
     public abstract String toString();

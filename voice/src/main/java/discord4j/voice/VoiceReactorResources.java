@@ -105,15 +105,6 @@ public class VoiceReactorResources extends ReactorResources {
     }
 
     /**
-     * Returns a new builder to create {@link VoiceReactorResources}.
-     *
-     * @return a builder to create {@link VoiceReactorResources}
-     */
-    public static VoiceReactorResources.Builder builder() {
-        return new VoiceReactorResources.Builder();
-    }
-
-    /**
      * Returns a new builder to create {@link VoiceReactorResources} from a pre-configured {@link ReactorResources},
      * copying its settings.
      *
@@ -124,6 +115,15 @@ public class VoiceReactorResources extends ReactorResources {
                 .httpClient(reactorResources.getHttpClient())
                 .timerTaskScheduler(reactorResources.getTimerTaskScheduler())
                 .blockingTaskScheduler(reactorResources.getBlockingTaskScheduler());
+    }
+
+    /**
+     * Returns a new builder to create {@link VoiceReactorResources}.
+     *
+     * @return a builder to create {@link VoiceReactorResources}
+     */
+    public static VoiceReactorResources.Builder builder() {
+        return new VoiceReactorResources.Builder();
     }
 
     /**

@@ -29,20 +29,18 @@ import java.util.function.Supplier;
 /**
  * Provides Reactor Netty resources like an {@link HttpClient} and {@link Scheduler} instances that can be customized
  * and reused across the application.
- * <p>
- * Allow a user to externally manage the connection pool through a custom {@link ConnectionProvider}, and custom
+ *
+ * <p>Allow a user to externally manage the connection pool through a custom {@link ConnectionProvider}, and custom
  * event loop threads using a {@link LoopResources}.
  */
 public class ReactorResources {
 
-    private static final AtomicInteger ID = new AtomicInteger();
-
     public static final Supplier<HttpClient> DEFAULT_HTTP_CLIENT =
             () -> HttpClient.create().compress(true).followRedirect(true).secure();
+    public static final Supplier<Scheduler> DEFAULT_BLOCKING_TASK_SCHEDULER = Schedulers::boundedElastic;
+    private static final AtomicInteger ID = new AtomicInteger();
     public static final Supplier<Scheduler> DEFAULT_TIMER_TASK_SCHEDULER = () ->
             Schedulers.newParallel("d4j-parallel-" + ID.incrementAndGet(), Schedulers.DEFAULT_POOL_SIZE, true);
-    public static final Supplier<Scheduler> DEFAULT_BLOCKING_TASK_SCHEDULER = Schedulers::boundedElastic;
-
     private final HttpClient httpClient;
     private final Scheduler timerTaskScheduler;
     private final Scheduler blockingTaskScheduler;
@@ -71,10 +69,10 @@ public class ReactorResources {
 
     protected ReactorResources(Builder builder) {
         this.httpClient = builder.httpClient == null ? DEFAULT_HTTP_CLIENT.get() : builder.httpClient;
-        this.timerTaskScheduler = builder.timerTaskScheduler == null ?
-                DEFAULT_TIMER_TASK_SCHEDULER.get() : builder.timerTaskScheduler;
-        this.blockingTaskScheduler = builder.blockingTaskScheduler == null ?
-                DEFAULT_BLOCKING_TASK_SCHEDULER.get() : builder.blockingTaskScheduler;
+        this.timerTaskScheduler = builder.timerTaskScheduler == null
+                ? DEFAULT_TIMER_TASK_SCHEDULER.get() : builder.timerTaskScheduler;
+        this.blockingTaskScheduler = builder.blockingTaskScheduler == null
+                ? DEFAULT_BLOCKING_TASK_SCHEDULER.get() : builder.blockingTaskScheduler;
     }
 
     public static ReactorResources create() {
@@ -83,6 +81,60 @@ public class ReactorResources {
 
     public static ReactorResources.Builder builder() {
         return new Builder();
+    }
+
+    /**
+     * Create a Reactor Netty {@link HttpClient} using the given connection pool.
+     *
+     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
+     * default.
+     *
+     * @param provider the connection pool provider to use
+     * @return an {@link HttpClient} configured with custom resources
+     */
+    public static HttpClient newHttpClient(ConnectionProvider provider) {
+        return HttpClient.create(provider).compress(true).followRedirect(true).secure();
+    }
+
+    /**
+     * Create a Reactor Netty {@link HttpClient} using the given connection pool and event loop threads.
+     *
+     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
+     * default.
+     *
+     * @param provider the connection pool provider to use
+     * @param resources the set of event loop threads to use
+     * @return an {@link HttpClient} configured with custom resources
+     */
+    public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
+        return HttpClient.create(provider).runOn(resources).compress(true).followRedirect(true).secure();
+    }
+
+    /**
+     * Get the {@link HttpClient} configured by this provider.
+     *
+     * @return a Reactor Netty HTTP client ready to perform requests
+     */
+    public HttpClient getHttpClient() {
+        return httpClient;
+    }
+
+    /**
+     * Get the {@link Scheduler} configured by this provider to be used in timed tasks.
+     *
+     * @return a time-capable {@link Scheduler}
+     */
+    public Scheduler getTimerTaskScheduler() {
+        return timerTaskScheduler;
+    }
+
+    /**
+     * Get the {@link Scheduler} configured by this provider to be used in blocking tasks.
+     *
+     * @return a blocking-capable {@link Scheduler}
+     */
+    public Scheduler getBlockingTaskScheduler() {
+        return blockingTaskScheduler;
     }
 
     public static class Builder {
@@ -136,57 +188,5 @@ public class ReactorResources {
             return new ReactorResources(this);
         }
 
-    }
-
-    /**
-     * Get the {@link HttpClient} configured by this provider.
-     *
-     * @return a Reactor Netty HTTP client ready to perform requests
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Get the {@link Scheduler} configured by this provider to be used in timed tasks.
-     *
-     * @return a time-capable {@link Scheduler}
-     */
-    public Scheduler getTimerTaskScheduler() {
-        return timerTaskScheduler;
-    }
-
-    /**
-     * Get the {@link Scheduler} configured by this provider to be used in blocking tasks.
-     *
-     * @return a blocking-capable {@link Scheduler}
-     */
-    public Scheduler getBlockingTaskScheduler() {
-        return blockingTaskScheduler;
-    }
-
-    /**
-     * Create a Reactor Netty {@link HttpClient} using the given connection pool.
-     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
-     * default.
-     *
-     * @param provider the connection pool provider to use
-     * @return an {@link HttpClient} configured with custom resources
-     */
-    public static HttpClient newHttpClient(ConnectionProvider provider) {
-        return HttpClient.create(provider).compress(true).followRedirect(true).secure();
-    }
-
-    /**
-     * Create a Reactor Netty {@link HttpClient} using the given connection pool and event loop threads.
-     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
-     * default.
-     *
-     * @param provider the connection pool provider to use
-     * @param resources the set of event loop threads to use
-     * @return an {@link HttpClient} configured with custom resources
-     */
-    public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
-        return HttpClient.create(provider).runOn(resources).compress(true).followRedirect(true).secure();
     }
 }

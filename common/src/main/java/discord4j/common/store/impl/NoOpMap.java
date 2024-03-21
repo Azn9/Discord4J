@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 class NoOpMap<K, V> implements ConcurrentMap<K, V> {
+
     @Override
     public int size() {
         return 0;
@@ -62,6 +63,11 @@ class NoOpMap<K, V> implements ConcurrentMap<K, V> {
     }
 
     @Override
+    public boolean remove(Object key, Object value) {
+        return false;
+    }
+
+    @Override
     public void putAll(Map<? extends K, ? extends V> m) {}
 
     @Override
@@ -85,11 +91,6 @@ class NoOpMap<K, V> implements ConcurrentMap<K, V> {
     @Override
     public @Nullable V putIfAbsent(K key, V value) {
         return null;
-    }
-
-    @Override
-    public boolean remove(Object key, Object value) {
-        return false;
     }
 
     @Override

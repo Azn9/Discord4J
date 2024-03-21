@@ -138,14 +138,6 @@ public class VoiceWebsocketHandler {
     }
 
     /**
-     * Initiates a close sequence that will terminate this session and instruct consumers downstream that a reconnect
-     * should take place afterwards.
-     */
-    public void close() {
-        close(DisconnectBehavior.retry(null));
-    }
-
-    /**
      * Initiates a close sequence that will terminate this session and then execute a given {@link DisconnectBehavior}.
      *
      * @param behavior the {@link DisconnectBehavior} to follow after the close sequence starts
@@ -163,5 +155,13 @@ public class VoiceWebsocketHandler {
     public void error(Throwable error) {
         log.info(format(context, "Triggering error sequence: {}"), error.toString());
         close(DisconnectBehavior.retryAbruptly(error));
+    }
+
+    /**
+     * Initiates a close sequence that will terminate this session and instruct consumers downstream that a reconnect
+     * should take place afterwards.
+     */
+    public void close() {
+        close(DisconnectBehavior.retry(null));
     }
 }

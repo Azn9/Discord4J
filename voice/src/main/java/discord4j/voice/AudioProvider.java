@@ -53,6 +53,7 @@ public abstract class AudioProvider {
      * Called every 20 milliseconds and is expected to provide
      * <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">Opus</a>-encoded audio according to the format in
      * {@link Opus} by writing to the provider's {@link #getBuffer() buffer}.
+     *
      * @return Whether audio was provided (the buffer was mutated).
      */
     public abstract boolean provide();

@@ -43,7 +43,13 @@ import reactor.util.Loggers;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -55,10 +61,8 @@ import java.util.function.Function;
 @Experimental
 public class DiscordOAuth2Server {
 
-    private static final Logger log = Loggers.getLogger(DiscordOAuth2Server.class);
-
     public static final String SESSION_KEY = "D4J-SESSION";
-
+    private static final Logger log = Loggers.getLogger(DiscordOAuth2Server.class);
     private final RestClient restClient;
     private final OAuth2Service service;
     private final long clientId;
@@ -69,19 +73,6 @@ public class DiscordOAuth2Server {
     private final DiscordOAuth2SuccessHandler successHandler;
     private final DiscordOAuth2ResponseHandler responseHandler;
     private final HttpServer httpServer;
-
-    /**
-     * Initialize a new builder.
-     *
-     * @return a builder capable of constructing instances of {@link DiscordOAuth2Server}
-     */
-    public static Builder builder() {
-        return new Builder(RestClientBuilder.createRestApplication().build());
-    }
-
-    public static Builder builder(RestClient restClient) {
-        return new Builder(restClient);
-    }
 
     private DiscordOAuth2Server(Builder builder) {
         this.restClient = builder.restClient;
@@ -107,6 +98,19 @@ public class DiscordOAuth2Server {
     }
 
     /**
+     * Initialize a new builder.
+     *
+     * @return a builder capable of constructing instances of {@link DiscordOAuth2Server}
+     */
+    public static Builder builder() {
+        return new Builder(RestClientBuilder.createRestApplication().build());
+    }
+
+    public static Builder builder(RestClient restClient) {
+        return new Builder(restClient);
+    }
+
+    /**
      * Gets the configured {@link HttpServer}.
      *
      * @return the configured {@link HttpServer}
@@ -120,11 +124,11 @@ public class DiscordOAuth2Server {
 
         private final RestClient restClient;
         private final List<String> redirectUris = new ArrayList<>();
+        private final StringBuilder scope = new StringBuilder();
         private long clientId;
         private String clientSecret;
         private HttpServer httpServer = HttpServer.create();
         private ObjectMapper objectMapper = new ObjectMapper();
-        private final StringBuilder scope = new StringBuilder();
         private DiscordOAuth2SuccessHandler successHandler;
         private DiscordOAuth2ResponseHandler responseHandler;
         private Consumer<HttpServerRoutes> routesCustomizer;
@@ -300,22 +304,22 @@ public class DiscordOAuth2Server {
 
                 Mono<DiscordOAuth2Client> exchange =
                         service.exchangeAuthorizationCode(AuthorizationCodeGrantRequest.builder()
-                                .clientId(clientId)
-                                .clientSecret(clientSecret)
-                                .code(code)
-                                .redirectUri(origin == null ? redirectUris.get(0) : origin)
-                                .build())
-                        .flatMap(data -> {
-                            DiscordOAuth2Client client = DiscordOAuth2Client.createFromToken(
-                                    restClient, clientId, clientSecret, data);
+                                        .clientId(clientId)
+                                        .clientSecret(clientSecret)
+                                        .code(code)
+                                        .redirectUri(origin == null ? redirectUris.get(0) : origin)
+                                        .build())
+                                .flatMap(data -> {
+                                    DiscordOAuth2Client client = DiscordOAuth2Client.createFromToken(
+                                            restClient, clientId, clientSecret, data);
 
-                            return Mono.defer(() -> successHandler.onAuthSuccess(client, sessionId))
-                                    .onErrorResume(e -> {
-                                        log.error("Unable to run success handler", e);
-                                        return Mono.empty();
-                                    })
-                                    .thenReturn(client);
-                        });
+                                    return Mono.defer(() -> successHandler.onAuthSuccess(client, sessionId))
+                                            .onErrorResume(e -> {
+                                                log.error("Unable to run success handler", e);
+                                                return Mono.empty();
+                                            })
+                                            .thenReturn(client);
+                                });
 
                 return exchange.flatMapMany(client -> Flux.defer(() -> responseHandler.handle(client, req, res)));
             }

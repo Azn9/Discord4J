@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * LegacySpec used to create {@link discord4j.core.object.entity.Message Messages} via a {@link discord4j.core.object.entity.Webhook}.
+ * LegacySpec used to create {@link discord4j.core.object.entity.Message Messages} via a
+ * {@link discord4j.core.object.entity.Webhook}.
  *
  * @see <a href="https://discord.com/developers/docs/resources/webhook#execute-webhook">Execute webhook</a>
  */
@@ -93,6 +94,17 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     }
 
     /**
+     * Adds a spoiler file as attachment to the created {@link discord4j.core.object.entity.Message}.
+     *
+     * @param fileName The filename used in the file being sent.
+     * @param file The file contents.
+     * @return This spec.
+     */
+    public LegacyWebhookExecuteSpec addFileSpoiler(String fileName, InputStream file) {
+        return addFile(Attachment.SPOILER_PREFIX + fileName, file);
+    }
+
+    /**
      * Adds a file as attachment to the created {@link discord4j.core.object.entity.Message}.
      *
      * @param fileName The filename used in the file being sent.
@@ -108,18 +120,8 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
     }
 
     /**
-     * Adds a spoiler file as attachment to the created {@link discord4j.core.object.entity.Message}.
-     *
-     * @param fileName The filename used in the file being sent.
-     * @param file The file contents.
-     * @return This spec.
-     */
-    public LegacyWebhookExecuteSpec addFileSpoiler(String fileName, InputStream file) {
-        return addFile(Attachment.SPOILER_PREFIX + fileName, file);
-    }
-
-    /**
-     * Adds rich content to the created {@link discord4j.core.object.entity.Message} in the form of an {@link discord4j.core.object.Embed} object.
+     * Adds rich content to the created {@link discord4j.core.object.entity.Message} in the form of an
+     * {@link discord4j.core.object.Embed} object.
      *
      * @param spec An {@link LegacyEmbedCreateSpec} consumer used to attach rich content when creating a message.
      * @return This spec.
@@ -136,6 +138,7 @@ public class LegacyWebhookExecuteSpec implements LegacySpec<MultipartRequest<Web
 
     /**
      * Adds an allowed mentions object to the webhook execute spec.
+     *
      * @param allowedMentions The allowed mentions to add.
      * @return Tis spec.
      */

@@ -81,7 +81,8 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     // TODO: Documentation
     public Optional<ApplicationCommandInteractionOptionValue> getValue() {
         return data.value().toOptional()
-                .map(value -> new ApplicationCommandInteractionOptionValue(gateway, guildId, data.type(), value, resolved));
+                .map(value -> new ApplicationCommandInteractionOptionValue(gateway, guildId, data.type(), value,
+                        resolved));
     }
 
     /**
@@ -121,6 +122,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      * Whether this option is currently focused or not.
      * <p>
      * This will always return false unless this option is from an autocomplete interaction.
+     *
      * @return Whether this option is currently focused or not.
      */
     public boolean isFocused() {

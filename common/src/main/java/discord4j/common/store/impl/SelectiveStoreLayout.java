@@ -35,6 +35,14 @@ public class SelectiveStoreLayout implements StoreLayout {
     private final DataAccessor dataAccessor;
     private final GatewayDataUpdater gatewayDataUpdater;
 
+    private SelectiveStoreLayout(EnumSet<StoreFlag> enabledFlags,
+                                 DataAccessor dataAccessor,
+                                 GatewayDataUpdater gatewayDataUpdater) {
+        this.enabledFlags = enabledFlags;
+        this.dataAccessor = dataAccessor;
+        this.gatewayDataUpdater = gatewayDataUpdater;
+    }
+
     /**
      * Create a new store layout that can partially enable entity stores depending on passed {@code enabledStoreFlags}.
      * Refer to {@link StoreFlag} values to understand each affected store operation.
@@ -42,7 +50,8 @@ public class SelectiveStoreLayout implements StoreLayout {
      * @param enabledStoreFlags a set of values indicating how to partially enable the delegate capabilities
      * @param delegate a delegate for store queries and updates
      */
-    public static <U extends DataAccessor & GatewayDataUpdater> StoreLayout create(EnumSet<StoreFlag> enabledStoreFlags, U delegate) {
+    public static <U extends DataAccessor & GatewayDataUpdater> StoreLayout create(EnumSet<StoreFlag> enabledStoreFlags,
+                                                                                   U delegate) {
         return new SelectiveStoreLayout(enabledStoreFlags, delegate, delegate);
     }
 
@@ -58,14 +67,6 @@ public class SelectiveStoreLayout implements StoreLayout {
                                      DataAccessor dataAccessor,
                                      GatewayDataUpdater gatewayDataUpdater) {
         return new SelectiveStoreLayout(enabledFlags, dataAccessor, gatewayDataUpdater);
-    }
-
-    private SelectiveStoreLayout(EnumSet<StoreFlag> enabledFlags,
-                                 DataAccessor dataAccessor,
-                                 GatewayDataUpdater gatewayDataUpdater) {
-        this.enabledFlags = enabledFlags;
-        this.dataAccessor = dataAccessor;
-        this.gatewayDataUpdater = gatewayDataUpdater;
     }
 
     @Override

@@ -41,7 +41,8 @@ public class NewsChannelUpdateEvent extends ChannelEvent {
     private final GuildMessageChannel current;
     private final NewsChannel old;
 
-    public NewsChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, GuildMessageChannel current, @Nullable NewsChannel old) {
+    public NewsChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, GuildMessageChannel current,
+                                  @Nullable NewsChannel old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

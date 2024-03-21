@@ -38,6 +38,22 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable
 interface AutoModRuleCreateSpecGenerator extends AuditSpec<AutoModRuleCreateRequest> {
 
+    @Override
+    default AutoModRuleCreateRequest asRequest() {
+        return AutoModRuleCreateRequest.builder()
+                .name(name())
+                .eventType(eventType())
+                .triggerType(triggerType())
+                .triggerMetadata(triggerMetaData())
+                .actions(actions())
+                .enabled(enabled())
+                .exemptRoles(mapPossible(exemptRoles(),
+                        r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+                .exemptChannels(mapPossible(exemptChannels(),
+                        r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
+                .build();
+    }
+
     String name();
 
     int eventType();
@@ -56,32 +72,18 @@ interface AutoModRuleCreateSpecGenerator extends AuditSpec<AutoModRuleCreateRequ
     Possible<List<Snowflake>> exemptRoles();
 
     Possible<List<Snowflake>> exemptChannels();
-
-    @Override
-    default AutoModRuleCreateRequest asRequest() {
-        return AutoModRuleCreateRequest.builder()
-                .name(name())
-                .eventType(eventType())
-                .triggerType(triggerType())
-                .triggerMetadata(triggerMetaData())
-                .actions(actions())
-                .enabled(enabled())
-                .exemptRoles(mapPossible(exemptRoles(), r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
-                .exemptChannels(mapPossible(exemptChannels(), r -> r.stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList())))
-                .build();
-    }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class AutoModRuleCreateMonoGenerator extends Mono<AutoModRule> implements AutoModRuleCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super AutoModRule> actual) {
         guild().createAutoModRule(AutoModRuleCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

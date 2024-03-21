@@ -17,7 +17,6 @@
 
 package discord4j.core.spec;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.RoleCreateRequest;
@@ -29,24 +28,11 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
 interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
-
-    Possible<String> name();
-
-    Possible<PermissionSet> permissions();
-
-    Possible<Color> color();
-
-    Possible<Boolean> hoist();
-
-    Possible<Boolean> mentionable();
-
-    Possible<Optional<String>> icon();
-
-    Possible<Optional<String>> unicodeEmoji();
 
     @Override
     default RoleCreateRequest asRequest() {
@@ -60,18 +46,25 @@ interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
                 .unicodeEmoji(unicodeEmoji())
                 .build();
     }
+    Possible<String> name();
+    Possible<PermissionSet> permissions();
+    Possible<Color> color();
+    Possible<Boolean> hoist();
+    Possible<Boolean> mentionable();
+    Possible<Optional<String>> icon();
+    Possible<Optional<String>> unicodeEmoji();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class RoleCreateMonoGenerator extends Mono<Role> implements RoleCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super Role> actual) {
         guild().createRole(RoleCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

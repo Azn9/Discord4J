@@ -94,15 +94,6 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
     }
 
     /**
-     * Gets the value of this choice as a string.
-     *
-     * @return The value of this choice as a string.
-     */
-    public String asString() {
-        return String.valueOf(data.value());
-    }
-
-    /**
      * Gets the value of this choice as a long.
      *
      * @return The value of this choice as a long.
@@ -113,6 +104,15 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Choice value cannot be converted to long", e);
         }
+    }
+
+    /**
+     * Gets the value of this choice as a string.
+     *
+     * @return The value of this choice as a string.
+     */
+    public String asString() {
+        return String.valueOf(data.value());
     }
 
     /**

@@ -52,7 +52,8 @@ public class EmojiService extends RestService {
                 .bodyToMono(EmojiData.class);
     }
 
-    public Mono<EmojiData> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request, @Nullable String reason) {
+    public Mono<EmojiData> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request,
+                                            @Nullable String reason) {
         return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)

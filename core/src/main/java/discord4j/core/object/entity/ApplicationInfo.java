@@ -16,17 +16,19 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.rest.util.Image;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents the Current (typically) Application Information.
@@ -60,11 +62,6 @@ public final class ApplicationInfo implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
      * Gets the data of the app.
      *
@@ -84,6 +81,17 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Gets the icon of the application.
+     *
+     * @param format The format in which to get the icon.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the application. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getIcon(final Image.Format format) {
+        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the icon URL of the application, if present.
      *
      * @param format The format for the URL.
@@ -94,15 +102,9 @@ public final class ApplicationInfo implements Entity {
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
-    /**
-     * Gets the icon of the application.
-     *
-     * @param format The format in which to get the icon.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the application. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Image> getIcon(final Image.Format format) {
-        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -152,15 +154,6 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the ID of the owner of the application.
-     *
-     * @return The ID of the owner of the application.
-     */
-    public Snowflake getOwnerId() {
-        return Snowflake.of(data.owner().id());
-    }
-
-    /**
      * Requests to retrieve the owner of the application.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User owner} of the application. If an
@@ -168,6 +161,15 @@ public final class ApplicationInfo implements Entity {
      */
     public Mono<User> getOwner() {
         return gateway.getUserById(getOwnerId());
+    }
+
+    /**
+     * Gets the ID of the owner of the application.
+     *
+     * @return The ID of the owner of the application.
+     */
+    public Snowflake getOwnerId() {
+        return Snowflake.of(data.owner().id());
     }
 
     /**
@@ -204,13 +206,20 @@ public final class ApplicationInfo implements Entity {
     }
 
     @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
+    }
+
+    @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public String toString() {
+        return "ApplicationInfo{" +
+                "data=" + data +
+                '}';
     }
 
     /**
@@ -246,24 +255,6 @@ public final class ApplicationInfo implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of an application. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -280,12 +271,23 @@ public final class ApplicationInfo implements Entity {
             }
             return flagSet;
         }
-    }
 
-    @Override
-    public String toString() {
-        return "ApplicationInfo{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

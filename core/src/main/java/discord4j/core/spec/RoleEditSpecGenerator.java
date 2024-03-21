@@ -27,24 +27,11 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
 interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
-
-    Possible<String> name();
-
-    Possible<PermissionSet> permissions();
-
-    Possible<Color> color();
-
-    Possible<Boolean> hoist();
-
-    Possible<Boolean> mentionable();
-
-    Possible<Optional<String>> icon();
-
-    Possible<Optional<String>> unicodeEmoji();
 
     @Override
     default RoleModifyRequest asRequest() {
@@ -58,18 +45,25 @@ interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
                 .unicodeEmoji(unicodeEmoji())
                 .build();
     }
+    Possible<String> name();
+    Possible<PermissionSet> permissions();
+    Possible<Color> color();
+    Possible<Boolean> hoist();
+    Possible<Boolean> mentionable();
+    Possible<Optional<String>> icon();
+    Possible<Optional<String>> unicodeEmoji();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class RoleEditMonoGenerator extends Mono<Role> implements RoleEditSpecGenerator {
 
-    abstract Role role();
-
     @Override
     public void subscribe(CoreSubscriber<? super Role> actual) {
         role().edit(RoleEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Role role();
 
     @Override
     public abstract String toString();

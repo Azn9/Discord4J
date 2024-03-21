@@ -16,13 +16,13 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
-import reactor.util.annotation.Nullable;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -43,20 +43,12 @@ public class EmojisUpdateEvent extends GuildEvent {
     @Nullable
     private final Set<GuildEmoji> old;
 
-    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis, Set<GuildEmoji> old) {
+    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis,
+                             Set<GuildEmoji> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;
         this.old = old;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -67,6 +59,15 @@ public class EmojisUpdateEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

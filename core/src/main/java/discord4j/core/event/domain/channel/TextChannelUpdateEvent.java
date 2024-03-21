@@ -41,7 +41,8 @@ public class TextChannelUpdateEvent extends ChannelEvent {
     private final GuildMessageChannel current;
     private final TextChannel old;
 
-    public TextChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, GuildMessageChannel current, @Nullable TextChannel old) {
+    public TextChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, GuildMessageChannel current,
+                                  @Nullable TextChannel old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

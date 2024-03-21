@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
@@ -26,7 +27,6 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -65,8 +65,8 @@ public class RestEntityRetriever implements EntityRetriever {
     @Override
     public Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId) {
         return rest.getStickerService()
-            .getGuildSticker(guildId.asLong(), stickerId.asLong())
-            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+                .getGuildSticker(guildId.asLong(), stickerId.asLong())
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class RestEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<Member> getSelfMember(Snowflake guildId) {
-        return rest.getSelfMember(guildId).map(data -> new Member(gateway,data, guildId.asLong()));
+        return rest.getSelfMember(guildId).map(data -> new Member(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -132,8 +132,8 @@ public class RestEntityRetriever implements EntityRetriever {
         Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
                 rest.getGuildService().getGuildMembers(guildId.asLong(), params);
 
-       return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
-                        .map(data -> new Member(gateway, data, guildId.asLong()));
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
+                .map(data -> new Member(gateway, data, guildId.asLong()));
     }
 
     @Override
@@ -161,15 +161,15 @@ public class RestEntityRetriever implements EntityRetriever {
     @Override
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return rest.getStickerService()
-            .getGuildStickers(guildId.asLong())
-            .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
+                .getGuildStickers(guildId.asLong())
+                .map(data -> new GuildSticker(gateway, data, guildId.asLong()));
     }
 
     @Override
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return rest.getAutoModService()
-            .getAutoModRules(guildId.asLong())
-            .map(data -> new AutoModRule(gateway, data));
+                .getAutoModRules(guildId.asLong())
+                .map(data -> new AutoModRule(gateway, data));
     }
 
     @Override
@@ -178,8 +178,8 @@ public class RestEntityRetriever implements EntityRetriever {
         queryParams.put("with_user_count", true);
 
         return rest.getGuildService()
-            .getScheduledEvent(guildId.asLong(), eventId.asLong(), queryParams)
-            .map(data -> new ScheduledEvent(gateway, data));
+                .getScheduledEvent(guildId.asLong(), eventId.asLong(), queryParams)
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     @Override
@@ -188,8 +188,8 @@ public class RestEntityRetriever implements EntityRetriever {
         queryParams.put("with_user_count", true);
 
         return rest.getGuildService()
-            .getScheduledEvents(guildId.asLong(), queryParams)
-            .map(data -> new ScheduledEvent(gateway, data));
+                .getScheduledEvents(guildId.asLong(), queryParams)
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     @Override
@@ -200,7 +200,7 @@ public class RestEntityRetriever implements EntityRetriever {
         };
 
         return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
-            .map(data -> new ScheduledEventUser(gateway, data, guildId));
+                .map(data -> new ScheduledEventUser(gateway, data, guildId));
 
     }
 

@@ -27,7 +27,7 @@ import java.util.Objects;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
  */
-public final class Reaction implements DiscordObject  {
+public final class Reaction implements DiscordObject {
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;

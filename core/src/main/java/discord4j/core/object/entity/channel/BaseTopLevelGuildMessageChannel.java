@@ -80,12 +80,12 @@ class BaseTopLevelGuildMessageChannel extends BaseCategorizableChannel implement
     }
 
     @Override
-    public Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec) {
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
         return guildMessageChannel.createMessage(spec);
     }
 
     @Override
-    public Mono<Message> createMessage(MessageCreateSpec spec) {
+    public Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec) {
         return guildMessageChannel.createMessage(spec);
     }
 

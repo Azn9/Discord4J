@@ -21,8 +21,8 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.RoleData;
 import reactor.core.publisher.Flux;
 
-import java.util.Comparator;
 import javax.management.relation.Role;
+import java.util.Comparator;
 
 /**
  * A utility class for the sorting of {@link  discord4j.rest.entity.RestRole}.

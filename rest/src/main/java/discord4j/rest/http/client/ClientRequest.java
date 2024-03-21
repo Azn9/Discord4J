@@ -77,15 +77,6 @@ public class ClientRequest {
     }
 
     /**
-     * Return the HTTP method.
-     *
-     * @return the {@link HttpMethod} of this {@link ClientRequest}
-     */
-    public HttpMethod getMethod() {
-        return request.getRoute().getMethod();
-    }
-
-    /**
      * Return the request URL.
      *
      * @return the request URL for this {@link ClientRequest}
@@ -154,5 +145,14 @@ public class ClientRequest {
                 ", body=" + body +
                 ", id=" + id +
                 '}';
+    }
+
+    /**
+     * Return the HTTP method.
+     *
+     * @return the {@link HttpMethod} of this {@link ClientRequest}
+     */
+    public HttpMethod getMethod() {
+        return request.getRoute().getMethod();
     }
 }

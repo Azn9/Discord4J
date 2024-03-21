@@ -63,7 +63,7 @@ final class InternalSpecUtils {
     }
 
     static <T, R> Possible<Optional<R>> mapPossibleOptional(Possible<Optional<T>> value,
-                                                           Function<? super T, ? extends R> mapper) {
+                                                            Function<? super T, ? extends R> mapper) {
         return value.isAbsent() ? Possible.absent() : Possible.of(value.get().map(mapper));
     }
 }

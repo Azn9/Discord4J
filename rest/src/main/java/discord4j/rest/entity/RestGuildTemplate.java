@@ -16,7 +16,9 @@
  */
 package discord4j.rest.entity;
 
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.TemplateCreateGuildRequest;
+import discord4j.discordjson.json.TemplateData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 
@@ -76,15 +78,19 @@ public class RestGuildTemplate {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestGuildTemplate that = (RestGuildTemplate) o;
-        return Objects.equals(code, that.code);
+    public int hashCode() {
+        return Objects.hash(code);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(code);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestGuildTemplate that = (RestGuildTemplate) o;
+        return Objects.equals(code, that.code);
     }
 }

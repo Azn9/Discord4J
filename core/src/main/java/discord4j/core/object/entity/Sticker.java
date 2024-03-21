@@ -21,21 +21,15 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.StickerData;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class Sticker extends PartialSticker {
 
     public Sticker(final GatewayDiscordClient gateway, final StickerData data) {
         super(gateway, data);
-    }
-
-    /**
-     * Gets the data of the sticker.
-     *
-     * @return The data of the sticker.
-     */
-    public StickerData getData() {
-        return (StickerData) super.getStickerData();
     }
 
     /**
@@ -45,6 +39,15 @@ public class Sticker extends PartialSticker {
      */
     public Optional<Snowflake> getPackId() {
         return getData().packId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * Gets the data of the sticker.
+     *
+     * @return The data of the sticker.
+     */
+    public StickerData getData() {
+        return (StickerData) super.getStickerData();
     }
 
     /**
@@ -63,19 +66,20 @@ public class Sticker extends PartialSticker {
      */
     public List<String> getTags() {
         return getData().tags().toOptional()
-            .map(tags -> tags.split(", "))
-            .map(Arrays::asList)
-            .orElse(Collections.emptyList());
+                .map(tags -> tags.split(", "))
+                .map(Arrays::asList)
+                .orElse(Collections.emptyList());
     }
 
     /**
      * Gets whether this sticker is available for use.
      *
-     * @return {@code true} if this sticker is available, {@code false} otherwise (due to loss of Server Boosts for example).
+     * @return {@code true} if this sticker is available, {@code false} otherwise (due to loss of Server Boosts for
+     * example).
      */
     public boolean isAvailable() {
         return getData().available().toOptional()
-            .orElseThrow(IllegalStateException::new); // this should be safe
+                .orElseThrow(IllegalStateException::new); // this should be safe
     }
 
     /**
@@ -91,7 +95,7 @@ public class Sticker extends PartialSticker {
      * The format of a sticker.
      *
      * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-sticker-format-types">
-     *     Sticker Formats</a>
+     * Sticker Formats</a>
      */
     public enum Format {
 
@@ -127,15 +131,6 @@ public class Sticker extends PartialSticker {
             this.value = value;
         }
 
-        /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
         public static Format of(final int value) {
             switch (value) {
                 case 1:
@@ -148,13 +143,22 @@ public class Sticker extends PartialSticker {
                     return UNKNOWN;
             }
         }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 
     /**
      * The type of sticker.
      *
      * @see <a href="https://discord.com/developers/docs/resources/sticker#sticker-object-sticker-types">
-     *     Sticker Types</a>
+     * Sticker Types</a>
      */
     public enum Type {
         /**
@@ -184,15 +188,6 @@ public class Sticker extends PartialSticker {
             this.value = value;
         }
 
-        /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
         public static Type of(final int value) {
             switch (value) {
                 case 1:
@@ -202,6 +197,15 @@ public class Sticker extends PartialSticker {
                 default:
                     return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

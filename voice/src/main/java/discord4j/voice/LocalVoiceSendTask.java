@@ -48,19 +48,6 @@ public class LocalVoiceSendTask implements Disposable {
         this.task = scheduler.schedulePeriodically(this::run, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    public void dispose() {
-        if (speaking.compareAndSet(true, false)) {
-            changeSpeaking(false);
-        }
-        task.dispose();
-    }
-
-    @Override
-    public boolean isDisposed() {
-        return task.isDisposed();
-    }
-
     private void run() {
         if (provider.provide()) {
             if (speaking.compareAndSet(false, true)) {
@@ -82,5 +69,18 @@ public class LocalVoiceSendTask implements Disposable {
 
     private void changeSpeaking(boolean speaking) {
         speakingSender.accept(speaking);
+    }
+
+    @Override
+    public void dispose() {
+        if (speaking.compareAndSet(true, false)) {
+            changeSpeaking(false);
+        }
+        task.dispose();
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return task.isDisposed();
     }
 }

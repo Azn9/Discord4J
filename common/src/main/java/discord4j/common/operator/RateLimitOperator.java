@@ -19,7 +19,9 @@ package discord4j.common.operator;
 
 import discord4j.common.sinks.EmissionStrategy;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -53,17 +55,14 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         this(capacity, refillPeriod, delayScheduler, DEFAULT_PUBLISH_SCHEDULER.get());
     }
 
-    public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler, Scheduler publishScheduler) {
+    public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler,
+                             Scheduler publishScheduler) {
         this.tokens = new AtomicInteger(capacity);
         this.refillPeriod = refillPeriod;
         this.delayScheduler = delayScheduler;
         this.tokenSink = Sinks.many().replay().latestOrDefault(capacity);
         this.tokenPublishScheduler = publishScheduler;
         this.emissionStrategy = EmissionStrategy.park(Duration.ofNanos(10));
-    }
-
-    private String id() {
-        return Integer.toHexString(hashCode());
     }
 
     @Override
@@ -77,9 +76,13 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
                 })
                 .map(token -> {
                     acquire();
-                    Mono.delay(refillPeriod, delayScheduler).subscribe(__ -> release());
+                    Mono.delay(refillPeriod, delayScheduler).subscribe(unused -> release());
                     return value;
                 }));
+    }
+
+    private String id() {
+        return Integer.toHexString(hashCode());
     }
 
     private void acquire() {
@@ -99,6 +102,6 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     }
 
     private Flux<Integer> availableTokens() {
-        return tokenSink.asFlux().publishOn(tokenPublishScheduler).filter(__ -> tokens.get() > 0);
+        return tokenSink.asFlux().publishOn(tokenPublishScheduler).filter(unused -> tokens.get() > 0);
     }
 }

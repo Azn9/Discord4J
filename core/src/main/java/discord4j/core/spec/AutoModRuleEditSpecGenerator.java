@@ -35,6 +35,20 @@ import java.util.stream.Collectors;
 @Value.Immutable
 public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModifyRequest> {
 
+    @Override
+    default AutoModRuleModifyRequest asRequest() {
+        return AutoModRuleModifyRequest.builder()
+                .name(name())
+                .eventType(eventType())
+                .triggerMetadata(triggerMetaData())
+                .actions(actions())
+                .enabled(enabled())
+                .exemptRoles(exemptRoles().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
+                .exemptChannels(exemptChannels().stream().map(Snowflake::asLong).map(Id::of)
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
     String name();
 
     int eventType();
@@ -57,32 +71,18 @@ public interface AutoModRuleEditSpecGenerator extends AuditSpec<AutoModRuleModif
     default List<Snowflake> exemptChannels() {
         return Collections.emptyList();
     }
-
-    @Override
-    default AutoModRuleModifyRequest asRequest() {
-        return AutoModRuleModifyRequest.builder()
-                .name(name())
-                .eventType(eventType())
-                .triggerMetadata(triggerMetaData())
-                .actions(actions())
-                .enabled(enabled())
-                .exemptRoles(exemptRoles().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
-                .exemptChannels(exemptChannels().stream().map(Snowflake::asLong).map(Id::of).collect(Collectors.toList()))
-                .build();
-    }
-
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class AutoModRuleEditMonoGenerator extends Mono<AutoModRule> implements AutoModRuleEditSpecGenerator {
 
-    abstract AutoModRule autoModRule();
-
     @Override
     public void subscribe(CoreSubscriber<? super AutoModRule> actual) {
         autoModRule().edit(AutoModRuleEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract AutoModRule autoModRule();
 
     @Override
     public abstract String toString();

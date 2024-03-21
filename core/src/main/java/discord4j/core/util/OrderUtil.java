@@ -16,12 +16,12 @@
  */
 package discord4j.core.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
@@ -33,8 +33,10 @@ public final class OrderUtil {
     /**
      * The ordering of Discord {@link Role roles}.
      * <p>
-     * In Discord, two orderable entities may have the same "raw position," the position as reported by the "position" field.
-     * This conflict is resolved by comparing the creation time of the entities, reflected in their {@link Snowflake IDs}.
+     * In Discord, two orderable entities may have the same "raw position," the position as reported by the
+     * "position" field.
+     * This conflict is resolved by comparing the creation time of the entities, reflected in their {@link Snowflake
+     * IDs}.
      */
     public static final Comparator<Role> ROLE_ORDER =
             Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId);
@@ -42,8 +44,10 @@ public final class OrderUtil {
     /**
      * The base ordering of Discord {@link GuildChannel guild channels}.
      * <p>
-     * In Discord, two orderable entities may have the same "raw position," the position as reported by the "position" field.
-     * This conflict is resolved by comparing the creation time of the entities, reflected in their {@link Snowflake IDs}.
+     * In Discord, two orderable entities may have the same "raw position," the position as reported by the
+     * "position" field.
+     * This conflict is resolved by comparing the creation time of the entities, reflected in their {@link Snowflake
+     * IDs}.
      * <p>
      * Note that this order is only applicable to channels if they are of the same type and in the same category. See
      * {@link #BUCKETED_CHANNEL_ORDER} for ordering between different channel types.
@@ -90,25 +94,6 @@ public final class OrderUtil {
                 .flatMapIterable(OrderUtil::orderGuildChannels);
     }
 
-    /**
-     * Sorts {@link Role roles} according to visual ordering in Discord. Roles at the bottom of the list are first. This
-     * sorts roles according to {@link #ROLE_ORDER}.
-     * <p>
-     * This function can be used with {@link Flux#transform(Function)} for better chaining:
-     * <pre>
-     * {@code
-     * guild.getRoles()
-     *   .transform(OrderUtil::orderRoles)
-     * }
-     * </pre>
-     *
-     * @param roles The roles to sort.
-     * @return The sorted roles.
-     */
-    public static Flux<Role> orderRoles(Flux<Role> roles) {
-        return roles.sort(OrderUtil.ROLE_ORDER);
-    }
-
     private static List<GuildChannel> orderGuildChannels(Map<Snowflake, GuildChannel> channels) {
         // associate channels to their parent category
         // sorted by raw position then ID
@@ -139,5 +124,24 @@ public final class OrderUtil {
         });
 
         return sorted;
+    }
+
+    /**
+     * Sorts {@link Role roles} according to visual ordering in Discord. Roles at the bottom of the list are first. This
+     * sorts roles according to {@link #ROLE_ORDER}.
+     * <p>
+     * This function can be used with {@link Flux#transform(Function)} for better chaining:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .transform(OrderUtil::orderRoles)
+     * }
+     * </pre>
+     *
+     * @param roles The roles to sort.
+     * @return The sorted roles.
+     */
+    public static Flux<Role> orderRoles(Flux<Role> roles) {
+        return roles.sort(OrderUtil.ROLE_ORDER);
     }
 }

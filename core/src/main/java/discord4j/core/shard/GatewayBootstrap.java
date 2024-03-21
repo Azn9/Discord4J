@@ -73,7 +73,9 @@ import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -111,10 +113,15 @@ import static reactor.function.TupleUtils.function;
 public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
-
+    private static final Sinks.EmitFailureHandler OPTIMISTIC = (signalType, emitResult) -> {
+        if (emitResult == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
+            LockSupport.parkNanos(10);
+            return true;
+        }
+        return false;
+    };
     private final DiscordClient client;
     private final Function<GatewayOptions, O> optionsModifier;
-
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
     private Boolean awaitConnections = null;
     private ShardCoordinator shardCoordinator = null;
@@ -138,17 +145,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
     private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
-
-    /**
-     * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
-     * of {@link CoreResources} used to provide defaults while building a {@link GatewayDiscordClient}.
-     *
-     * @param client the {@link DiscordClient} used to set up configuration
-     * @return a default builder to create {@link GatewayDiscordClient}
-     */
-    public static GatewayBootstrap<GatewayOptions> create(DiscordClient client) {
-        return new GatewayBootstrap<>(client, Function.identity());
-    }
 
     GatewayBootstrap(DiscordClient client, Function<GatewayOptions, O> optionsModifier) {
         this.client = client;
@@ -182,6 +178,47 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.dispatchEventMapper = source.dispatchEventMapper;
         this.maxMissedHeartbeatAck = source.maxMissedHeartbeatAck;
         this.dispatcherFunction = source.dispatcherFunction;
+    }
+
+    /**
+     * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
+     * of {@link CoreResources} used to provide defaults while building a {@link GatewayDiscordClient}.
+     *
+     * @param client the {@link DiscordClient} used to set up configuration
+     * @return a default builder to create {@link GatewayDiscordClient}
+     */
+    public static GatewayBootstrap<GatewayOptions> create(DiscordClient client) {
+        return new GatewayBootstrap<>(client, Function.identity());
+    }
+
+    /**
+     * Destroy handler that doesn't perform any cleanup task.
+     *
+     * @return a noop destroy handler
+     */
+    public static Function<GatewayDiscordClient, Mono<Void>> noopDestroyHandler() {
+        return gateway -> Mono.empty();
+    }
+
+    /**
+     * Destroy handler that calls {@link EventDispatcher#shutdown()} asynchronously.
+     *
+     * @return a shutdown destroy handler
+     */
+    public static Function<GatewayDiscordClient, Mono<Void>> shutdownDestroyHandler() {
+        return gateway -> {
+            gateway.getEventDispatcher().shutdown();
+            return Mono.empty();
+        };
+    }
+
+    /**
+     * Create a {@link VoiceConnectionFactory} with reconnecting capabilities.
+     *
+     * @return a default {@link VoiceConnectionFactory}
+     */
+    public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
+        return new DefaultVoiceConnectionFactory();
     }
 
     /**
@@ -300,10 +337,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when
+     * identifying
      * to the Gateway. Defaults to no status given.
      *
-     * @param initialPresence a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
+     * @param initialPresence a {@link Function} that supplies {@link ClientPresence} instances from a given
+     * {@link ShardInfo}
      * @return this builder
      */
     public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, ClientPresence> initialPresence) {
@@ -312,10 +351,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when
+     * identifying
      * to the Gateway. Defaults to no status given.
      *
-     * @param initialStatus a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
+     * @param initialStatus a {@link Function} that supplies {@link ClientPresence} instances from a given
+     * {@link ShardInfo}
      * @return this builder
      * @deprecated use {@link #setInitialPresence(Function)}
      */
@@ -634,24 +675,26 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, onCloseSink.asMono(),
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy, completingChunkNonces);
                     Mono<Void> destroySequence = Mono.deferContextual(ctx -> b.destroyHandler.apply(gateway)
-                            .doFinally(s -> {
-                                log.info(format(ctx, "All shards disconnected"));
-                                Throwable t = dispatcherFunctionError.get();
-                                if (t != null) {
-                                    onCloseSink.emitError(t, OPTIMISTIC);
-                                } else {
-                                    onCloseSink.emitEmpty(OPTIMISTIC);
-                                }
-                            }))
+                                    .doFinally(s -> {
+                                        log.info(format(ctx, "All shards disconnected"));
+                                        Throwable t = dispatcherFunctionError.get();
+                                        if (t != null) {
+                                            onCloseSink.emitError(t, OPTIMISTIC);
+                                        } else {
+                                            onCloseSink.emitEmpty(OPTIMISTIC);
+                                        }
+                                    }))
                             .cache();
 
                     Flux<ShardInfo> connections = b.shardingStrategy.getMaxConcurrency(b.client)
                             .flatMapMany(maxConcurrency -> b.shardingStrategy.getShards(count)
-                                .groupBy(shard -> shard.getIndex() % maxConcurrency)
-                                .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
-                                        gateway, shardCoordinator, store, eventDispatcher, clientGroup,
-                                        onCloseSink, dispatchMapper, completingChunkNonces,
-                                        destroySequence.contextWrite(buildContext(gateway, shard)), maxConcurrency))));
+                                    .groupBy(shard -> shard.getIndex() % maxConcurrency)
+                                    .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard,
+                                            clientFactory,
+                                            gateway, shardCoordinator, store, eventDispatcher, clientGroup,
+                                            onCloseSink, dispatchMapper, completingChunkNonces,
+                                            destroySequence.contextWrite(buildContext(gateway, shard)),
+                                            maxConcurrency))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
                             Flux.from(b.dispatcherFunction.apply(eventDispatcher))
@@ -725,122 +768,128 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               Mono<Void> destroySequence,
                                               int maxConcurrency) {
         return Mono.deferContextual(ctx ->
-                Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard))
-                            .map(ClientPresence::getStatusUpdate)
-                            .orElse(null);
-                    IdentifyOptions identify = IdentifyOptions.builder(shard)
-                            .initialStatus(initial)
-                            .intents(b.intents)
-                            .resumeSession(b.resumeOptions.apply(shard))
-                            .build();
-                    PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard, maxConcurrency);
-                    GatewayReactorResources resources = gateway.getGatewayResources().getGatewayReactorResources();
-                    ReconnectOptions reconnectOptions = initReconnectOptions(resources);
-                    GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
-                            resources, initPayloadReader(), initPayloadWriter(), reconnectOptions,
-                            identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
-                    GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));
-                    clientGroup.add(shard.getIndex(), gatewayClient);
-                    DispatchStoreLayer dispatchStoreLayer = DispatchStoreLayer.create(store, shard);
+                        Mono.<ShardInfo>create(sink -> {
+                            StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard))
+                                    .map(ClientPresence::getStatusUpdate)
+                                    .orElse(null);
+                            IdentifyOptions identify = IdentifyOptions.builder(shard)
+                                    .initialStatus(initial)
+                                    .intents(b.intents)
+                                    .resumeSession(b.resumeOptions.apply(shard))
+                                    .build();
+                            PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard, maxConcurrency);
+                            GatewayReactorResources resources =
+                                    gateway.getGatewayResources().getGatewayReactorResources();
+                            ReconnectOptions reconnectOptions = initReconnectOptions(resources);
+                            GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
+                                    resources, initPayloadReader(), initPayloadWriter(), reconnectOptions,
+                                    identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
+                            GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));
+                            clientGroup.add(shard.getIndex(), gatewayClient);
+                            DispatchStoreLayer dispatchStoreLayer = DispatchStoreLayer.create(store, shard);
 
-                    // wire gateway events to EventDispatcher
-                    Disposable.Composite forCleanup = Disposables.composite();
-                    forCleanup.add(gatewayClient.dispatch()
-                            .takeUntilOther(onCloseSink.asMono())
-                            .checkpoint("Read payload from gateway")
-                            .flatMap(dispatchStoreLayer::store)
-                            .checkpoint("Write gateway update to the store")
-                            .flatMap(statefulDispatch -> {
-                                if (!(statefulDispatch.getDispatch() instanceof GuildMembersChunk)) {
-                                    return Mono.just(statefulDispatch);
-                                }
-                                GuildMembersChunk chunk = (GuildMembersChunk) statefulDispatch.getDispatch();
-                                return Mono.justOrEmpty(chunk.nonce().toOptional())
-                                        .filter(nonce -> chunk.chunkIndex() + 1 == chunk.chunkCount()
-                                                && completingChunkNonces.remove(nonce))
-                                        .flatMap(nonce -> Mono.from(store.execute(GatewayActions
-                                                .completeGuildMembers(Snowflake.asLong(chunk.guildId())))))
-                                        .<StatefulDispatch<?, ?>>thenReturn(statefulDispatch)
-                                        .onErrorResume(t -> {
-                                            log.warn(format(ctx, "Error sending completeGuildMembers to the store"), t);
+                            // wire gateway events to EventDispatcher
+                            Disposable.Composite forCleanup = Disposables.composite();
+                            forCleanup.add(gatewayClient.dispatch()
+                                    .takeUntilOther(onCloseSink.asMono())
+                                    .checkpoint("Read payload from gateway")
+                                    .flatMap(dispatchStoreLayer::store)
+                                    .checkpoint("Write gateway update to the store")
+                                    .flatMap(statefulDispatch -> {
+                                        if (!(statefulDispatch.getDispatch() instanceof GuildMembersChunk)) {
                                             return Mono.just(statefulDispatch);
-                                        });
-                            })
-                            .flatMap(statefulDispatch -> {
-                                DispatchContext<?, ?> context = DispatchContext.of(statefulDispatch, gateway);
-                                return dispatchMapper.handle(context)
-                                        .contextWrite(c -> c.put(LogUtil.KEY_SHARD_ID,
-                                                context.getShardInfo().getIndex()))
-                                        .onErrorResume(error -> {
-                                            log.error(format(ctx, "Error dispatching event"), error);
-                                            return Mono.empty();
-                                        });
-                            })
-                            .doOnNext(eventDispatcher::publish)
-                            .subscribe(null,
-                                    t -> log.error(format(ctx, "Event mapper terminated with an error"), t),
-                                    () -> log.debug(format(ctx, "Event mapper completed"))));
-
-                    // wire internal shard coordinator events
-                    // TODO: migrate to GatewayClient::stateEvents
-                    forCleanup.add(gatewayClient.dispatch()
-                            .ofType(GatewayStateChange.class)
-                            .takeUntilOther(onCloseSink.asMono())
-                            .flatMap(event -> {
-                                SessionInfo session = null;
-                                switch (event.getState()) {
-                                    case CONNECTED:
-                                    case RETRY_SUCCEEDED:
-                                        // TODO: ensure this sink is only pushed to once and avoid dropping signals
-                                        return shardCoordinator.publishConnected(shard)
-                                                .publishOn(gateway.getGatewayResources()
-                                                        .getGatewayReactorResources()
-                                                        .getBlockingTaskScheduler())
-                                                .doFinally(__ -> sink.success(shard));
-                                    case DISCONNECTED_RESUME:
-                                        session = SessionInfo.create(gatewayClient.getSessionId(),
-                                                gatewayClient.getSequence());
-                                    case DISCONNECTED:
-                                        return shardCoordinator.publishDisconnected(shard, session)
-                                                .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
-                                                .then(shardCoordinator.getConnectedCount()
-                                                        .filter(count -> count == 0)
-                                                        .flatMap(__ -> destroySequence))
+                                        }
+                                        GuildMembersChunk chunk = (GuildMembersChunk) statefulDispatch.getDispatch();
+                                        return Mono.justOrEmpty(chunk.nonce().toOptional())
+                                                .filter(nonce -> chunk.chunkIndex() + 1 == chunk.chunkCount()
+                                                        && completingChunkNonces.remove(nonce))
+                                                .flatMap(nonce -> Mono.from(store.execute(GatewayActions
+                                                        .completeGuildMembers(Snowflake.asLong(chunk.guildId())))))
+                                                .<StatefulDispatch<?, ?>>thenReturn(statefulDispatch)
                                                 .onErrorResume(t -> {
-                                                    log.warn(format(ctx, "Error while releasing resources"), t);
+                                                    log.warn(format(ctx, "Error sending completeGuildMembers to the " +
+                                                            "store"), t);
+                                                    return Mono.just(statefulDispatch);
+                                                });
+                                    })
+                                    .flatMap(statefulDispatch -> {
+                                        DispatchContext<?, ?> context = DispatchContext.of(statefulDispatch, gateway);
+                                        return dispatchMapper.handle(context)
+                                                .contextWrite(c -> c.put(LogUtil.KEY_SHARD_ID,
+                                                        context.getShardInfo().getIndex()))
+                                                .onErrorResume(error -> {
+                                                    log.error(format(ctx, "Error dispatching event"), error);
                                                     return Mono.empty();
                                                 });
-                                    case RETRY_FAILED:
-                                        log.debug(format(ctx, "Invalidating stores for shard"));
-                                }
-                                return Mono.empty();
-                            })
-                            .contextWrite(buildContext(gateway, shard))
-                            .subscribe(null,
-                                    t -> log.error(format(ctx, "Lifecycle listener terminated with an error"), t),
-                                    () -> log.debug(format(ctx, "Lifecycle listener completed"))));
+                                    })
+                                    .doOnNext(eventDispatcher::publish)
+                                    .subscribe(null,
+                                            t -> log.error(format(ctx, "Event mapper terminated with an error"), t),
+                                            () -> log.debug(format(ctx, "Event mapper completed"))));
 
-                    forCleanup.add(b.client.getGatewayService()
-                            .getGateway()
-                            .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
-                            .retryWhen(Retry.backoff(
-                                    reconnectOptions.getMaxRetries(), reconnectOptions.getFirstBackoff())
-                                    .maxBackoff(reconnectOptions.getMaxBackoffInterval()))
-                            .flatMap(response -> gatewayClient.execute(
-                                    RouteUtils.expandQuery(response.url(), getGatewayParameters())))
-                            .doOnError(sink::error) // only useful for startup errors
-                            .doFinally(__ -> {
-                                sink.success(); // no-op if we completed it before
-                                onCloseSink.emitEmpty(OPTIMISTIC);
-                            })
-                            .contextWrite(buildContext(gateway, shard))
-                            .subscribe(null,
-                                    t -> log.debug(format(ctx, "Gateway terminated with an error: {}"), t.toString()),
-                                    () -> log.debug(format(ctx, "Gateway completed"))));
+                            // wire internal shard coordinator events
+                            // TODO: migrate to GatewayClient::stateEvents
+                            forCleanup.add(gatewayClient.dispatch()
+                                    .ofType(GatewayStateChange.class)
+                                    .takeUntilOther(onCloseSink.asMono())
+                                    .flatMap(event -> {
+                                        SessionInfo session = null;
+                                        switch (event.getState()) {
+                                            case CONNECTED:
+                                            case RETRY_SUCCEEDED:
+                                                // TODO: ensure this sink is only pushed to once and avoid dropping
+                                                //  signals
+                                                return shardCoordinator.publishConnected(shard)
+                                                        .publishOn(gateway.getGatewayResources()
+                                                                .getGatewayReactorResources()
+                                                                .getBlockingTaskScheduler())
+                                                        .doFinally(__ -> sink.success(shard));
+                                            case DISCONNECTED_RESUME:
+                                                session = SessionInfo.create(gatewayClient.getSessionId(),
+                                                        gatewayClient.getSequence());
+                                            case DISCONNECTED:
+                                                return shardCoordinator.publishDisconnected(shard, session)
+                                                        .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
+                                                        .then(shardCoordinator.getConnectedCount()
+                                                                .filter(count -> count == 0)
+                                                                .flatMap(__ -> destroySequence))
+                                                        .onErrorResume(t -> {
+                                                            log.warn(format(ctx, "Error while releasing resources"), t);
+                                                            return Mono.empty();
+                                                        });
+                                            case RETRY_FAILED:
+                                                log.debug(format(ctx, "Invalidating stores for shard"));
+                                        }
+                                        return Mono.empty();
+                                    })
+                                    .contextWrite(buildContext(gateway, shard))
+                                    .subscribe(null,
+                                            t -> log.error(format(ctx, "Lifecycle listener terminated with an error")
+                                                    , t),
+                                            () -> log.debug(format(ctx, "Lifecycle listener completed"))));
 
-                    sink.onCancel(forCleanup);
-                }))
+                            forCleanup.add(b.client.getGatewayService()
+                                    .getGateway()
+                                    .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
+                                    .retryWhen(Retry.backoff(
+                                                    reconnectOptions.getMaxRetries(),
+                                                    reconnectOptions.getFirstBackoff())
+                                            .maxBackoff(reconnectOptions.getMaxBackoffInterval()))
+                                    .flatMap(response -> gatewayClient.execute(
+                                            RouteUtils.expandQuery(response.url(), getGatewayParameters())))
+                                    .doOnError(sink::error) // only useful for startup errors
+                                    .doFinally(__ -> {
+                                        sink.success(); // no-op if we completed it before
+                                        onCloseSink.emitEmpty(OPTIMISTIC);
+                                    })
+                                    .contextWrite(buildContext(gateway, shard))
+                                    .subscribe(null,
+                                            t -> log.debug(format(ctx, "Gateway terminated with an error: {}"),
+                                                    t.toString()),
+                                            () -> log.debug(format(ctx, "Gateway completed"))));
+
+                            sink.onCancel(forCleanup);
+                        }))
                 .contextWrite(buildContext(gateway, shard));
     }
 
@@ -870,6 +919,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return ReconnectOptions.builder()
                 .setBackoffScheduler(resources.getTimerTaskScheduler())
                 .build();
+    }
+
+    private Multimap<String, Object> getGatewayParameters() {
+        final Multimap<String, Object> parameters = new Multimap<>(3);
+        parameters.add("compress", "zlib-stream");
+        parameters.add("encoding", "json");
+        parameters.add("v", 8);
+        return parameters;
     }
 
     private ReconnectOptions initReconnectOptions(VoiceReactorResources resources) {
@@ -944,52 +1001,5 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return MemberRequestFilter.none();
         }
     }
-
-    private Multimap<String, Object> getGatewayParameters() {
-        final Multimap<String, Object> parameters = new Multimap<>(3);
-        parameters.add("compress", "zlib-stream");
-        parameters.add("encoding", "json");
-        parameters.add("v", 8);
-        return parameters;
-    }
-
-    /**
-     * Destroy handler that doesn't perform any cleanup task.
-     *
-     * @return a noop destroy handler
-     */
-    public static Function<GatewayDiscordClient, Mono<Void>> noopDestroyHandler() {
-        return gateway -> Mono.empty();
-    }
-
-
-    /**
-     * Destroy handler that calls {@link EventDispatcher#shutdown()} asynchronously.
-     *
-     * @return a shutdown destroy handler
-     */
-    public static Function<GatewayDiscordClient, Mono<Void>> shutdownDestroyHandler() {
-        return gateway -> {
-            gateway.getEventDispatcher().shutdown();
-            return Mono.empty();
-        };
-    }
-
-    /**
-     * Create a {@link VoiceConnectionFactory} with reconnecting capabilities.
-     *
-     * @return a default {@link VoiceConnectionFactory}
-     */
-    public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
-        return new DefaultVoiceConnectionFactory();
-    }
-
-    private static final Sinks.EmitFailureHandler OPTIMISTIC = (signalType, emitResult) -> {
-        if (emitResult == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
-            LockSupport.parkNanos(10);
-            return true;
-        }
-        return false;
-    };
 
 }

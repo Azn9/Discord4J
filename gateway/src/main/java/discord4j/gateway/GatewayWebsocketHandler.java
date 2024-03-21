@@ -149,12 +149,16 @@ public class GatewayWebsocketHandler {
         }
     }
 
-    /**
-     * Initiates a close sequence that will terminate this session and instruct consumers downstream that a reconnect
-     * should take place afterwards.
-     */
-    public void close() {
-        close(DisconnectBehavior.retry(null));
+    private void safeRelease(ByteBuf buf) {
+        if (!unpooled && buf.refCnt() > 0) {
+            try {
+                buf.release();
+            } catch (IllegalReferenceCountException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("", e);
+                }
+            }
+        }
     }
 
     /**
@@ -179,15 +183,11 @@ public class GatewayWebsocketHandler {
         close(DisconnectBehavior.retryAbruptly(error));
     }
 
-    private void safeRelease(ByteBuf buf) {
-        if (!unpooled && buf.refCnt() > 0) {
-            try {
-                buf.release();
-            } catch (IllegalReferenceCountException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("", e);
-                }
-            }
-        }
+    /**
+     * Initiates a close sequence that will terminate this session and instruct consumers downstream that a reconnect
+     * should take place afterwards.
+     */
+    public void close() {
+        close(DisconnectBehavior.retry(null));
     }
 }

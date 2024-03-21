@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -40,20 +40,12 @@ public class InviteDeleteEvent extends Event {
     private final long channelId;
     private final String code;
 
-    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId, String code) {
+    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId,
+                             String code) {
         super(client, shardInfo);
         this.guildId = guildId;
         this.channelId = channelId;
         this.code = code;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
-     *
-     * @return The ID of the guild involved, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -64,6 +56,15 @@ public class InviteDeleteEvent extends Event {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
+     *
+     * @return The ID of the guild involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -87,9 +88,9 @@ public class InviteDeleteEvent extends Event {
     @Override
     public String toString() {
         return "InviteDeleteEvent{" +
-            "guildId=" + guildId +
-            ", channelId=" + channelId +
-            ", code=" + code +
-            '}';
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", code=" + code +
+                '}';
     }
 }

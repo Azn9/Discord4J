@@ -32,15 +32,16 @@ public final class Snowflake implements Comparable<Snowflake> {
 
     /** The UNIX time that represents Discord's epoch (January 1, 2015). */
     public static final long DISCORD_EPOCH = 1420070400000L;
+    /** The <i>unsigned</i> ID. */
+    private final long id;
 
     /**
      * Constructs a {@code Snowflake} utilizing an <i>unsigned</i> ID.
      *
      * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}.
-     * @return A constructed {@code Snowflake} with the <i>unsigned</i> ID.
      */
-    public static Snowflake of(final long id) {
-        return new Snowflake(id);
+    private Snowflake(final long id) {
+        this.id = id;
     }
 
     /**
@@ -63,6 +64,16 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     public static Snowflake of(final Instant timestamp) {
         return of((timestamp.toEpochMilli() - DISCORD_EPOCH) << 22);
+    }
+
+    /**
+     * Constructs a {@code Snowflake} utilizing an <i>unsigned</i> ID.
+     *
+     * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}.
+     * @return A constructed {@code Snowflake} with the <i>unsigned</i> ID.
+     */
+    public static Snowflake of(final long id) {
+        return new Snowflake(id);
     }
 
     /**
@@ -107,6 +118,15 @@ public final class Snowflake implements Comparable<Snowflake> {
     }
 
     /**
+     * Gets the <i>unsigned</i> ID of this {@code Snowflake} as a primitive long.
+     *
+     * @return The <i>unsigned</i> ID of this {@code Snowflake} as a primitive long.
+     */
+    public long asLong() {
+        return id;
+    }
+
+    /**
      * Constructs a {@code Snowflake} represented as a {@link String} utilizing an <i>unsigned</i> ID.
      *
      * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}. Must be non-null.
@@ -115,27 +135,6 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     public static String asString(final long id) {
         return Long.toUnsignedString(id);
-    }
-
-    /** The <i>unsigned</i> ID. */
-    private final long id;
-
-    /**
-     * Constructs a {@code Snowflake} utilizing an <i>unsigned</i> ID.
-     *
-     * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}.
-     */
-    private Snowflake(final long id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the <i>unsigned</i> ID of this {@code Snowflake} as a primitive long.
-     *
-     * @return The <i>unsigned</i> ID of this {@code Snowflake} as a primitive long.
-     */
-    public long asLong() {
-        return id;
     }
 
     /**
@@ -167,8 +166,8 @@ public final class Snowflake implements Comparable<Snowflake> {
 
     /**
      * Compares this snowflake to the specified snowflake.
-     * <p>
-     * The comparison is based on the timestamp portion of the snowflakes.
+     *
+     * <p>The comparison is based on the timestamp portion of the snowflakes.
      *
      * @param other The other snowflake to compare to.
      * @return The comparator value.
@@ -176,6 +175,16 @@ public final class Snowflake implements Comparable<Snowflake> {
     @Override
     public int compareTo(Snowflake other) {
         return Long.signum((id >>> 22) - (other.id >>> 22));
+    }
+
+    /**
+     * Gets the hash code value of the {@link #asLong() ID}.
+     *
+     * @return The hash code value of the {@link #asLong() ID}.
+     */
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
     }
 
     /**
@@ -195,19 +204,9 @@ public final class Snowflake implements Comparable<Snowflake> {
     }
 
     /**
-     * Gets the hash code value of the {@link #asLong() ID}.
-     *
-     * @return The hash code value of the {@link #asLong() ID}.
-     */
-    @Override
-    public int hashCode() {
-        return Long.hashCode(id);
-    }
-
-    /**
      * Gets the String representation of this {@code Snowflake}.
-     * <p>
-     * The format returned by this method is unspecified and may vary between implementations; however, it is guaranteed
+     *
+     * <p>The format returned by this method is unspecified and may vary between implementations; however, it is guaranteed
      * to always be non-empty. This method is not suitable for obtaining the ID; use {@link #asString()} instead.
      *
      * @return The String representation of this {@code Snowflake}.

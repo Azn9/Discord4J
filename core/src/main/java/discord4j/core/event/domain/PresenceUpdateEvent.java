@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -24,7 +25,6 @@ import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -58,21 +58,21 @@ public class PresenceUpdateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link User} whose presence has been updated.
-     *
-     * @return The ID of the {@link Guild} involved.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Gets the {@link Guild} containing the {@link User} whose presence has been updated.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link User} whose presence has been updated.
+     *
+     * @return The ID of the {@link Guild} involved.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -128,15 +128,6 @@ public class PresenceUpdateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link User} whose presence has been updated in this event.
-     *
-     * @return The ID of the {@link User} whose presence has been updated.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(user.id());
-    }
-
-    /**
      * Requests to retrieve the {@link User} whose presence has been changed in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} involved in this event.
@@ -144,6 +135,15 @@ public class PresenceUpdateEvent extends Event {
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link User} whose presence has been updated in this event.
+     *
+     * @return The ID of the {@link User} whose presence has been updated.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(user.id());
     }
 
     /**

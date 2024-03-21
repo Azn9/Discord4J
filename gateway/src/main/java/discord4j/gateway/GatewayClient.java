@@ -94,15 +94,6 @@ public interface GatewayClient {
      * @return a {@link Flux} of raw payloads transformed by a mapping function
      */
     <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper);
-
-    /**
-     * Retrieves a new {@link Sinks.Many} to safely produce outbound values using
-     * {@link Sinks.Many#tryEmitNext(Object)} or {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}.
-     *
-     * @return a serializing {@link Sinks.Many}
-     */
-    Sinks.Many<GatewayPayload<?>> sender();
-
     /**
      * Sends a sequence of {@link GatewayPayload payloads} through this {@link GatewayClient} and returns a
      * {@link Mono} that signals completion when the payloads have been sent.
@@ -115,7 +106,13 @@ public interface GatewayClient {
                 .doOnNext(payload -> sender().emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST))
                 .then();
     }
-
+    /**
+     * Retrieves a new {@link Sinks.Many} to safely produce outbound values using
+     * {@link Sinks.Many#tryEmitNext(Object)} or {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}.
+     *
+     * @return a serializing {@link Sinks.Many}
+     */
+    Sinks.Many<GatewayPayload<?>> sender();
     /**
      * Sends a sequence of {@link ByteBuf} payloads through this {@link GatewayClient} and returns a {@link Mono}
      * that signals completion when the given publisher completes.

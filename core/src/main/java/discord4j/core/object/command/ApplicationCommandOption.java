@@ -24,7 +24,12 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.possible.Possible;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -176,6 +181,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Returns a list of acceptable channel types the user may pick
      * </p>
      * Only applies to CHANNEL type options, if empty, no restriction on channel types is placed.
+     *
      * @return A list of channel types a user may pick. Empty list means no restriction is applied.
      */
     public List<Channel.Type> getAllowedChannelTypes() {
@@ -190,6 +196,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Whether this option supports auto-complete or not. Default is false.
      * </p>
      * Autocomplete cannot be enabled on options that have choices.
+     *
      * @return Whether this option supports auto-complete or not.
      */
     public boolean hasAutocompleteEnabled() {
@@ -200,6 +207,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Returns the minimum value a user is allowed to input, represented as a {@link Double}.
      * </p>
      * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     *
      * @return The minimum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
     public Optional<Double> getMinimumValue() {
@@ -210,6 +218,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Returns the maximum value a user is allowed to input, represented as a {@link Double}.
      * </p>
      * This is only applicable to {@link Type#INTEGER} and {@link Type#NUMBER} types.
+     *
      * @return The maximum value a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
     public Optional<Double> getMaximumValue() {
@@ -220,6 +229,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Returns the minimum length a user is allowed to input, represented as a {@link Integer}.
      * </p>
      * This is only applicable to {@link Type#STRING} type.
+     *
      * @return The minimum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
     public Optional<Integer> getMinimumLength() {
@@ -230,6 +240,7 @@ public class ApplicationCommandOption implements DiscordObject {
      * Returns the maximum length a user is allowed to input, represented as a {@link Integer}.
      * </p>
      * This is only applicable to {@link Type#STRING} type.
+     *
      * @return The maximum length a user is allowed to input if present, otherwise {@link Optional#empty()}.
      */
     public Optional<Integer> getMaximumLength() {
@@ -274,15 +285,6 @@ public class ApplicationCommandOption implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of an application command option. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will
          * equal ({@code ==}) the supplied {@code value}.
@@ -305,6 +307,15 @@ public class ApplicationCommandOption implements DiscordObject {
                 case 11: return ATTACHMENT;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

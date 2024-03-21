@@ -74,25 +74,6 @@ public class ClientResponse {
     }
 
     /**
-     * Return the body of this response as a {@link Mono} of {@link ByteBuf}. If this {@link Mono} is cancelled, then
-     * it will not be possible to consume the body again.
-     *
-     * @return the response body contents
-     */
-    public Mono<ByteBuf> getBody() {
-        return inbound.receive()
-                .aggregate()
-                .doOnSubscribe(s -> {
-                    if (reject.get()) {
-                        throw new IllegalStateException("Response body can only be consumed once");
-                    }
-                })
-                .doOnCancel(() -> reject.set(true))
-                //.map(ByteBuf::retain)
-                .doOnNext(buf -> buf.touch("discord4j.client.response"));
-    }
-
-    /**
      * Read the response body and extract it to a single object according to the {@code responseType} given. If the
      * response has an HTTP error (status codes 4xx and 5xx) the produced object will be a {@link ClientException}.
      *
@@ -103,13 +84,13 @@ public class ClientResponse {
      */
     public <T> Mono<T> bodyToMono(Class<T> responseType) {
         return Mono.defer(
-                () -> {
-                    if (response.status().code() >= 400) {
-                        return createException().flatMap(Mono::error);
-                    } else {
-                        return Mono.just(this);
-                    }
-                })
+                        () -> {
+                            if (response.status().code() >= 400) {
+                                return createException().flatMap(Mono::error);
+                            } else {
+                                return Mono.just(this);
+                            }
+                        })
                 .transform(getResponseTransformers(clientRequest.getDiscordRequest()))
                 .flatMap(res -> {
                     String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
@@ -123,7 +104,8 @@ public class ClientResponse {
                 });
     }
 
-    private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {
+    private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(
+            DiscordWebRequest discordRequest) {
         return responseFunctions.stream()
                 .map(rt -> rt.transform(discordRequest)
                         .andThen(mono -> mono.checkpoint("Apply " + rt + " to " +
@@ -153,12 +135,22 @@ public class ClientResponse {
     }
 
     /**
-     * Consume and release the response body then return and empty {@link Mono}.
+     * Return the body of this response as a {@link Mono} of {@link ByteBuf}. If this {@link Mono} is cancelled, then
+     * it will not be possible to consume the body again.
      *
-     * @return an empty {@link Mono} indicating response body consumption and release
+     * @return the response body contents
      */
-    public Mono<Void> skipBody() {
-        return getBody().map(ReferenceCounted::release).then();
+    public Mono<ByteBuf> getBody() {
+        return inbound.receive()
+                .aggregate()
+                .doOnSubscribe(s -> {
+                    if (reject.get()) {
+                        throw new IllegalStateException("Response body can only be consumed once");
+                    }
+                })
+                .doOnCancel(() -> reject.set(true))
+                //.map(ByteBuf::retain)
+                .doOnNext(buf -> buf.touch("discord4j.client.response"));
     }
 
     @SuppressWarnings("unchecked")
@@ -173,6 +165,15 @@ public class ClientResponse {
 
     private static RuntimeException noReaderException(Object body, String contentType) {
         return new RuntimeException("No strategies to read this response: " + body + " - " + contentType);
+    }
+
+    /**
+     * Consume and release the response body then return and empty {@link Mono}.
+     *
+     * @return an empty {@link Mono} indicating response body consumption and release
+     */
+    public Mono<Void> skipBody() {
+        return getBody().map(ReferenceCounted::release).then();
     }
 
     @Override

@@ -24,8 +24,55 @@ import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ClientStatusData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildCreateData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildScheduledEventData;
+import discord4j.discordjson.json.ImmutableMessageData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PartialMessageData;
+import discord4j.discordjson.json.PartialUserData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.ReactionData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 import discord4j.discordjson.possible.Possible;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
@@ -37,7 +84,13 @@ import reactor.util.Loggers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayDataUpdater {
@@ -194,8 +247,9 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<StickerData> getStickersInGuild(long guildId) {
         return stateHolder.getGuildStore().find(guildId)
-            .flatMapMany(guild -> Flux.fromStream(guild.stickers().toOptional().orElse(Collections.emptyList()).stream().map(Snowflake::asLong)))
-            .flatMap(id -> stateHolder.getGuildStickerStore().find(id));
+                .flatMapMany(guild -> Flux.fromStream(guild.stickers().toOptional().orElse(Collections.emptyList())
+                        .stream().map(Snowflake::asLong)))
+                .flatMap(id -> stateHolder.getGuildStickerStore().find(id));
     }
 
     @Override
@@ -233,7 +287,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId) {
         return stateHolder.getGuildEventsStore()
-            .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
+                .findInRange(LongLongTuple2.of(guildId, 0), LongLongTuple2.of(guildId, Long.MAX_VALUE));
     }
 
     @Override
@@ -245,8 +299,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     @Override
     public Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
         return stateHolder.getGuildEventsUsersStore().find(LongLongTuple2.of(guildId, eventId))
-            .flatMapIterable(list -> list)
-            .map(value -> Id.of((Long) value));
+                .flatMapIterable(list -> list)
+                .map(value -> Id.of((Long) value));
     }
 
     @Override
@@ -368,10 +422,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
+            case GUILD_STAGE_VOICE:
+                return saveChannel(dispatch);
             case DM:
-            case GROUP_DM: return Mono.empty();
-            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
+            case GROUP_DM:
+                return Mono.empty();
+            default:
+                throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -401,10 +458,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
+            case GUILD_STAGE_VOICE:
+                return deleteChannel(dispatch);
             case DM:
-            case GROUP_DM: return Mono.empty();
-            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
+            case GROUP_DM:
+                return Mono.empty();
+            default:
+                throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -434,46 +494,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_CATEGORY:
             case GUILD_NEWS:
             case GUILD_STORE:
-            case GUILD_STAGE_VOICE: return updateChannel(dispatch);
+            case GUILD_STAGE_VOICE:
+                return updateChannel(dispatch);
             case DM:
-            case GROUP_DM: return Mono.empty();
-            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
-        }
-    }
-
-    private enum Type {
-        UNKNOWN(-1),
-        GUILD_TEXT(0),
-        DM(1),
-        GUILD_VOICE(2),
-        GROUP_DM(3),
-        GUILD_CATEGORY(4),
-        GUILD_NEWS(5),
-        GUILD_STORE(6),
-        GUILD_STAGE_VOICE(13);
-
-        private final int value;
-
-        Type(final int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static Type of(final int value) {
-            switch (value) {
-                case 0: return GUILD_TEXT;
-                case 1: return DM;
-                case 2: return GUILD_VOICE;
-                case 3: return GROUP_DM;
-                case 4: return GUILD_CATEGORY;
-                case 5: return GUILD_NEWS;
-                case 6: return GUILD_STORE;
-                case 13: return GUILD_STAGE_VOICE;
-                default: return UNKNOWN;
-            }
+            case GROUP_DM:
+                return Mono.empty();
+            default:
+                throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -505,7 +532,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             guild = GuildData.builder()
                     .from(createData)
                     .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
-                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
+                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent)
+                            .map(Optional::get).collect(Collectors.toList()))
                     .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
                     .build();
         } else {
@@ -513,8 +541,10 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             guild = GuildData.builder()
                     .from(createData)
                     .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
-                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
-                    .members(createData.members().stream().map(data -> data.user().id()).distinct().collect(Collectors.toList()))
+                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent)
+                            .map(Optional::get).collect(Collectors.toList()))
+                    .members(createData.members().stream().map(data -> data.user().id()).distinct()
+                            .collect(Collectors.toList()))
                     .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
                     .build();
         }
@@ -552,7 +582,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         Mono<Void> saveVoiceStates = stateHolder.getVoiceStateStore()
                 .save(Flux.fromIterable(createData.voiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
-                                Snowflake.asLong(voiceState.userId())),
+                                        Snowflake.asLong(voiceState.userId())),
                                 VoiceStateData.builder()
                                         .from(voiceState)
                                         .guildId(guild.id())
@@ -651,28 +681,29 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         long guildId = Snowflake.asLong(dispatch.guildId());
 
         Mono<Void> updateGuildBean = stateHolder.getGuildStore()
-            .find(guildId)
-            .map(guild -> GuildData.builder()
-                .from(guild)
-                .emojis(dispatch.stickers().stream()
-                    .map(StickerData::id)
-                    .collect(Collectors.toList()))
-                .build())
-            .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
-            .doOnSubscribe(s -> log.trace("GuildStickersUpdate doOnSubscribe {}", guildId))
-            .doFinally(s -> log.trace("GuildStickersUpdate doFinally {}: {}", guildId, s));
+                .find(guildId)
+                .map(guild -> GuildData.builder()
+                        .from(guild)
+                        .emojis(dispatch.stickers().stream()
+                                .map(StickerData::id)
+                                .collect(Collectors.toList()))
+                        .build())
+                .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace("GuildStickersUpdate doOnSubscribe {}", guildId))
+                .doFinally(s -> log.trace("GuildStickersUpdate doFinally {}: {}", guildId, s));
 
         Mono<Void> saveStickers = stateHolder.getGuildStickerStore()
-            .saveWithLong(Flux.fromIterable(dispatch.stickers())
-                .map(sticker -> LongObjTuple2.of(Snowflake.asLong(sticker.id()), sticker)));
+                .saveWithLong(Flux.fromIterable(dispatch.stickers())
+                        .map(sticker -> LongObjTuple2.of(Snowflake.asLong(sticker.id()), sticker)));
 
         return stateHolder.getGuildStore()
-            .find(guildId)
-            .flatMapMany(guild -> updateGuildBean
-                .and(saveStickers)
-                .thenMany(Flux.fromIterable(guild.stickers().toOptional().orElse(Collections.emptyList())).map(Snowflake::asLong)
-                    .flatMap(id -> stateHolder.getGuildStickerStore().find(id))))
-            .collect(Collectors.toSet());
+                .find(guildId)
+                .flatMapMany(guild -> updateGuildBean
+                        .and(saveStickers)
+                        .thenMany(Flux.fromIterable(guild.stickers().toOptional().orElse(Collections.emptyList()))
+                                .map(Snowflake::asLong)
+                                .flatMap(id -> stateHolder.getGuildStickerStore().find(id))))
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -767,7 +798,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .keys().filter(key -> key.getT1() != guildId && key.getT2() == userId)
                 .hasElements()
                 .flatMap(hasMutualServers -> Mono.just(userId)
-                        .filter(__ -> !hasMutualServers)
+                        .filter(unused -> !hasMutualServers)
                         .flatMap(stateHolder.getUserStore()::delete));
 
         return member.flatMap(value -> Mono.when(removeMemberId, deleteMember, deletePresence, deleteOrphanUser)
@@ -920,35 +951,39 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+                dispatch.scheduledEvent().id().asLong());
 
         return stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex,
+                                                                     GuildScheduledEventUpdate dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+                dispatch.scheduledEvent().id().asLong());
 
         Mono<Void> saveNew = stateHolder.getGuildEventsStore().save(key, dispatch.scheduledEvent());
 
         return stateHolder.getGuildEventsStore()
-            .find(key)
-            .flatMap(saveNew::thenReturn)
-            .switchIfEmpty(saveNew.then(Mono.empty()));
+                .find(key)
+                .flatMap(saveNew::thenReturn)
+                .switchIfEmpty(saveNew.then(Mono.empty()));
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
-        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(), dispatch.scheduledEvent().id().asLong());
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex,
+                                                                     GuildScheduledEventDelete dispatch) {
+        LongLongTuple2 key = LongLongTuple2.of(dispatch.scheduledEvent().guildId().asLong(),
+                dispatch.scheduledEvent().id().asLong());
 
         Mono<Void> deletion = stateHolder.getGuildEventsStore().delete(key);
 
         return stateHolder.getGuildEventsStore()
-            .find(key)
-            .flatMap(deletion::thenReturn)
-            .switchIfEmpty(deletion.then(Mono.empty()));
+                .find(key)
+                .flatMap(deletion::thenReturn)
+                .switchIfEmpty(deletion.then(Mono.empty()));
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -956,12 +991,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
         return stateHolder.getGuildEventsUsersStore().find(key)
-            .defaultIfEmpty(new HashSet<Long>())
-            .map(set -> {
-                set.add(dispatch.userId().asLong());
-                return set;
-            })
-            .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
+                .defaultIfEmpty(new HashSet<Long>())
+                .map(set -> {
+                    set.add(dispatch.userId().asLong());
+                    return set;
+                })
+                .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
     }
 
     @Override
@@ -969,12 +1004,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         LongLongTuple2 key = LongLongTuple2.of(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
         return stateHolder.getGuildEventsUsersStore().find(key)
-            .defaultIfEmpty(new HashSet<Long>())
-            .map(set -> {
-                set.remove(dispatch.userId().asLong());
-                return set;
-            })
-            .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
+                .defaultIfEmpty(new HashSet<Long>())
+                .map(set -> {
+                    set.remove(dispatch.userId().asLong());
+                    return set;
+                })
+                .flatMap(set -> stateHolder.getGuildEventsUsersStore().save(key, set));
     }
 
     @Override
@@ -1178,20 +1213,6 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .flatMap(message -> stateHolder.getMessageStore().save(messageId, message));
     }
 
-    private int indexOfReactionByEmojiData(List<ReactionData> reactions, EmojiData emojiData) {
-        int i;
-        for (i = 0; i < reactions.size(); i++) {
-            ReactionData r = reactions.get(i);
-            // (non-null id && matching id) OR (null id && matching name)
-            boolean emojiHasId = emojiData.id().isPresent();
-            if ((emojiHasId && emojiData.id().equals(r.emoji().id()))
-                    || (!emojiHasId && emojiData.name().equals(r.emoji().name()))) {
-                break;
-            }
-        }
-        return i;
-    }
-
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
         PartialMessageData messageData = dispatch.message();
@@ -1201,8 +1222,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .find(messageId)
                 .flatMap(oldMessageData -> {
                     // updating the content and embed of the bean in the store
-                    boolean contentChanged = !messageData.content().isAbsent() &&
-                            !Objects.equals(oldMessageData.content(), messageData.content().get());
+                    boolean contentChanged = !messageData.content().isAbsent()
+                            && !Objects.equals(oldMessageData.content(), messageData.content().get());
                     boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
 
                     MessageData newMessageData = MessageData.builder()
@@ -1250,7 +1271,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                     UserData newUserData = UserData.builder()
                             .from(oldUserData)
                             .globalName(userData.globalName().isAbsent() ? oldUserData.globalName() :
-                                Possible.flatOpt(userData.globalName()))
+                                    Possible.flatOpt(userData.globalName()))
                             .username(userData.username().toOptional()
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()
@@ -1312,5 +1333,55 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<Void> onGuildMembersCompletion(long guildId) {
         // TODO needs implementation
         return Mono.empty();
+    }
+
+    private int indexOfReactionByEmojiData(List<ReactionData> reactions, EmojiData emojiData) {
+        int i;
+        for (i = 0; i < reactions.size(); i++) {
+            ReactionData r = reactions.get(i);
+            // (non-null id && matching id) OR (null id && matching name)
+            boolean emojiHasId = emojiData.id().isPresent();
+            if ((emojiHasId && emojiData.id().equals(r.emoji().id()))
+                    || (!emojiHasId && emojiData.name().equals(r.emoji().name()))) {
+                break;
+            }
+        }
+        return i;
+    }
+
+    private enum Type {
+        UNKNOWN(-1),
+        GUILD_TEXT(0),
+        DM(1),
+        GUILD_VOICE(2),
+        GROUP_DM(3),
+        GUILD_CATEGORY(4),
+        GUILD_NEWS(5),
+        GUILD_STORE(6),
+        GUILD_STAGE_VOICE(13);
+
+        private final int value;
+
+        Type(final int value) {
+            this.value = value;
+        }
+
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return GUILD_TEXT;
+                case 1: return DM;
+                case 2: return GUILD_VOICE;
+                case 3: return GROUP_DM;
+                case 4: return GUILD_CATEGORY;
+                case 5: return GUILD_NEWS;
+                case 6: return GUILD_STORE;
+                case 13: return GUILD_STAGE_VOICE;
+                default: return UNKNOWN;
+            }
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 }

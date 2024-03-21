@@ -178,8 +178,8 @@ public class LegacyEmbedCreateSpec implements LegacySpec<EmbedData> {
         requestBuilder.from(embedData);
         this.fields.clear();
         this.fields.addAll(embedData.fields()
-            .toOptional()
-            .orElseGet(ArrayList::new));
+                .toOptional()
+                .orElseGet(ArrayList::new));
         return this;
     }
 

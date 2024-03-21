@@ -19,7 +19,38 @@ package discord4j.common.store.action.gateway;
 
 import discord4j.common.store.api.StoreAction;
 import discord4j.common.store.api.object.InvalidationCause;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 
 /**
  * Provides static factories to obtain {@link StoreAction} instances that enable updating data in a store in response
@@ -35,7 +66,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link ChannelCreate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link ChannelCreateAction}
      */
     public static ChannelCreateAction channelCreate(int shardIndex, ChannelCreate dispatch) {
@@ -46,7 +77,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link ChannelDelete} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link ChannelDeleteAction}
      */
     public static ChannelDeleteAction channelDelete(int shardIndex, ChannelDelete dispatch) {
@@ -57,7 +88,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link ChannelUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link ChannelUpdateAction}
      */
     public static ChannelUpdateAction channelUpdate(int shardIndex, ChannelUpdate dispatch) {
@@ -68,7 +99,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildCreate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildCreateAction}
      */
     public static GuildCreateAction guildCreate(int shardIndex, GuildCreate dispatch) {
@@ -79,7 +110,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildDelete} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildDeleteAction}
      */
     public static GuildDeleteAction guildDelete(int shardIndex, GuildDelete dispatch) {
@@ -90,7 +121,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildStickersUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildStickersUpdateAction}
      */
     public static GuildStickersUpdateAction guildStickersUpdate(int shardIndex, GuildStickersUpdate dispatch) {
@@ -101,7 +132,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildEmojisUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildEmojisUpdateAction}
      */
     public static GuildEmojisUpdateAction guildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch) {
@@ -112,7 +143,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildMemberAdd} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildMemberAddAction}
      */
     public static GuildMemberAddAction guildMemberAdd(int shardIndex, GuildMemberAdd dispatch) {
@@ -123,7 +154,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildMemberRemove} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildMemberRemoveAction}
      */
     public static GuildMemberRemoveAction guildMemberRemove(int shardIndex, GuildMemberRemove dispatch) {
@@ -134,7 +165,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildMembersChunk} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildMembersChunkAction}
      */
     public static GuildMembersChunkAction guildMembersChunk(int shardIndex, GuildMembersChunk dispatch) {
@@ -145,7 +176,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildMemberUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildMemberUpdateAction}
      */
     public static GuildMemberUpdateAction guildMemberUpdate(int shardIndex, GuildMemberUpdate dispatch) {
@@ -156,7 +187,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildRoleCreate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildRoleCreateAction}
      */
     public static GuildRoleCreateAction guildRoleCreate(int shardIndex, GuildRoleCreate dispatch) {
@@ -167,7 +198,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildRoleDelete} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildRoleDeleteAction}
      */
     public static GuildRoleDeleteAction guildRoleDelete(int shardIndex, GuildRoleDelete dispatch) {
@@ -178,7 +209,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildRoleUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildRoleUpdateAction}
      */
     public static GuildRoleUpdateAction guildRoleUpdate(int shardIndex, GuildRoleUpdate dispatch) {
@@ -189,10 +220,11 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildScheduledEventCreate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildScheduledEventCreate}
      */
-    public static GuildScheduledEventCreateAction guildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch) {
+    public static GuildScheduledEventCreateAction guildScheduledEventCreate(int shardIndex,
+                                                                            GuildScheduledEventCreate dispatch) {
         return new GuildScheduledEventCreateAction(shardIndex, dispatch);
     }
 
@@ -200,10 +232,11 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildScheduledEventUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildScheduledEventUpdate}
      */
-    public static GuildScheduledEventUpdateAction guildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+    public static GuildScheduledEventUpdateAction guildScheduledEventUpdate(int shardIndex,
+                                                                            GuildScheduledEventUpdate dispatch) {
         return new GuildScheduledEventUpdateAction(shardIndex, dispatch);
     }
 
@@ -211,10 +244,11 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildScheduledEventDelete} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildScheduledEventDelete}
      */
-    public static GuildScheduledEventDeleteAction guildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+    public static GuildScheduledEventDeleteAction guildScheduledEventDelete(int shardIndex,
+                                                                            GuildScheduledEventDelete dispatch) {
         return new GuildScheduledEventDeleteAction(shardIndex, dispatch);
     }
 
@@ -223,7 +257,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildScheduledEventUserAdd} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildScheduledEventUserAddAction}
      */
     public static GuildScheduledEventUserAddAction guildScheduledEventUserAdd(int shardIndex,
@@ -235,11 +269,12 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildScheduledEventUserRemove} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildScheduledEventUserRemoveAction}
      */
-    public static GuildScheduledEventUserRemoveAction guildScheduledEventUserRemove(int shardIndex,
-                                                                                    GuildScheduledEventUserRemove dispatch) {
+    public static GuildScheduledEventUserRemoveAction guildScheduledEventUserRemove(
+            int shardIndex,
+            GuildScheduledEventUserRemove dispatch) {
         return new GuildScheduledEventUserRemoveAction(shardIndex, dispatch);
     }
 
@@ -247,7 +282,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link GuildUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link GuildUpdateAction}
      */
     public static GuildUpdateAction guildUpdate(int shardIndex, GuildUpdate dispatch) {
@@ -258,7 +293,7 @@ public class GatewayActions {
      * Creates an action to execute when a shard should be invalidated.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param cause      the cause of the invalidation
+     * @param cause the cause of the invalidation
      * @return a new {@link InvalidateShardAction}
      */
     public static InvalidateShardAction invalidateShard(int shardIndex, InvalidationCause cause) {
@@ -269,7 +304,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageCreate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageCreateAction}
      */
     public static MessageCreateAction messageCreate(int shardIndex, MessageCreate dispatch) {
@@ -280,7 +315,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageDelete} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageDeleteAction}
      */
     public static MessageDeleteAction messageDelete(int shardIndex, MessageDelete dispatch) {
@@ -291,7 +326,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageDeleteBulk} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageDeleteBulkAction}
      */
     public static MessageDeleteBulkAction messageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
@@ -302,7 +337,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageReactionAdd} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageReactionAddAction}
      */
     public static MessageReactionAddAction messageReactionAdd(int shardIndex, MessageReactionAdd dispatch) {
@@ -313,7 +348,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageReactionRemove} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageReactionRemoveAction}
      */
     public static MessageReactionRemoveAction messageReactionRemove(int shardIndex, MessageReactionRemove dispatch) {
@@ -324,7 +359,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageReactionRemoveAll} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageReactionRemoveAllAction}
      */
     public static MessageReactionRemoveAllAction messageReactionRemoveAll(int shardIndex,
@@ -336,7 +371,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageReactionRemoveEmoji} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageReactionRemoveEmojiAction}
      */
     public static MessageReactionRemoveEmojiAction messageReactionRemoveEmoji(int shardIndex,
@@ -348,7 +383,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link MessageUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link MessageUpdateAction}
      */
     public static MessageUpdateAction messageUpdate(int shardIndex, MessageUpdate dispatch) {
@@ -359,7 +394,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link PresenceUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link PresenceUpdateAction}
      */
     public static PresenceUpdateAction presenceUpdate(int shardIndex, PresenceUpdate dispatch) {
@@ -380,7 +415,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link UserUpdate} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link UserUpdateAction}
      */
     public static UserUpdateAction userUpdate(int shardIndex, UserUpdate dispatch) {
@@ -391,7 +426,7 @@ public class GatewayActions {
      * Creates an action to execute when a {@link VoiceStateUpdateDispatch} is received from the gateway.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link VoiceStateUpdateDispatchAction}
      */
     public static VoiceStateUpdateDispatchAction voiceStateUpdateDispatch(int shardIndex,

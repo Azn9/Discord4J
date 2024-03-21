@@ -18,7 +18,14 @@ package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmbedAuthorData;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.EmbedFieldData;
+import discord4j.discordjson.json.EmbedFooterData;
+import discord4j.discordjson.json.EmbedImageData;
+import discord4j.discordjson.json.EmbedProviderData;
+import discord4j.discordjson.json.EmbedThumbnailData;
+import discord4j.discordjson.json.EmbedVideoData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
@@ -209,6 +216,13 @@ public final class Embed implements DiscordObject {
                 .orElse(Collections.emptyList());
     }
 
+    @Override
+    public String toString() {
+        return "Embed{" +
+                "data=" + data +
+                '}';
+    }
+
     /** Represents the various types of embeds. */
     public enum Type {
 
@@ -246,15 +260,6 @@ public final class Embed implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public String getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of embed. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
          * ({@link #equals(Object)}) the supplied {@code value}.
          *
@@ -271,6 +276,15 @@ public final class Embed implements DiscordObject {
                 case "article": return ARTICLE;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
         }
     }
 
@@ -452,7 +466,8 @@ public final class Embed implements DiscordObject {
          */
         public String getUrl() {
             return data.url().toOptional()
-                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received embeds
+                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received
+            // embeds
         }
 
         /**
@@ -462,7 +477,8 @@ public final class Embed implements DiscordObject {
          */
         public String getProxyUrl() {
             return data.proxyUrl().toOptional()
-                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received embeds
+                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received
+            // embeds
         }
 
         /**
@@ -751,12 +767,5 @@ public final class Embed implements DiscordObject {
             return data.inline().toOptional()
                     .orElseThrow(IllegalStateException::new);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Embed{" +
-                "data=" + data +
-                '}';
     }
 }

@@ -22,7 +22,12 @@ import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.ImmutableAllowedMentionsData;
 import discord4j.discordjson.possible.Possible;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -33,14 +38,17 @@ import java.util.function.Function;
  */
 public class AllowedMentions {
 
-    /**
-     * Create a builder for this {@link AllowedMentions} class. Building this object without any configuration is
-     * equivalent to suppressing all mentions.
-     *
-     * @return A builder class for allowed mentions
-     */
-    public static AllowedMentions.Builder builder() {
-        return new Builder();
+    private final Possible<Set<Type>> parse;
+    private final Possible<Set<Snowflake>> userIds;
+    private final Possible<Set<Snowflake>> roleIds;
+    private final Possible<Boolean> repliedUser;
+
+    private AllowedMentions(final Possible<Set<AllowedMentions.Type>> parse, final Possible<Set<Snowflake>> userIds,
+                            final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
+        this.parse = parse;
+        this.userIds = userIds;
+        this.roleIds = roleIds;
+        this.repliedUser = repliedUser;
     }
 
     /**
@@ -63,31 +71,22 @@ public class AllowedMentions {
     }
 
     /**
+     * Create a builder for this {@link AllowedMentions} class. Building this object without any configuration is
+     * equivalent to suppressing all mentions.
+     *
+     * @return A builder class for allowed mentions
+     */
+    public static AllowedMentions.Builder builder() {
+        return new Builder();
+    }
+
+    /**
      * Create an {@link AllowedMentions} object that will suppress @everyone and @here mentions.
      *
      * @return A suppressing allowed mentions
      */
     public static AllowedMentions suppressEveryone() {
         return builder().parseType(Type.USER, Type.ROLE).build();
-    }
-
-    private final Possible<Set<Type>> parse;
-    private final Possible<Set<Snowflake>> userIds;
-    private final Possible<Set<Snowflake>> roleIds;
-    private final Possible<Boolean> repliedUser;
-
-    private AllowedMentions(final Possible<Set<AllowedMentions.Type>> parse, final Possible<Set<Snowflake>> userIds,
-                            final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
-        this.parse = parse;
-        this.userIds = userIds;
-        this.roleIds = roleIds;
-        this.repliedUser = repliedUser;
-    }
-
-    private <T, U> List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
-        final List<T> data = new ArrayList<>(list.size());
-        list.forEach(u -> data.add(mapper.apply(u)));
-        return data;
     }
 
     /**
@@ -122,6 +121,41 @@ public class AllowedMentions {
             builder.repliedUser(repliedUser.get());
         }
         return builder.build();
+    }
+
+    private <T, U> List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
+        final List<T> data = new ArrayList<>(list.size());
+        list.forEach(u -> data.add(mapper.apply(u)));
+        return data;
+    }
+
+    /**
+     * An allowed mentions type, grouped into role mentions, user mentions and everyone mentions (includes @everyone
+     * and @here).
+     */
+    public enum Type {
+        /**
+         * Control role mentions.
+         */
+        ROLE("roles"),
+        /**
+         * Control user mentions.
+         */
+        USER("users"),
+        /**
+         * Control @everyone and @here mentions.
+         */
+        EVERYONE_AND_HERE("everyone");
+
+        private final String raw;
+
+        Type(final String raw) {
+            this.raw = raw;
+        }
+
+        public String getRaw() {
+            return raw;
+        }
     }
 
     /**
@@ -255,35 +289,6 @@ public class AllowedMentions {
          */
         public AllowedMentions build() {
             return new AllowedMentions(parse, userIds, roleIds, repliedUser);
-        }
-    }
-
-    /**
-     * An allowed mentions type, grouped into role mentions, user mentions and everyone mentions (includes @everyone
-     * and @here).
-     */
-    public enum Type {
-        /**
-         * Control role mentions.
-         */
-        ROLE("roles"),
-        /**
-         * Control user mentions.
-         */
-        USER("users"),
-        /**
-         * Control @everyone and @here mentions.
-         */
-        EVERYONE_AND_HERE("everyone");
-
-        private final String raw;
-
-        Type(final String raw) {
-            this.raw = raw;
-        }
-
-        public String getRaw() {
-            return raw;
         }
     }
 }

@@ -103,6 +103,24 @@ public class ReplayingEventDispatcher implements EventDispatcher {
         this.stopReplayingTrigger = stopReplayingTrigger;
     }
 
+    /**
+     * Return a new default {@link ReplayingEventDispatcher}.
+     *
+     * @return a new replay event dispatcher
+     */
+    public static EventDispatcher create() {
+        return builder().build();
+    }
+
+    /**
+     * Return a new builder for {@link ReplayingEventDispatcher}.
+     *
+     * @return a new builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -158,24 +176,6 @@ public class ReplayingEventDispatcher implements EventDispatcher {
     }
 
     /**
-     * Return a new default {@link ReplayingEventDispatcher}.
-     *
-     * @return a new replay event dispatcher
-     */
-    public static EventDispatcher create() {
-        return builder().build();
-    }
-
-    /**
-     * Return a new builder for {@link ReplayingEventDispatcher}.
-     *
-     * @return a new builder
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
      * A builder to create {@link EventDispatcher} instances.
      */
     public static class Builder extends DefaultEventDispatcher.Builder {
@@ -206,6 +206,34 @@ public class ReplayingEventDispatcher implements EventDispatcher {
         public Builder eventScheduler(Scheduler eventScheduler) {
             this.eventScheduler = Objects.requireNonNull(eventScheduler);
             return this;
+        }
+
+        @Override
+        public EventDispatcher build() {
+            if (eventProcessor == null) {
+                eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
+            }
+            if (eventScheduler == null) {
+                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
+            }
+            if (timedTaskScheduler == null) {
+                timedTaskScheduler = Schedulers.parallel();
+            }
+            if (replayEventProcessor == null) {
+                replayEventProcessor = ReplayProcessor.createTimeout(Duration.ofMinutes(2), timedTaskScheduler);
+            }
+            if (stopReplayingTrigger == null) {
+                stopReplayingTrigger = Mono.delay(Duration.ofSeconds(5), timedTaskScheduler);
+            }
+            return new ReplayingEventDispatcher(
+                    eventProcessor,
+                    overflowStrategy,
+                    eventScheduler,
+                    replayEventProcessor,
+                    replayEventOverflowStrategy,
+                    replayEventFilter,
+                    timedTaskScheduler,
+                    stopReplayingTrigger);
         }
 
         /**
@@ -265,34 +293,6 @@ public class ReplayingEventDispatcher implements EventDispatcher {
         public Builder stopReplayingTrigger(Publisher<?> stopReplayingTrigger) {
             this.stopReplayingTrigger = Objects.requireNonNull(stopReplayingTrigger);
             return this;
-        }
-
-        @Override
-        public EventDispatcher build() {
-            if (eventProcessor == null) {
-                eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
-            }
-            if (eventScheduler == null) {
-                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
-            }
-            if (timedTaskScheduler == null) {
-                timedTaskScheduler = Schedulers.parallel();
-            }
-            if (replayEventProcessor == null) {
-                replayEventProcessor = ReplayProcessor.createTimeout(Duration.ofMinutes(2), timedTaskScheduler);
-            }
-            if (stopReplayingTrigger == null) {
-                stopReplayingTrigger = Mono.delay(Duration.ofSeconds(5), timedTaskScheduler);
-            }
-            return new ReplayingEventDispatcher(
-                    eventProcessor,
-                    overflowStrategy,
-                    eventScheduler,
-                    replayEventProcessor,
-                    replayEventOverflowStrategy,
-                    replayEventFilter,
-                    timedTaskScheduler,
-                    stopReplayingTrigger);
         }
 
     }

@@ -36,20 +36,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable
 interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
-    String name();
-
-    Possible<Integer> bitrate();
-
-    Possible<Integer> userLimit();
-
-    Possible<Integer> position();
-
-    Possible<Integer> rateLimitPerUser();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
-    Possible<Snowflake> parentId();
-
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
@@ -65,18 +51,25 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
                 .parentId(mapPossible(parentId(), Snowflake::asString))
                 .build();
     }
+    String name();
+    Possible<Integer> bitrate();
+    Possible<Integer> userLimit();
+    Possible<Integer> position();
+    Possible<Integer> rateLimitPerUser();
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Snowflake> parentId();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class VoiceChannelCreateMonoGenerator extends Mono<VoiceChannel> implements VoiceChannelCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super VoiceChannel> actual) {
         guild().createVoiceChannel(VoiceChannelCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

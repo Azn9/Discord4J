@@ -37,7 +37,8 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
     private final VoiceChannel current;
     private final VoiceChannel old;
 
-    public VoiceChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceChannel current, @Nullable VoiceChannel old) {
+    public VoiceChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceChannel current,
+                                   @Nullable VoiceChannel old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

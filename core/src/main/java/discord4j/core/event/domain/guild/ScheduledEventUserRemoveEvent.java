@@ -31,7 +31,8 @@ import reactor.core.publisher.Mono;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove">Discord</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove">Discord</a>
  */
 public class ScheduledEventUserRemoveEvent extends GuildEvent {
 
@@ -48,15 +49,6 @@ public class ScheduledEventUserRemoveEvent extends GuildEvent {
     }
 
     /**
-     * Return the guild ID of the scheduled event.
-     *
-     * @return a guild snowflake
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Return the guild of the scheduled event.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -67,12 +59,12 @@ public class ScheduledEventUserRemoveEvent extends GuildEvent {
     }
 
     /**
-     * Return the scheduled event ID.
+     * Return the guild ID of the scheduled event.
      *
-     * @return a scheduled event snowflake
+     * @return a guild snowflake
      */
-    public Snowflake getScheduledEventId() {
-        return Snowflake.of(scheduledEventId);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -86,12 +78,12 @@ public class ScheduledEventUserRemoveEvent extends GuildEvent {
     }
 
     /**
-     * Return the unsubscribing user ID.
+     * Return the scheduled event ID.
      *
-     * @return a user snowflake
+     * @return a scheduled event snowflake
      */
-    public Snowflake getUserId() {
-        return Snowflake.of(userId);
+    public Snowflake getScheduledEventId() {
+        return Snowflake.of(scheduledEventId);
     }
 
     /**
@@ -102,6 +94,15 @@ public class ScheduledEventUserRemoveEvent extends GuildEvent {
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
+    }
+
+    /**
+     * Return the unsubscribing user ID.
+     *
+     * @return a user snowflake
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     /**

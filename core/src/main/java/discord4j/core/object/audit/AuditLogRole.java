@@ -42,6 +42,11 @@ public final class AuditLogRole {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(data);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -51,11 +56,6 @@ public final class AuditLogRole {
         }
         AuditLogRole that = (AuditLogRole) o;
         return Objects.equals(data, that.data);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(data);
     }
 
     @Override

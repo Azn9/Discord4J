@@ -4,6 +4,7 @@ import discord4j.common.store.api.StoreAction;
 import discord4j.discordjson.json.AutoModRuleData;
 
 public class GetAutoModRuleByIdAction implements StoreAction<AutoModRuleData> {
+
     private final long guildId;
     private final long autoModRuleId;
 

@@ -78,7 +78,8 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
      * Adds an embed to the edit request.
      * <p>
      * <b>Warning:</b> This method does <i>not</i> add an embed to the embeds already existing on the message. That is,
-     * if a message has embeds A and B, editing it with {@code addEmbed(C)} will result in the message having <i>only</i>
+     * if a message has embeds A and B, editing it with {@code addEmbed(C)} will result in the message having
+     * <i>only</i>
      * embed C. To actually add embed C to the message, all embeds must be sent
      * (i.e., do {@code addEmbed(A).addEmbed(B).addEmbed(C)}.
      *
@@ -153,7 +154,8 @@ public class LegacyMessageEditSpec implements LegacySpec<MessageEditRequest> {
      * @return This spec.
      */
     public LegacyMessageEditSpec setComponents(List<LayoutComponent> components) {
-        this.components = Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())));
+        this.components =
+                Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())));
         return this;
     }
 

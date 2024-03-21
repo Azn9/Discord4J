@@ -25,7 +25,12 @@ import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -78,15 +83,6 @@ public class ApplicationCommand implements DiscordObject {
     }
 
     /**
-     * Gets the id of the guild if the command is guild scoped.
-     *
-     * @return The id of the guild
-     */
-    public Optional<Snowflake> getGuildId() {
-        return data.guildId().toOptional().map(Snowflake::of);
-    }
-
-    /**
      * Gets the type of the command.
      *
      * @return The type of the command.
@@ -94,8 +90,8 @@ public class ApplicationCommand implements DiscordObject {
     public Type getType() {
         // Discord defaults to treating the type as a CHAT_INPUT command if type is not present.
         return data.type().toOptional()
-            .map(Type::of)
-            .orElse(Type.CHAT_INPUT);
+                .map(Type::of)
+                .orElse(Type.CHAT_INPUT);
     }
 
     /**
@@ -193,13 +189,23 @@ public class ApplicationCommand implements DiscordObject {
         return data.dmPermission().toOptional().orElse(!this.getGuildId().isPresent());
     }
 
+    /**
+     * Gets the id of the guild if the command is guild scoped.
+     *
+     * @return The id of the guild
+     */
+    public Optional<Snowflake> getGuildId() {
+        return data.guildId().toOptional().map(Snowflake::of);
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
     }
 
     /**
-     * @see <a href="https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types">
+     * @see
+     * <a href="https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types">
      * Application Command Type</a>
      */
     public enum Type {
@@ -223,15 +229,6 @@ public class ApplicationCommand implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of application command. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will
          * equal ({@code ==}) the supplied {@code value}.
@@ -246,6 +243,15 @@ public class ApplicationCommand implements DiscordObject {
                 case 3: return MESSAGE;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

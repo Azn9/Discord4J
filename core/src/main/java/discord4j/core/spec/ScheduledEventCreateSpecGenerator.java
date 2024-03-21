@@ -18,50 +18,41 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable
 public interface ScheduledEventCreateSpecGenerator extends AuditSpec<GuildScheduledEventCreateRequest> {
 
-    /* Possible for events with entity type external */
-    Possible<Snowflake> channelId();
-
-    Possible<ScheduledEventEntityMetadataSpec> entityMetadata();
-
-    String name();
-
-    ScheduledEvent.PrivacyLevel privacyLevel();
-
-    Instant scheduledStartTime();
-
-    Possible<Instant> scheduledEndTime();
-
-    Possible<String> description();
-
-    ScheduledEvent.EntityType entityType();
-
-    Possible<Image> image();
-
     @Override
     default GuildScheduledEventCreateRequest asRequest() {
         return GuildScheduledEventCreateRequest.builder()
-            .channelId(mapPossible(channelId(), snowflake -> Id.of(snowflake.asLong())))
-            .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
-            .name(name())
-            .privacyLevel(privacyLevel().getValue())
-            .scheduledStartTime(scheduledStartTime())
-            .scheduledEndTime(scheduledEndTime())
-            .description(description())
-            .entityType(entityType().getValue())
-            .image(mapPossible(image(), Image::getDataUri))
-            .build();
+                .channelId(mapPossible(channelId(), snowflake -> Id.of(snowflake.asLong())))
+                .entityMetadata(mapPossible(entityMetadata(), ScheduledEventEntityMetadataSpecGenerator::asRequest))
+                .name(name())
+                .privacyLevel(privacyLevel().getValue())
+                .scheduledStartTime(scheduledStartTime())
+                .scheduledEndTime(scheduledEndTime())
+                .description(description())
+                .entityType(entityType().getValue())
+                .image(mapPossible(image(), Image::getDataUri))
+                .build();
     }
+    /* Possible for events with entity type external */
+    Possible<Snowflake> channelId();
+    Possible<ScheduledEventEntityMetadataSpec> entityMetadata();
+    String name();
+    ScheduledEvent.PrivacyLevel privacyLevel();
+    Instant scheduledStartTime();
+    Possible<Instant> scheduledEndTime();
+    Possible<String> description();
+    ScheduledEvent.EntityType entityType();
+    Possible<Image> image();
 }
 
 @Value.Immutable(builder = false)
 abstract class ScheduledEventCreateMonoGenerator extends Mono<ScheduledEvent> implements ScheduledEventCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super ScheduledEvent> actual) {
         guild().createScheduledEvent(ScheduledEventCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

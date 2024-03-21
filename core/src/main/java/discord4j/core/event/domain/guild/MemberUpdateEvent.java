@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Role;
 import discord4j.core.util.ImageUtil;
 import discord4j.gateway.ShardInfo;
@@ -68,7 +68,8 @@ public class MemberUpdateEvent extends GuildEvent {
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
-                             @Nullable String currentAvatar, @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
+                             @Nullable String currentAvatar, @Nullable String currentJoinedAt,
+                             @Nullable String currentPremiumSince,
                              @Nullable Boolean currentPending, @Nullable String communicationDisabledUntil) {
         super(gateway, shardInfo);
 
@@ -85,15 +86,6 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild} involved.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} involved in the event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -104,12 +96,12 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Member} involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
      *
-     * @return The ID of the {@link Member} involved.
+     * @return The ID of the {@link Guild} involved.
      */
-    public Snowflake getMemberId() {
-        return Snowflake.of(memberId);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -120,6 +112,15 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Mono<Member> getMember() {
         return getClient().getMemberById(getGuildId(), getMemberId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Member} involved in the event.
+     *
+     * @return The ID of the {@link Member} involved.
+     */
+    public Snowflake getMemberId() {
+        return Snowflake.of(memberId);
     }
 
     /**
@@ -163,6 +164,19 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
+     * Gets the current member's guild avatar. This is the avatar at the url given by
+     * {@link #getCurrentGuildAvatarUrl(Image.Format)}.
+     *
+     * @param format The format for the avatar.
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild avatar} of the
+     * member.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getCurrentGuildAvatar(Image.Format format) {
+        return Mono.justOrEmpty(getCurrentGuildAvatarUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the current member's guild avatar URL, if present.
      *
      * @param format the format for the URL.
@@ -172,18 +186,6 @@ public class MemberUpdateEvent extends GuildEvent {
         return Optional.ofNullable(currentAvatar)
                 .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH,
                         guildId, Snowflake.asString(memberId), avatar), format));
-    }
-
-
-    /**
-     * Gets the current member's guild avatar. This is the avatar at the url given by {@link #getCurrentGuildAvatarUrl(Image.Format)}.
-     *
-     * @param format The format for the avatar.
-     * @return a {@link Mono} where, upon successful completion, emits the current {@link Image guild avatar} of the member.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Image> getCurrentGuildAvatar(Image.Format format) {
-        return Mono.justOrEmpty(getCurrentGuildAvatarUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -204,7 +206,7 @@ public class MemberUpdateEvent extends GuildEvent {
      */
     public Optional<Instant> getCurrentPremiumSince() {
         return Optional.ofNullable(currentPremiumSince)
-            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**

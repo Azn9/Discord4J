@@ -62,6 +62,16 @@ public class IdentifyOptions {
     }
 
     /**
+     * Create a builder to create an {@link IdentifyOptions} using the given shard information.
+     *
+     * @param shardInfo the shard index and count to be used when authenticating
+     * @return a {@link Builder}
+     */
+    public static Builder builder(ShardInfo shardInfo) {
+        return new Builder(shardInfo);
+    }
+
+    /**
      * Create a default {@link IdentifyOptions} using the given shard information.
      *
      * @param shardInfo the shard index and count to be used when authenticating
@@ -80,91 +90,6 @@ public class IdentifyOptions {
      */
     public static Builder builder(int shardIndex, int shardCount) {
         return new Builder(ShardInfo.create(shardIndex, shardCount));
-    }
-
-    /**
-     * Create a builder to create an {@link IdentifyOptions} using the given shard information.
-     *
-     * @param shardInfo the shard index and count to be used when authenticating
-     * @return a {@link Builder}
-     */
-    public static Builder builder(ShardInfo shardInfo) {
-        return new Builder(shardInfo);
-    }
-
-    /**
-     * Builder to create {@link IdentifyOptions}. Requires specifying the shard information.
-     */
-    public static class Builder {
-
-        private final ShardInfo shardInfo;
-        private StatusUpdate initialStatus;
-        private IntentSet intents;
-        private int largeThreshold = 250;
-        private SessionInfo resumeSession;
-
-        /**
-         * Create a builder using the given shard information.
-         *
-         * @param shardInfo the shard index and count to be used when authenticating
-         */
-        protected Builder(ShardInfo shardInfo) {
-            this.shardInfo = ShardInfo.create(shardInfo.getIndex(), shardInfo.getCount());
-        }
-
-        /**
-         * Set the initial presence status the bot will identify with.
-         *
-         * @param initialStatus a {@link StatusUpdate} to be used when authenticating
-         * @return this builder
-         */
-        public Builder initialStatus(@Nullable StatusUpdate initialStatus) {
-            this.initialStatus = initialStatus;
-            return this;
-        }
-
-        /**
-         * Set the Gateway intents to use when authenticating.
-         *
-         * @param intents an {@link IntentSet} for authenticating, or {@code null} if not using this capability
-         * @return this builder
-         */
-        public Builder intents(@Nullable IntentSet intents) {
-            this.intents = intents;
-            return this;
-        }
-
-        /**
-         * Set the number of members a guild must have to be considered "large". Defaults to 250.
-         *
-         * @param largeThreshold the number of guild members to identify a large guild
-         * @return this builder
-         */
-        public Builder largeThreshold(int largeThreshold) {
-            this.largeThreshold = largeThreshold;
-            return this;
-        }
-
-        /**
-         * Set information about a Gateway session to be resumed. If not specified, a normal authentication is
-         * performed, creating a fresh session to the Gateway.
-         *
-         * @param resumeSession a {@link SessionInfo} for resumption, or {@code null} if not using this capability
-         * @return this builder
-         */
-        public Builder resumeSession(@Nullable SessionInfo resumeSession) {
-            this.resumeSession = resumeSession;
-            return this;
-        }
-
-        /**
-         * Construct the authentication policy.
-         *
-         * @return a built {@link IdentifyOptions}
-         */
-        public IdentifyOptions build() {
-            return new IdentifyOptions(this);
-        }
     }
 
     /**
@@ -250,5 +175,80 @@ public class IdentifyOptions {
                 ", largeThreshold=" + largeThreshold +
                 ", resumeSession=" + resumeSession +
                 '}';
+    }
+
+    /**
+     * Builder to create {@link IdentifyOptions}. Requires specifying the shard information.
+     */
+    public static class Builder {
+
+        private final ShardInfo shardInfo;
+        private StatusUpdate initialStatus;
+        private IntentSet intents;
+        private int largeThreshold = 250;
+        private SessionInfo resumeSession;
+
+        /**
+         * Create a builder using the given shard information.
+         *
+         * @param shardInfo the shard index and count to be used when authenticating
+         */
+        protected Builder(ShardInfo shardInfo) {
+            this.shardInfo = ShardInfo.create(shardInfo.getIndex(), shardInfo.getCount());
+        }
+
+        /**
+         * Set the initial presence status the bot will identify with.
+         *
+         * @param initialStatus a {@link StatusUpdate} to be used when authenticating
+         * @return this builder
+         */
+        public Builder initialStatus(@Nullable StatusUpdate initialStatus) {
+            this.initialStatus = initialStatus;
+            return this;
+        }
+
+        /**
+         * Set the Gateway intents to use when authenticating.
+         *
+         * @param intents an {@link IntentSet} for authenticating, or {@code null} if not using this capability
+         * @return this builder
+         */
+        public Builder intents(@Nullable IntentSet intents) {
+            this.intents = intents;
+            return this;
+        }
+
+        /**
+         * Set the number of members a guild must have to be considered "large". Defaults to 250.
+         *
+         * @param largeThreshold the number of guild members to identify a large guild
+         * @return this builder
+         */
+        public Builder largeThreshold(int largeThreshold) {
+            this.largeThreshold = largeThreshold;
+            return this;
+        }
+
+        /**
+         * Set information about a Gateway session to be resumed. If not specified, a normal authentication is
+         * performed, creating a fresh session to the Gateway.
+         *
+         * @param resumeSession a {@link SessionInfo} for resumption, or {@code null} if not using this capability
+         * @return this builder
+         */
+        public Builder resumeSession(@Nullable SessionInfo resumeSession) {
+            this.resumeSession = resumeSession;
+            return this;
+        }
+
+        /**
+         * Construct the authentication policy.
+         *
+         * @return a built {@link IdentifyOptions}
+         */
+        public IdentifyOptions build() {
+            return new IdentifyOptions(this);
+        }
     }
 }

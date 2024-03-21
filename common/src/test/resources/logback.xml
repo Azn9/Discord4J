@@ -26,6 +26,6 @@
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-<!--        <appender-ref ref="ASYNC"/>-->
+        <!--        <appender-ref ref="ASYNC"/>-->
     </root>
 </configuration>

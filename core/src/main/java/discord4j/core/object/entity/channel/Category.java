@@ -46,7 +46,8 @@ public final class Category extends BaseGuildChannel {
     /**
      * Requests to retrieve the channels residing in this category.
      *
-     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this category. If an
+     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this
+     * category. If an
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<CategorizableChannel> getChannels() {
@@ -59,7 +60,8 @@ public final class Category extends BaseGuildChannel {
      * Requests to retrieve the channels residing in this category, using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the channels
-     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this category. If an
+     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this
+     * category. If an
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<CategorizableChannel> getChannels(EntityRetrievalStrategy retrievalStrategy) {
@@ -81,12 +83,12 @@ public final class Category extends BaseGuildChannel {
     @Deprecated
     public Mono<Category> edit(final Consumer<? super LegacyCategoryEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyCategoryEditSpec mutatedSpec = new LegacyCategoryEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyCategoryEditSpec mutatedSpec = new LegacyCategoryEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(Category.class);
     }
@@ -112,8 +114,8 @@ public final class Category extends BaseGuildChannel {
     public Mono<Category> edit(CategoryEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(Category.class);
     }

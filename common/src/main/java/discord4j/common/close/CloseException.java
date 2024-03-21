@@ -24,8 +24,8 @@ import java.util.Optional;
 
 /**
  * Unchecked exception thrown when closing a websocket session, expectedly or not.
- * <p>
- * Used to wrap an underlying websocket {@link CloseStatus} so clients can retrieve the
+ *
+ * <p>Used to wrap an underlying websocket {@link CloseStatus} so clients can retrieve the
  * status code and perform actions after it.
  */
 public class CloseException extends RuntimeException {

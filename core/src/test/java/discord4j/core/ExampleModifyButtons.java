@@ -77,8 +77,8 @@ public class ExampleModifyButtons {
                                 ActionRow row = (ActionRow) last;
                                 if (count == 25) {
                                     return event.edit(InteractionApplicationCommandCallbackSpec.builder()
-                                                    .content("Cannot add more than 25 buttons")
-                                                    .build());
+                                            .content("Cannot add more than 25 buttons")
+                                            .build());
                                 } else {
                                     String current = String.valueOf(count + 1);
 
@@ -93,9 +93,9 @@ public class ExampleModifyButtons {
                                     }
 
                                     return event.edit(InteractionApplicationCommandCallbackSpec.builder()
-                                                    .content("Button added!")
-                                                    .components(edited)
-                                                    .build());
+                                            .content("Button added!")
+                                            .components(edited)
+                                            .build());
                                 }
                             }
                         } else if (rem.equals(event.getCustomId())) {
@@ -111,8 +111,8 @@ public class ExampleModifyButtons {
                                 ActionRow row = (ActionRow) last;
                                 if (count == 2) {
                                     return event.edit(InteractionApplicationCommandCallbackSpec.builder()
-                                                    .content("No buttons to remove")
-                                                    .build());
+                                            .content("No buttons to remove")
+                                            .build());
                                 } else {
                                     String current = String.valueOf(count);
 
@@ -124,9 +124,9 @@ public class ExampleModifyButtons {
                                     }
 
                                     return event.edit(InteractionApplicationCommandCallbackSpec.builder()
-                                                    .content("Button removed!")
-                                                    .components(edited)
-                                                    .build());
+                                            .content("Button removed!")
+                                            .components(edited)
+                                            .build());
                                 }
                             }
                         }

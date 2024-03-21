@@ -22,7 +22,12 @@ import ch.qos.logback.classic.LoggerContext;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandContext;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -40,22 +45,23 @@ import reactor.util.Loggers;
 public class Commands {
 
     private static final Logger log = Loggers.getLogger(Commands.class);
+    private static final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
     public static Mono<Boolean> isAuthor(Mono<Long> authorId, CommandContext context) {
         return authorId.filter(id -> context.getAuthor()
-                .map(User::getId)
-                .map(Snowflake::asLong)
-                .map(eventAuthor -> eventAuthor.equals(id))
-                .orElse(false))
+                        .map(User::getId)
+                        .map(Snowflake::asLong)
+                        .map(eventAuthor -> eventAuthor.equals(id))
+                        .orElse(false))
                 .hasElement();
     }
 
     public static Mono<Void> echo(CommandContext context) {
         Message message = context.getMessage();
         return message.getRestChannel().createMessage(
-                MessageCreateRequest.builder()
-                        .content("<@" + message.getUserData().id() + "> " + context.parameters())
-                        .build())
+                        MessageCreateRequest.builder()
+                                .content("<@" + message.getUserData().id() + "> " + context.parameters())
+                                .build())
                 .flatMap(data -> context.getClient().rest().restMessage(data)
                         .createReaction("✅"))
                 .then();
@@ -159,8 +165,6 @@ public class Commands {
         }
         return Mono.empty();
     }
-
-    private static final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
     public static Mono<Void> logLevelChange(CommandContext context) {
         return Mono.fromRunnable(() -> {

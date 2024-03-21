@@ -51,15 +51,15 @@ public class InviteServiceTest {
     @Test
     public void testDeleteInvite() {
         channelService.getChannelInvites(modifyChannel)
-            .filter(invite -> !invite.maxAge().isAbsent())
-            .filter(invite -> invite.createdAt().toOptional()
-                .map(this::asInstant)
-                .map(ts -> ts.plusSeconds(invite.maxAge().get()))
-                .map(ts -> ts.isBefore(Instant.now()))
-                .orElse(false))
-            .map(InviteData::code)
-            .flatMap(code -> inviteService.deleteInvite(code, null))
-            .blockLast();
+                .filter(invite -> !invite.maxAge().isAbsent())
+                .filter(invite -> invite.createdAt().toOptional()
+                        .map(this::asInstant)
+                        .map(ts -> ts.plusSeconds(invite.maxAge().get()))
+                        .map(ts -> ts.isBefore(Instant.now()))
+                        .orElse(false))
+                .map(InviteData::code)
+                .flatMap(code -> inviteService.deleteInvite(code, null))
+                .blockLast();
     }
 
     private Instant asInstant(String timestamp) {

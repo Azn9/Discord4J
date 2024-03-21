@@ -33,10 +33,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<List<Snowflake>> roles();
-
     @Override
     default GuildEmojiModifyRequest asRequest() {
         return GuildEmojiModifyRequest.builder()
@@ -44,18 +40,20 @@ interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest>
                 .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
                 .build();
     }
+    Possible<String> name();
+    Possible<List<Snowflake>> roles();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildEmojiEditMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiEditSpecGenerator {
 
-    abstract GuildEmoji guildEmoji();
-
     @Override
     public void subscribe(CoreSubscriber<? super GuildEmoji> actual) {
         guildEmoji().edit(GuildEmojiEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GuildEmoji guildEmoji();
 
     @Override
     public abstract String toString();

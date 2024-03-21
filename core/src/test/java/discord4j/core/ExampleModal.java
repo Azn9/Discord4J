@@ -24,8 +24,8 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.object.component.TextInput;
 import discord4j.core.spec.InteractionPresentModalSpec;
-import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -36,13 +36,12 @@ import static java.util.Collections.emptyList;
 
 public class ExampleModal {
 
-    private static final String token = System.getenv("token");
-    private static final long guildId = Long.parseLong(System.getenv("guildId"));
-
     static final String CHAT_INPUT_COMMAND_NAME = "example";
     static final String MODAL_CUSTOM_ID = "my-modal";
     static final String SELECT_CUSTOM_ID = "my-select";
     static final String INPUT_CUSTOM_ID = "my-input";
+    private static final String token = System.getenv("token");
+    private static final long guildId = Long.parseLong(System.getenv("guildId"));
 
     public static void main(String[] args) {
         DiscordClient.create(token)
@@ -64,9 +63,9 @@ public class ExampleModal {
                                                     SelectMenu.Option.of("two", "2"),
                                                     SelectMenu.Option.of("three", "3"))
                                             .withMinValues(0)))
-                                            .addComponent(ActionRow.of(TextInput.small(
+                                    .addComponent(ActionRow.of(TextInput.small(
                                                     INPUT_CUSTOM_ID, "Something else to add?")
-                                                    .required(false)))
+                                            .required(false)))
                                     .build());
                         }
                         return Mono.empty();

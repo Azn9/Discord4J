@@ -37,7 +37,8 @@ public class StoreChannelUpdateEvent extends ChannelEvent {
     private final StoreChannel current;
     private final StoreChannel old;
 
-    public StoreChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, StoreChannel current, @Nullable StoreChannel old) {
+    public StoreChannelUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, StoreChannel current,
+                                   @Nullable StoreChannel old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

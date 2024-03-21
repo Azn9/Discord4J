@@ -76,15 +76,15 @@ public class LegacyStoreChannelEditSpec implements LegacyAuditSpec<ChannelModify
     }
 
     @Override
-    public LegacyStoreChannelEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyStoreChannelEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

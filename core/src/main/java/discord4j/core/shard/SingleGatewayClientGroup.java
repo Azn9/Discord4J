@@ -50,13 +50,13 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         client.set(null);
     }
 
-    private Optional<GatewayClient> instance() {
-        return Optional.ofNullable(client.get());
-    }
-
     @Override
     public Optional<GatewayClient> find(int index) {
         return instance().map(client -> new RoutableGatewayClient(client, index));
+    }
+
+    private Optional<GatewayClient> instance() {
+        return Optional.ofNullable(client.get());
     }
 
     @Override
@@ -88,7 +88,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
     @Override
     public Mono<Void> unicast(ShardGatewayPayload<?> payload) {
         return Mono.defer(() -> Mono.justOrEmpty(instance())
-                .switchIfEmpty(Mono.error(new IllegalStateException("Missing gateway client"))))
+                        .switchIfEmpty(Mono.error(new IllegalStateException("Missing gateway client"))))
                 .flatMap(client -> client.send(Mono.just(payload)));
     }
 
@@ -134,15 +134,15 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         }
 
         @Override
+        public Sinks.Many<GatewayPayload<?>> sender() {
+            return client.sender();
+        }
+
+        @Override
         public Mono<Void> send(Publisher<? extends GatewayPayload<?>> publisher) {
             return Flux.from(publisher)
                     .doOnNext(payload -> sender().emitNext(makeShardAware(payload, shardIndex), FAIL_FAST))
                     .then();
-        }
-
-        @Override
-        public Sinks.Many<GatewayPayload<?>> sender() {
-            return client.sender();
         }
 
         @Override

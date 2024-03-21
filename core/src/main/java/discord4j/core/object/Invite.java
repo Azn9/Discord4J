@@ -16,12 +16,12 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.UserData;
@@ -62,12 +62,13 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Gets the invite code (unique ID).
+     * Requests to retrieve the guild this invite is associated to, if present.
      *
-     * @return The invite code (unique ID).
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final String getCode() {
-        return data.code();
+    public final Mono<Guild> getGuild() {
+        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
     }
 
     /**
@@ -77,18 +78,8 @@ public class Invite implements DiscordObject {
      */
     public final Optional<Snowflake> getGuildId() {
         return data.guild().toOptional()
-            .map(PartialGuildData::id)
-            .map(Snowflake::of);
-    }
-
-    /**
-     * Requests to retrieve the guild this invite is associated to, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
-     * to. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<Guild> getGuild() {
-        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
+                .map(PartialGuildData::id)
+                .map(Snowflake::of);
     }
 
     /**
@@ -105,6 +96,17 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the channel this invite is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this
+     * invite is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<CategorizableChannel> getChannel() {
+        return gateway.getChannelById(getChannelId()).cast(CategorizableChannel.class);
+    }
+
+    /**
      * Gets the ID of the channel this invite is associated to.
      *
      * @return The ID of the channel this invite is associated to.
@@ -114,20 +116,11 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Requests to retrieve the channel this invite is associated to.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
-     * associated to. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<CategorizableChannel> getChannel() {
-        return gateway.getChannelById(getChannelId()).cast(CategorizableChannel.class);
-    }
-
-    /**
      * Requests to retrieve the channel this invite is associated to, using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
+     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this
+     * invite is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
@@ -143,8 +136,8 @@ public class Invite implements DiscordObject {
      */
     public final Optional<Snowflake> getInviterId() {
         return data.inviter().toOptional()
-            .map(UserData::id)
-            .map(Snowflake::of);
+                .map(UserData::id)
+                .map(Snowflake::of);
     }
 
     /**
@@ -164,8 +157,8 @@ public class Invite implements DiscordObject {
      */
     public final Optional<Snowflake> getTargetUserId() {
         return data.targetUser().toOptional()
-            .map(UserData::id)
-            .map(Snowflake::of);
+                .map(UserData::id)
+                .map(Snowflake::of);
     }
 
     /**
@@ -196,7 +189,7 @@ public class Invite implements DiscordObject {
      */
     public final Optional<Type> getTargetType() {
         return data.targetType().toOptional()
-            .map(Type::of);
+                .map(Type::of);
     }
 
     /**
@@ -208,8 +201,8 @@ public class Invite implements DiscordObject {
      */
     public final OptionalInt getApproximatePresenceCount() {
         return data.approximatePresenceCount().toOptional()
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
     /**
@@ -221,8 +214,8 @@ public class Invite implements DiscordObject {
      */
     public final OptionalInt getApproximateMemberCount() {
         return data.approximateMemberCount().toOptional()
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
     /**
@@ -249,12 +242,28 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the invite code (unique ID).
+     *
+     * @return The invite code (unique ID).
+     */
+    public final String getCode() {
+        return data.code();
+    }
+
+    /**
      * Gets the raw data as represented by Discord.
      *
      * @return The raw data as represented by Discord.
      */
     InviteData getData() {
         return data;
+    }
+
+    @Override
+    public String toString() {
+        return "Invite{" +
+                "data=" + data +
+                '}';
     }
 
     /** Represents the various types of target user for an invite. */
@@ -282,15 +291,6 @@ public class Invite implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of target user. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -305,12 +305,14 @@ public class Invite implements DiscordObject {
             }
         }
 
-    }
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
 
-    @Override
-    public String toString() {
-        return "Invite{" +
-                "data=" + data +
-                '}';
     }
 }

@@ -49,15 +49,6 @@ public class ApplicationCommandCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
-     *
-     * @return The ID of the guild involved, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} that had an application command created in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
@@ -65,6 +56,15 @@ public class ApplicationCommandCreateEvent extends Event {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
+     *
+     * @return The ID of the guild involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**

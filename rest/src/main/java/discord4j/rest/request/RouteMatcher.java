@@ -42,7 +42,8 @@ public class RouteMatcher {
         this(request, null);
     }
 
-    public RouteMatcher(@Nullable DiscordWebRequest request, @Nullable Predicate<Map<String, String>> requestVariableMatcher) {
+    public RouteMatcher(@Nullable DiscordWebRequest request,
+                        @Nullable Predicate<Map<String, String>> requestVariableMatcher) {
         this.request = request;
         this.requestVariableMatcher = requestVariableMatcher;
     }

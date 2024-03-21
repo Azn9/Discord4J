@@ -42,26 +42,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<WebhookMessageEditRequest>> {
 
-    Possible<Optional<String>> content();
-
-    Possible<Optional<List<EmbedCreateSpec>>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<Optional<AllowedMentions>> allowedMentions();
-
-    Possible<Optional<List<LayoutComponent>>> components();
-
-    Possible<Optional<List<Attachment>>> attachments();
-
     @Override
     default MultipartRequest<WebhookMessageEditRequest> asRequest() {
         WebhookMessageEditRequest json = WebhookMessageEditRequest.builder()
@@ -84,18 +64,31 @@ interface InteractionReplyEditSpecGenerator extends Spec<MultipartRequest<Webhoo
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<Optional<String>> content();
+    Possible<Optional<List<EmbedCreateSpec>>> embeds();
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    Possible<Optional<AllowedMentions>> allowedMentions();
+    Possible<Optional<List<LayoutComponent>>> components();
+    Possible<Optional<List<Attachment>>> attachments();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class InteractionReplyEditMonoGenerator extends Mono<Message> implements InteractionReplyEditSpecGenerator {
 
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         event().editReply(InteractionReplyEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();
@@ -105,14 +98,14 @@ abstract class InteractionReplyEditMonoGenerator extends Mono<Message> implement
 @Value.Immutable(builder = false)
 abstract class InteractionFollowupEditMonoGenerator extends Mono<Message> implements InteractionReplyEditSpecGenerator {
 
-    abstract Snowflake messageId();
-
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         event().editFollowup(messageId(), InteractionReplyEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Snowflake messageId();
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();

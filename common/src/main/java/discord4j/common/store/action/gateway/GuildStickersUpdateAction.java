@@ -19,6 +19,7 @@ package discord4j.common.store.action.gateway;
 
 import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+
 import java.util.Set;
 
 public class GuildStickersUpdateAction extends ShardAwareAction<Set<StickerData>> {

@@ -86,10 +86,10 @@ public class ExampleButtons {
                             .flatMapMany(buttonMessageId ->
                                     gw.on(ButtonInteractionEvent.class, event ->
                                             Mono.justOrEmpty(event.getInteraction().getMessage())
-                                                .map(Message::getId)
-                                                .filter(buttonMessageId::equals)
-                                                .then(event.edit(spec -> spec.setContent(event.getCustomId())))
-                                        )
+                                                    .map(Message::getId)
+                                                    .filter(buttonMessageId::equals)
+                                                    .then(event.edit(spec -> spec.setContent(event.getCustomId())))
+                                    )
                             )
                             .then();
                 })

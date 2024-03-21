@@ -32,57 +32,6 @@ import reactor.core.publisher.Mono;
 public interface ShardingStrategy {
 
     /**
-     * Return the shard count used to create a group of sharded clients.
-     *
-     * @param restClient a handle to consume REST API resources, typically to retrieve the number of recommended shards
-     * @return a shard count as a {@link Mono} to obtain this number asynchronously.
-     */
-    Mono<Integer> getShardCount(RestClient restClient);
-
-    /**
-     * Return the shard factory used to create a group of sharded clients.
-     *
-     * @param shardCount the total number of shards
-     * @return a shard factory as a sequence of {@link ShardInfo} items.
-     */
-    default Flux<ShardInfo> getShards(int shardCount) {
-        return Flux.range(0, shardCount).map(index -> ShardInfo.create(index, shardCount));
-    }
-
-    /**
-     * Return the {@link GatewayClientGroupManager} to maintain each gateway client in the created group.
-     *
-     * @param shardCount the total number of shards
-     * @return a {@link GatewayClientGroupManager} used by this strategy
-     */
-    GatewayClientGroupManager getGroupManager(int shardCount);
-
-    /**
-     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
-     * to use the large bot sharding system.
-     *
-     * @return a value determining the sharding factor this strategy has
-     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
-     * Sharding for very large bots</a>
-     * @deprecated use {@link #getMaxConcurrency(RestClient)} instead
-     */
-    @Deprecated
-    int getMaxConcurrency();
-
-    /**
-     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
-     * to use the large bot sharding system.
-     *
-     * @param restClient a handle to consume REST API resources, typically to retrieve the recommended concurrency
-     * @return a value determining the sharding factor this strategy has
-     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
-     * Sharding for very large bots</a>
-     */
-    default Mono<Integer> getMaxConcurrency(RestClient restClient) {
-        return Mono.just(getMaxConcurrency());
-    }
-
-    /**
      * Sharding strategy that retrieves the recommended shard count and concurrency, and creates as many
      * {@link GatewayClient} instances as indexes given by that count.
      *
@@ -111,17 +60,16 @@ public interface ShardingStrategy {
             @Override
             public Mono<Integer> getMaxConcurrency(RestClient restClient) {
                 return restClient.getGatewayService().getGatewayBot()
-                    .map(GatewayData::sessionStartLimit)
-                    .map(sessionStartLimit -> sessionStartLimit.toOptional()
-                        .map(SessionStartLimitData::maxConcurrency)
-                        .flatMap(Possible::toOptional)
-                        .orElseGet(this::getMaxConcurrency)
-                    );
+                        .map(GatewayData::sessionStartLimit)
+                        .map(sessionStartLimit -> sessionStartLimit.toOptional()
+                                .map(SessionStartLimitData::maxConcurrency)
+                                .flatMap(Possible::toOptional)
+                                .orElseGet(this::getMaxConcurrency)
+                        );
 
             }
         };
     }
-
     /**
      * Sharding strategy that creates a fixed number of {@link GatewayClient} instances, using the given {@code count}.
      *
@@ -147,7 +95,6 @@ public interface ShardingStrategy {
             }
         };
     }
-
     /**
      * Sharding strategy that creates a single {@link GatewayClient}. Useful for basic bots or for advanced worker
      * {@link GatewayClient} that do not directly perform authentication to the Discord Gateway.
@@ -173,7 +120,6 @@ public interface ShardingStrategy {
             }
         };
     }
-
     /**
      * Return a builder to customize the {@link ShardingStrategy} using commonly used parameters.
      *
@@ -182,5 +128,51 @@ public interface ShardingStrategy {
     static DefaultShardingStrategy.Builder builder() {
         return new DefaultShardingStrategy.Builder();
     }
+    /**
+     * Return the shard count used to create a group of sharded clients.
+     *
+     * @param restClient a handle to consume REST API resources, typically to retrieve the number of recommended shards
+     * @return a shard count as a {@link Mono} to obtain this number asynchronously.
+     */
+    Mono<Integer> getShardCount(RestClient restClient);
+    /**
+     * Return the shard factory used to create a group of sharded clients.
+     *
+     * @param shardCount the total number of shards
+     * @return a shard factory as a sequence of {@link ShardInfo} items.
+     */
+    default Flux<ShardInfo> getShards(int shardCount) {
+        return Flux.range(0, shardCount).map(index -> ShardInfo.create(index, shardCount));
+    }
+    /**
+     * Return the {@link GatewayClientGroupManager} to maintain each gateway client in the created group.
+     *
+     * @param shardCount the total number of shards
+     * @return a {@link GatewayClientGroupManager} used by this strategy
+     */
+    GatewayClientGroupManager getGroupManager(int shardCount);
+    /**
+     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
+     * to use the large bot sharding system.
+     *
+     * @param restClient a handle to consume REST API resources, typically to retrieve the recommended concurrency
+     * @return a value determining the sharding factor this strategy has
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
+     * Sharding for very large bots</a>
+     */
+    default Mono<Integer> getMaxConcurrency(RestClient restClient) {
+        return Mono.just(getMaxConcurrency());
+    }
+    /**
+     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
+     * to use the large bot sharding system.
+     *
+     * @return a value determining the sharding factor this strategy has
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
+     * Sharding for very large bots</a>
+     * @deprecated use {@link #getMaxConcurrency(RestClient)} instead
+     */
+    @Deprecated
+    int getMaxConcurrency();
 
 }

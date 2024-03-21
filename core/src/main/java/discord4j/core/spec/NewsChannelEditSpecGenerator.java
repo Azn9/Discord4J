@@ -35,20 +35,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<Integer> position();
-
-    Possible<Integer> rateLimitPerUser();
-
-    Possible<String> topic();
-
-    Possible<Boolean> nsfw();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
-    Possible<Optional<Snowflake>> parentId();
-
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
@@ -63,18 +49,25 @@ interface NewsChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
                 .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .build();
     }
+    Possible<String> name();
+    Possible<Integer> position();
+    Possible<Integer> rateLimitPerUser();
+    Possible<String> topic();
+    Possible<Boolean> nsfw();
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Optional<Snowflake>> parentId();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class NewsChannelEditMonoGenerator extends Mono<NewsChannel> implements NewsChannelEditSpecGenerator {
 
-    abstract NewsChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super NewsChannel> actual) {
         channel().edit(NewsChannelEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract NewsChannel channel();
 
     @Override
     public abstract String toString();

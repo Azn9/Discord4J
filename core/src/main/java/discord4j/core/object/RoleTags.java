@@ -89,7 +89,7 @@ public class RoleTags implements DiscordObject {
     @Override
     public String toString() {
         return "RoleTags{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

@@ -36,7 +36,8 @@ import reactor.core.publisher.Mono;
 
 class ApplicationCommandDispatchHandlers {
 
-    static Mono<ApplicationCommandCreateEvent> applicationCommandCreate(DispatchContext<ApplicationCommandCreate, Void> context) {
+    static Mono<ApplicationCommandCreateEvent> applicationCommandCreate(DispatchContext<ApplicationCommandCreate,
+            Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Snowflake.asLong(context.getDispatch().guildId());
@@ -46,7 +47,8 @@ class ApplicationCommandDispatchHandlers {
                 new ApplicationCommand(gateway, command), guildId));
     }
 
-    static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate, Void> context) {
+    static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate,
+            Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Snowflake.asLong(context.getDispatch().guildId());
@@ -57,23 +59,23 @@ class ApplicationCommandDispatchHandlers {
     }
 
     static Mono<ApplicationCommandDeleteEvent> applicationCommandDelete(
-        DispatchContext<ApplicationCommandDelete, Void> context) {
+            DispatchContext<ApplicationCommandDelete, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Snowflake.asLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
         return Mono.just(new ApplicationCommandDeleteEvent(gateway, shardInfo,
-            new ApplicationCommand(gateway, command), guildId));
+                new ApplicationCommand(gateway, command), guildId));
     }
 
     static Mono<ApplicationCommandPermissionUpdateEvent> applicationCommandPermissionUpdate(
-        DispatchContext<ApplicationCommandPermissionUpdate, Void> context) {
+            DispatchContext<ApplicationCommandPermissionUpdate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         GuildApplicationCommandPermissionsData data = context.getDispatch().data();
 
         return Mono.just(new ApplicationCommandPermissionUpdateEvent(gateway, shardInfo,
-            new ApplicationCommandGuildPermissions(gateway, data)));
+                new ApplicationCommandGuildPermissions(gateway, data)));
     }
 }

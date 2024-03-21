@@ -46,12 +46,11 @@ import static discord4j.common.LogUtil.format;
  */
 public class VoiceSocket {
 
+    static final String PROTOCOL = "udp";
+    static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
     private static final Logger log = Loggers.getLogger(VoiceSocket.class);
     private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.udp.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.udp.receiver");
-
-    static final String PROTOCOL = "udp";
-    static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
     private static final int DISCOVERY_PACKET_LENGTH = 74;
     private static final int TYPE_LENGTH_SSRC_LENGTH = Short.BYTES + Short.BYTES + Integer.BYTES;
 
@@ -84,7 +83,7 @@ public class VoiceSocket {
                                     .then();
 
                             Mono<Void> outboundThen = out.send(outbound.asFlux()
-                                    .doOnNext(buf -> logPayload(senderLog, context, buf)))
+                                            .doOnNext(buf -> logPayload(senderLog, context, buf)))
                                     .then();
 
                             in.withConnection(c -> c.onDispose(() -> log.debug(format(context, "Connection disposed"))));
@@ -144,14 +143,6 @@ public class VoiceSocket {
         return sendDiscoveryPacket.then(parseResponse);
     }
 
-    void send(ByteBuf data) {
-        emissionStrategy.emitNext(outbound, data);
-    }
-
-    Flux<ByteBuf> getInbound() {
-        return inbound.asFlux();
-    }
-
     private static String getNullTerminatedString(ByteBuf buffer, int offset) {
         buffer.skipBytes(offset);
         ByteArrayOutputStream os = new ByteArrayOutputStream(15);
@@ -161,5 +152,13 @@ public class VoiceSocket {
         }
 
         return new String(os.toByteArray(), StandardCharsets.US_ASCII);
+    }
+
+    void send(ByteBuf data) {
+        emissionStrategy.emitNext(outbound, data);
+    }
+
+    Flux<ByteBuf> getInbound() {
+        return inbound.asFlux();
     }
 }

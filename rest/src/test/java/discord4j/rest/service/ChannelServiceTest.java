@@ -17,7 +17,12 @@
 package discord4j.rest.service;
 
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.InviteCreateRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.MessageEditRequest;
+import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.RestTests;
 import discord4j.rest.util.MultipartRequest;
 import org.junit.jupiter.api.BeforeAll;
@@ -105,27 +110,6 @@ public class ChannelServiceTest {
         }
     }
 
-    @Test
-    public void testCreateMessagesWithMultipleFiles() throws IOException {
-        MessageCreateRequest req = MessageCreateRequest.builder()
-                .content("Hello world with *multiple* files!")
-                .build();
-        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
-            if (inputStream == null) {
-                throw new NullPointerException();
-            }
-            byte[] bytes = readAllBytes(inputStream);
-
-            ByteArrayInputStream in0 = new ByteArrayInputStream(bytes);
-            ByteArrayInputStream in1 = new ByteArrayInputStream(bytes);
-            List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
-                    Tuples.of("file1.txt", in1));
-
-            MultipartRequest<MessageCreateRequest> request = MultipartRequest.ofRequestAndFiles(req, files);
-            channelService.createMessage(permanentChannel, request).block();
-        }
-    }
-
     private byte[] readAllBytes(InputStream inputStream) throws IOException {
         int size = 8192;
         int max = Integer.MAX_VALUE - 8;
@@ -151,6 +135,27 @@ public class ChannelServiceTest {
             buf = Arrays.copyOf(buf, capacity);
         }
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
+    }
+
+    @Test
+    public void testCreateMessagesWithMultipleFiles() throws IOException {
+        MessageCreateRequest req = MessageCreateRequest.builder()
+                .content("Hello world with *multiple* files!")
+                .build();
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
+            if (inputStream == null) {
+                throw new NullPointerException();
+            }
+            byte[] bytes = readAllBytes(inputStream);
+
+            ByteArrayInputStream in0 = new ByteArrayInputStream(bytes);
+            ByteArrayInputStream in1 = new ByteArrayInputStream(bytes);
+            List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
+                    Tuples.of("file1.txt", in1));
+
+            MultipartRequest<MessageCreateRequest> request = MultipartRequest.ofRequestAndFiles(req, files);
+            channelService.createMessage(permanentChannel, request).block();
+        }
     }
 
     @Test

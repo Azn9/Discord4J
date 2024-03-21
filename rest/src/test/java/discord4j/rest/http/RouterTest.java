@@ -48,8 +48,8 @@ public class RouterTest {
     @Test
     public void test() throws Exception {
         MessageCreateRequest body = MessageCreateRequest.builder()
-            .content("hello at " + Instant.now())
-            .build();
+                .content("hello at " + Instant.now())
+                .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
@@ -68,8 +68,8 @@ public class RouterTest {
             final int a = i;
 
             MessageCreateRequest body = MessageCreateRequest.builder()
-                .content(cid + " " + a)
-                .build();
+                    .content(cid + " " + a)
+                    .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
@@ -84,8 +84,8 @@ public class RouterTest {
     @Test
     public void testMultiSub() throws Exception {
         MessageCreateRequest body = MessageCreateRequest.builder()
-            .content("hi")
-            .build();
+                .content("hi")
+                .build();
 
         Mono<MessageData> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
@@ -108,8 +108,8 @@ public class RouterTest {
             final int a = i;
 
             MessageCreateRequest body = MessageCreateRequest.builder()
-                .content(cid + " " + a)
-                .build();
+                    .content(cid + " " + a)
+                    .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
@@ -129,8 +129,8 @@ public class RouterTest {
         String cid = Integer.toHexString(this.hashCode());
 
         MessageCreateRequest body0 = MessageCreateRequest.builder()
-            .content(cid + " 0 at" + Instant.now())
-            .build();
+                .content(cid + " 0 at" + Instant.now())
+                .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body0)
@@ -139,8 +139,8 @@ public class RouterTest {
                 .block();
 
         MessageCreateRequest body1 = MessageCreateRequest.builder()
-            .content(cid + " 1 at" + Instant.now())
-            .build();
+                .content(cid + " 1 at" + Instant.now())
+                .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body1)

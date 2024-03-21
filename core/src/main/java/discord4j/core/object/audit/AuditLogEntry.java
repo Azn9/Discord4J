@@ -91,15 +91,6 @@ public class AuditLogEntry implements Entity {
     }
 
     /**
-     * Gets the ID of the user who made the changes, if present.
-     *
-     * @return The ID of the user who made the changes, if present.
-     */
-    public Optional<Snowflake> getResponsibleUserId() {
-        return data.userId().map(Snowflake::of);
-    }
-
-    /**
      * Gets the user who made the changes, if present.
      *
      * @return The user who made the changes, if present.
@@ -112,7 +103,17 @@ public class AuditLogEntry implements Entity {
         }
         return getResponsibleUserId()
                 .map(id -> auditLogPart.getUserById(id)
-                        .orElseThrow(() -> new NoSuchElementException("Audit log user data does not contain responsible user ID")));
+                        .orElseThrow(() -> new NoSuchElementException("Audit log user data does not contain " +
+                                "responsible user ID")));
+    }
+
+    /**
+     * Gets the ID of the user who made the changes, if present.
+     *
+     * @return The ID of the user who made the changes, if present.
+     */
+    public Optional<Snowflake> getResponsibleUserId() {
+        return data.userId().map(Snowflake::of);
     }
 
     /**

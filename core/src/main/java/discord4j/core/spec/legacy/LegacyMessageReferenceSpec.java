@@ -24,7 +24,8 @@ import discord4j.discordjson.json.MessageReferenceData;
 /**
  * LegacySpec used to create a message reference.
  *
- * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure">Message Reference</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure">Message Reference</a>
  */
 public class LegacyMessageReferenceSpec implements LegacySpec<MessageReferenceData> {
 
@@ -68,7 +69,7 @@ public class LegacyMessageReferenceSpec implements LegacySpec<MessageReferenceDa
      * default true.
      *
      * @param failIfNotExists Whether to error if the referenced message doesn't exist instead of sending as a normal
-     *                        (non-reply) message.
+     * (non-reply) message.
      * @return This spec.
      */
     public LegacyMessageReferenceSpec setFailIfNotExists(boolean failIfNotExists) {

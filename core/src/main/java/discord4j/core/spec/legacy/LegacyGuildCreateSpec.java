@@ -38,10 +38,10 @@ import java.util.function.Consumer;
  * A spec used to configure and create a {@link Guild}. <b>This can only be used for bots in less than 10 guilds.</b>
  * <p>
  * This spec also has some limitations to it.
- *  - The first role added, either from {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the
- *  default @everyone role. Each subsequent call to {@link #addEveryoneRole} will not override the first role but shift
- *  all other roles down.
- *  - When using the channels parameter, the position field is ignored, and none of the default channels are created.
+ * - The first role added, either from {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the
+ * default @everyone role. Each subsequent call to {@link #addEveryoneRole} will not override the first role but shift
+ * all other roles down.
+ * - When using the channels parameter, the position field is ignored, and none of the default channels are created.
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild">Create Guild</a>
  */

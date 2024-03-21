@@ -70,17 +70,7 @@ public final class ExtendedInvite extends Invite {
      */
     public Optional<Instant> getExpiration() {
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
-        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
-    }
-
-    /**
-     * Gets whether this invite only grants temporary membership.
-     *
-     * @return {@code true} if this invite only grants temporary membership
-     */
-    public boolean isTemporary() {
-        return getData().temporary().toOptional()
-            .orElseThrow(IllegalStateException::new);
+        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
     }
 
     /**
@@ -91,6 +81,16 @@ public final class ExtendedInvite extends Invite {
     public Instant getCreation() {
         String createdAt = getData().createdAt().toOptional().orElseThrow(IllegalStateException::new);
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(createdAt, Instant::from);
+    }
+
+    /**
+     * Gets whether this invite only grants temporary membership.
+     *
+     * @return {@code true} if this invite only grants temporary membership
+     */
+    public boolean isTemporary() {
+        return getData().temporary().toOptional()
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override

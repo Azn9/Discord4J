@@ -57,39 +57,100 @@ public interface EventDispatcher {
 
     Logger log = Loggers.getLogger(EventDispatcher.class);
     Supplier<Scheduler> DEFAULT_EVENT_SCHEDULER = () -> ForkJoinPoolScheduler.create("d4j-events");
-
     /**
-     * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
-     * in order to start processing. See {@link Event} class for the list of possible event classes.
-     * <p>
-     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
-     * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
-     * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
-     * explaining this behavior.
-     * <p>
-     * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
-     * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
-     * equivalent methods to maintain the sequence active:
-     * <pre>
-     * client.getEventDispatcher().on(MessageCreateEvent.class)
-     *     .flatMap(event -&gt; myCodeThatMightThrow(event)
-     *             .onErrorResume(error -&gt; {
-     *                 // log and then discard the error to keep the sequence alive
-     *                 log.error("Failed to handle event!", error);
-     *                 return Mono.empty();
-     *             }))
-     *     .subscribe();
-     * </pre>
-     * <p>
-     * For more alternatives to handling errors, please see
-     * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
+     * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
+     * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
+     * consumed. Startup events collected before the first subscription are only forwarded to that subscriber.
      *
-     * @param eventClass the event class to obtain events from
-     * @param <E> the type of the event class
-     * @return a new {@link Flux} with the requested events
+     * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
      */
-    <E extends Event> Flux<E> on(Class<E> eventClass);
+    static EventDispatcher buffering() {
+        return builder().build();
+    }
+    /**
+     * Create an {@link EventDispatcher} builder. It can be configured with a custom {@link FluxProcessor} for
+     * events, a custom {@link FluxSink.OverflowStrategy} to handle backpressure and a custom {@link Scheduler} to
+     * dispatch events.
+     *
+     * @return a {@link Builder}
+     */
+    static Builder builder() {
+        return new DefaultEventDispatcher.Builder();
+    }
+    /**
+     * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
+     * where subsequent events will be dropped in favor of retaining the earliest ones. Startup events collected
+     * before the first subscription are only forwarded to that subscriber.
+     *
+     * @param bufferSize the number of events to keep in the backlog
+     * @return an {@link EventDispatcher} keeping the earliest events up to {@code bufferSize}
+     */
+    static EventDispatcher withEarliestEvents(int bufferSize) {
+        return builder()
+                .eventSink(spec -> spec.multicast().onBackpressureBuffer(bufferSize, false))
+                .build();
+    }
+    /**
+     * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
+     * where earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
+     * the first subscription are only forwarded to that subscriber.
+     *
+     * @param bufferSize the number of events to keep in the backlog
+     * @return an {@link EventDispatcher} keeping the latest events backed by an {@link EmitterProcessor}
+     * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
+     * dispatcher that is able to retain a given number of latest events
+     */
+    static EventDispatcher withLatestEvents(int bufferSize) {
+        return builder()
+                .eventProcessor(EmitterProcessor.create(bufferSize, false))
+                .overflowStrategy(FluxSink.OverflowStrategy.LATEST)
+                .build();
+    }
+    /**
+     * Create an {@link EventDispatcher} that is capable of replaying up to 2 minutes worth of important events like
+     * {@link GuildCreateEvent} and {@link GatewayLifecycleEvent} that arrive while no subscribers are connected to
+     * all late subscribers, as long as they subscribe within the replay window of 5 seconds. After the replay window
+     * has closed, it behaves like an emitter event dispatcher.
+     * <p>
+     * This allows controlling the memory overhead of dispatchers like {@link #buffering()} while still keeping a record
+     * of important events to all late subscribers, even after login has completed.
+     * <p>
+     * This dispatcher can be customized through the use of {@link ReplayingEventDispatcher#builder()}.
+     *
+     * @return an {@link EventDispatcher} that is capable of replaying events to late subscribers
+     */
+    static EventDispatcher replaying() {
+        return ReplayingEventDispatcher.create();
+    }
 
+    // Factories
+    /**
+     * Create an {@link EventDispatcher} that is time-bounded and retains all elements whose age is at most {@code
+     * maxAge}, replaying them to late subscribers. Be aware that using this type of dispatcher with operators such
+     * as {@link Flux#retry()} or {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same
+     * elements as the backlog contains.
+     *
+     * @param maxAge the maximum age of the contained items
+     * @return an {@link EventDispatcher} that will replay elements up to {@code maxAge} duration to late subscribers
+     */
+    static EventDispatcher replayingWithTimeout(Duration maxAge) {
+        return builder()
+                .eventSink(spec -> spec.replay().limit(maxAge))
+                .build();
+    }
+    /**
+     * Create an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers.
+     * Be aware that using this type of dispatcher with operators such as {@link Flux#retry()} or
+     * {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same elements as the backlog contains.
+     *
+     * @param historySize the backlog size or maximum items retained for replay
+     * @return an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers
+     */
+    static EventDispatcher replayingWithSize(int historySize) {
+        return builder()
+                .eventSink(spec -> spec.replay().limit(historySize))
+                .build();
+    }
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type, to be processed through a given
      * {@link Function} upon subscription. Errors occurring within the mapper will be logged and discarded, preventing
@@ -130,7 +191,37 @@ public interface EventDispatcher {
                             return Mono.empty();
                         }));
     }
-
+    /**
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
+     * in order to start processing. See {@link Event} class for the list of possible event classes.
+     * <p>
+     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
+     * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
+     * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
+     * explaining this behavior.
+     * <p>
+     * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
+     * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
+     * equivalent methods to maintain the sequence active:
+     * <pre>
+     * client.getEventDispatcher().on(MessageCreateEvent.class)
+     *     .flatMap(event -&gt; myCodeThatMightThrow(event)
+     *             .onErrorResume(error -&gt; {
+     *                 // log and then discard the error to keep the sequence alive
+     *                 log.error("Failed to handle event!", error);
+     *                 return Mono.empty();
+     *             }))
+     *     .subscribe();
+     * </pre>
+     * <p>
+     * For more alternatives to handling errors, please see
+     * <a href="https://docs.discord4j.com/error-handling">Error Handling</a> docs page.
+     *
+     * @param eventClass the event class to obtain events from
+     * @param <E> the type of the event class
+     * @return a new {@link Flux} with the requested events
+     */
+    <E extends Event> Flux<E> on(Class<E> eventClass);
     /**
      * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
      * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
@@ -178,7 +269,6 @@ public interface EventDispatcher {
                         })
                         .then(Mono.just(event)));
     }
-
     /**
      * Publishes an {@link Event} to the dispatcher. Might throw an unchecked exception if the dispatcher can't
      * handle this event.
@@ -186,112 +276,10 @@ public interface EventDispatcher {
      * @param event the {@link Event} to publish
      */
     void publish(Event event);
-
     /**
      * Signal that this event dispatcher must terminate and release its resources.
      */
     void shutdown();
-
-    // Factories
-
-    /**
-     * Create an {@link EventDispatcher} builder. It can be configured with a custom {@link FluxProcessor} for
-     * events, a custom {@link FluxSink.OverflowStrategy} to handle backpressure and a custom {@link Scheduler} to
-     * dispatch events.
-     *
-     * @return a {@link Builder}
-     */
-    static Builder builder() {
-        return new DefaultEventDispatcher.Builder();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
-     * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
-     * consumed. Startup events collected before the first subscription are only forwarded to that subscriber.
-     *
-     * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
-     */
-    static EventDispatcher buffering() {
-        return builder().build();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where subsequent events will be dropped in favor of retaining the earliest ones. Startup events collected
-     * before the first subscription are only forwarded to that subscriber.
-     *
-     * @param bufferSize the number of events to keep in the backlog
-     * @return an {@link EventDispatcher} keeping the earliest events up to {@code bufferSize}
-     */
-    static EventDispatcher withEarliestEvents(int bufferSize) {
-        return builder()
-                .eventSink(spec -> spec.multicast().onBackpressureBuffer(bufferSize, false))
-                .build();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
-     * the first subscription are only forwarded to that subscriber.
-     *
-     * @param bufferSize the number of events to keep in the backlog
-     * @return an {@link EventDispatcher} keeping the latest events backed by an {@link EmitterProcessor}
-     * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
-     * dispatcher that is able to retain a given number of latest events
-     */
-    static EventDispatcher withLatestEvents(int bufferSize) {
-        return builder()
-                .eventProcessor(EmitterProcessor.create(bufferSize, false))
-                .overflowStrategy(FluxSink.OverflowStrategy.LATEST)
-                .build();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that is capable of replaying up to 2 minutes worth of important events like
-     * {@link GuildCreateEvent} and {@link GatewayLifecycleEvent} that arrive while no subscribers are connected to
-     * all late subscribers, as long as they subscribe within the replay window of 5 seconds. After the replay window
-     * has closed, it behaves like an emitter event dispatcher.
-     * <p>
-     * This allows controlling the memory overhead of dispatchers like {@link #buffering()} while still keeping a record
-     * of important events to all late subscribers, even after login has completed.
-     * <p>
-     * This dispatcher can be customized through the use of {@link ReplayingEventDispatcher#builder()}.
-     *
-     * @return an {@link EventDispatcher} that is capable of replaying events to late subscribers
-     */
-    static EventDispatcher replaying() {
-        return ReplayingEventDispatcher.create();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that is time-bounded and retains all elements whose age is at most {@code
-     * maxAge}, replaying them to late subscribers. Be aware that using this type of dispatcher with operators such
-     * as {@link Flux#retry()} or {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same
-     * elements as the backlog contains.
-     *
-     * @param maxAge the maximum age of the contained items
-     * @return an {@link EventDispatcher} that will replay elements up to {@code maxAge} duration to late subscribers
-     */
-    static EventDispatcher replayingWithTimeout(Duration maxAge) {
-        return builder()
-                .eventSink(spec -> spec.replay().limit(maxAge))
-                .build();
-    }
-
-    /**
-     * Create an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers.
-     * Be aware that using this type of dispatcher with operators such as {@link Flux#retry()} or
-     * {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same elements as the backlog contains.
-     *
-     * @param historySize the backlog size or maximum items retained for replay
-     * @return an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers
-     */
-    static EventDispatcher replayingWithSize(int historySize) {
-        return builder()
-                .eventSink(spec -> spec.replay().limit(historySize))
-                .build();
-    }
 
     interface Builder {
 

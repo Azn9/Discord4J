@@ -16,9 +16,9 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -40,15 +40,6 @@ public class IntegrationsUpdateEvent extends GuildEvent {
     }
 
     /**
-     * The {@link Snowflake} ID of the {@link Guild} involved in this event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} whose integrations have been updated.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
@@ -56,6 +47,15 @@ public class IntegrationsUpdateEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * The {@link Snowflake} ID of the {@link Guild} involved in this event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     @Override

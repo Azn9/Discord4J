@@ -32,20 +32,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
 
-    Possible<Integer> maxAge();
-
-    Possible<Integer> maxUses();
-
-    Possible<Boolean> temporary();
-
-    Possible<Boolean> unique();
-
-    Possible<Invite.Type> targetType();
-
-    Possible<Snowflake> targetUserId();
-
-    Possible<Snowflake> targetApplicationId();
-
     @Override
     default InviteCreateRequest asRequest() {
         return InviteCreateRequest.builder()
@@ -58,18 +44,25 @@ interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
                 .targetApplicationId(mapPossible(targetApplicationId(), Snowflake::asString))
                 .build();
     }
+    Possible<Integer> maxAge();
+    Possible<Integer> maxUses();
+    Possible<Boolean> temporary();
+    Possible<Boolean> unique();
+    Possible<Invite.Type> targetType();
+    Possible<Snowflake> targetUserId();
+    Possible<Snowflake> targetApplicationId();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class InviteCreateMonoGenerator extends Mono<ExtendedInvite> implements InviteCreateSpecGenerator {
 
-    abstract CategorizableChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super ExtendedInvite> actual) {
         channel().createInvite(InviteCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract CategorizableChannel channel();
 
     @Override
     public abstract String toString();

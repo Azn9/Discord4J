@@ -24,8 +24,8 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateFields;
-import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 

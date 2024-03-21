@@ -22,19 +22,16 @@ import java.time.Instant;
  */
 public class ExampleGuildScheduledEvents {
 
-    private static final Logger log = Loggers.getLogger(ExampleGuildScheduledEvents.class);
-
-    private static final String token = System.getenv("token");
-    private static final long guildId = Long.parseLong(System.getenv("guildId"));
-
     public static final String EVENT_NAME = "Guild event test";
     public static final String EVENT_DESCRIPTION = "This is a test event from a bot using Discord4J.";
     public static final String EVENT_LOCATION = "Somewhere, probably still on Earth";
+    private static final Logger log = Loggers.getLogger(ExampleGuildScheduledEvents.class);
+    private static final String token = System.getenv("token");
+    private static final long guildId = Long.parseLong(System.getenv("guildId"));
 
     public static void main(String[] args) {
         DiscordClient.create(token)
                 .withGateway(client -> {
-
 
 
                     // Logic to create a scheduled event on ready event
@@ -50,17 +47,19 @@ public class ExampleGuildScheduledEvents {
                                             .location(EVENT_LOCATION)
                                             .build())
                                     .scheduledStartTime(Instant.now().plusSeconds(3600)) // Start in one hour
-                                    .scheduledEndTime(Instant.now().plusSeconds(7200)) // End in two hours (required for external events)
+                                    .scheduledEndTime(Instant.now().plusSeconds(7200)) // End in two hours (required
+                                    // for external events)
                                     .build()
                             ))
                             // Advertise our event
-                            .doOnNext(event -> System.out.format("The created event ID is %d\n", event.getId().asLong()))
+                            .doOnNext(event -> System.out.format("The created event ID is %d\n",
+                                    event.getId().asLong()))
                             // Wait 10 seconds, then update the event
                             .delayElements(Duration.ofSeconds(10))
                             .flatMap(event -> event.edit(ScheduledEventEditSpec.builder()
-                                            .name("Edited " + EVENT_NAME)
-                                            .description(EVENT_DESCRIPTION)
-                                            .status(ScheduledEvent.Status.ACTIVE)
+                                    .name("Edited " + EVENT_NAME)
+                                    .description(EVENT_DESCRIPTION)
+                                    .status(ScheduledEvent.Status.ACTIVE)
                                     .build()))
                             // Wait a minute before deleting it
                             .delayElements(Duration.ofMinutes(1))

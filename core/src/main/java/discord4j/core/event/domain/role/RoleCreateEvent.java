@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain.role;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -42,15 +42,6 @@ public class RoleCreateEvent extends RoleEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was created in.
-     *
-     * @return The ID of the {@link Guild} the {@link Role} was created in.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} the {@link Role} was created in.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the {@link Guild}
@@ -59,6 +50,15 @@ public class RoleCreateEvent extends RoleEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was created in.
+     *
+     * @return The ID of the {@link Guild} the {@link Role} was created in.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

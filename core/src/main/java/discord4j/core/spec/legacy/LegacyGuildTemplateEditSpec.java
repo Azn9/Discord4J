@@ -56,8 +56,8 @@ public class LegacyGuildTemplateEditSpec implements LegacySpec<TemplateModifyReq
     @Override
     public TemplateModifyRequest asRequest() {
         return TemplateModifyRequest.builder()
-            .name(name)
-            .description(description)
-            .build();
+                .name(name)
+                .description(description)
+                .build();
     }
 }

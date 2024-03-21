@@ -18,8 +18,8 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.core.event.domain.Event;
 import discord4j.common.store.Store;
+import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,17 +28,6 @@ import reactor.core.publisher.Mono;
 @FunctionalInterface
 @Experimental
 public interface DispatchEventMapper {
-
-    /**
-     * Process a {@link DispatchContext} to potentially obtain an {@link Event}.
-     *
-     * @param context the DispatchContext used with this Dispatch object
-     * @param <D> the Dispatch type
-     * @param <E> the resulting Event type
-     * @return a {@link Mono} of {@link Event} mapped from the given {@link DispatchContext} object, or empty if no
-     * Event is produced. If an error occurs during processing, it is emitted through the {@code Mono}.
-     */
-    <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context);
 
     /**
      * Create a {@link DispatchEventMapper} that processes updates and records them into the right {@link Store},
@@ -80,4 +69,15 @@ public interface DispatchEventMapper {
             }
         };
     }
+
+    /**
+     * Process a {@link DispatchContext} to potentially obtain an {@link Event}.
+     *
+     * @param context the DispatchContext used with this Dispatch object
+     * @param <D> the Dispatch type
+     * @param <E> the resulting Event type
+     * @return a {@link Mono} of {@link Event} mapped from the given {@link DispatchContext} object, or empty if no
+     * Event is produced. If an error occurs during processing, it is emitted through the {@code Mono}.
+     */
+    <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context);
 }

@@ -75,12 +75,12 @@ public final class TextChannel extends BaseTopLevelGuildMessageChannel {
     @Deprecated
     public Mono<TextChannel> edit(final Consumer<? super LegacyTextChannelEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyTextChannelEditSpec mutatedSpec = new LegacyTextChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyTextChannelEditSpec mutatedSpec = new LegacyTextChannelEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(TextChannel.class);
     }
@@ -106,8 +106,8 @@ public final class TextChannel extends BaseTopLevelGuildMessageChannel {
     public Mono<TextChannel> edit(TextChannelEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(TextChannel.class);
     }

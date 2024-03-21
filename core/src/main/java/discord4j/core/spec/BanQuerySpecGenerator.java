@@ -33,13 +33,6 @@ import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 @Value.Immutable(singleton = true)
 interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
 
-    @Nullable
-    Integer deleteMessageSeconds();
-
-    @Deprecated
-    @Nullable
-    Integer deleteMessageDays();
-
     @Override
     default Map<String, Object> asRequest() {
         Map<String, Object> request = new HashMap<>(2);
@@ -48,20 +41,27 @@ interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
         putIfNotNull(request, "reason", reason());
         return request;
     }
+
+    @Nullable
+    Integer deleteMessageSeconds();
+
+    @Deprecated
+    @Nullable
+    Integer deleteMessageDays();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildBanQueryMonoGenerator extends Mono<Void> implements BanQuerySpecGenerator {
 
-    abstract Snowflake userId();
-
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         guild().ban(userId(), BanQuerySpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Snowflake userId();
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();
@@ -71,12 +71,12 @@ abstract class GuildBanQueryMonoGenerator extends Mono<Void> implements BanQuery
 @Value.Immutable(builder = false)
 abstract class MemberBanQueryMonoGenerator extends Mono<Void> implements BanQuerySpecGenerator {
 
-    abstract PartialMember member();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         member().ban(BanQuerySpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract PartialMember member();
 
     @Override
     public abstract String toString();

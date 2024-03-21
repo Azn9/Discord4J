@@ -16,6 +16,8 @@
  */
 /**
  * Classes supporting HTTP processes like encoding and decoding data.
+ * <p>
+ * Components used to work with Discord interactions feature.
  */
 /**
  * Components used to work with Discord interactions feature.

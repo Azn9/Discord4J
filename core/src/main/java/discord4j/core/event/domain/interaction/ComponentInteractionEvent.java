@@ -23,7 +23,10 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.*;
+import discord4j.core.spec.InteractionApplicationCommandCallbackEditMono;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpecDeferEditMono;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
@@ -93,7 +96,8 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      */
     public Snowflake getMessageId() {
         return getInteraction().getMessageId()
-                .orElseThrow(IllegalStateException::new); // at least the ID is always present for component interactions
+                .orElseThrow(IllegalStateException::new); // at least the ID is always present for component
+                // interactions
     }
 
     /**
@@ -175,8 +179,8 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
-    public InteractionApplicationCommandCallbackEditMono edit() {
-        return InteractionApplicationCommandCallbackEditMono.of(this);
+    public InteractionApplicationCommandCallbackEditMono edit(String content) {
+        return edit().withContent(content);
     }
 
     /**
@@ -193,8 +197,8 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
-    public InteractionApplicationCommandCallbackEditMono edit(String content) {
-        return edit().withContent(content);
+    public InteractionApplicationCommandCallbackEditMono edit() {
+        return InteractionApplicationCommandCallbackEditMono.of(this);
     }
 
     /**
@@ -235,7 +239,8 @@ public class ComponentInteractionEvent extends DeferrableInteractionEvent {
      */
     @Override
     public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, (InteractionApplicationCommandCallbackData) null);
+        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE,
+                (InteractionApplicationCommandCallbackData) null);
     }
 
     /**

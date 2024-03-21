@@ -88,17 +88,6 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
     }
 
     /**
-     * Gets the components from the modal
-     *
-     * @return The components from the modal
-     */
-    public List<MessageComponent> getComponents() {
-        return getInteraction().getCommandInteraction()
-                .map(ApplicationCommandInteraction::getComponents)
-                .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
-    }
-
-    /**
      * Gets the components from the modal that match the given component type.
      *
      * @param componentType the modal component type to return
@@ -121,6 +110,17 @@ public class ModalSubmitInteractionEvent extends ComponentInteractionEvent {
                     return Stream.empty();
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the components from the modal
+     *
+     * @return The components from the modal
+     */
+    public List<MessageComponent> getComponents() {
+        return getInteraction().getCommandInteraction()
+                .map(ApplicationCommandInteraction::getComponents)
+                .orElse(Collections.emptyList()); // the list should never actually be empty, but just in case
     }
 
     @Override

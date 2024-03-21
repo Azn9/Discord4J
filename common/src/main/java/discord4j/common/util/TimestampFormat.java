@@ -21,7 +21,8 @@ import java.time.Instant;
 /**
  * A utility class for formatting a Java {@link Instant} as a timestamp in Discord messages.
  *
- * @see <a href="https://discord.com/developers/docs/reference#message-formatting-timestamp-styles">Timestamp message formatting</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/reference#message-formatting-timestamp-styles">Timestamp message formatting</a>
  */
 public enum TimestampFormat {
     /**
@@ -33,19 +34,19 @@ public enum TimestampFormat {
      */
     SHORT_TIME("t"),
     /**
-     * Example: {@code 	16:20:30}
+     * Example: {@code    16:20:30}
      */
     LONG_TIME("T"),
     /**
-     * Example: {@code 	20/04/2021}
+     * Example: {@code    20/04/2021}
      */
     SHORT_DATE("d"),
     /**
-     * Example: {@code 	20 April 2021}
+     * Example: {@code    20 April 2021}
      */
     LONG_DATE("D"),
     /**
-     * Example: {@code 	20 April 2021 16:20}
+     * Example: {@code    20 April 2021 16:20}
      */
     SHORT_DATE_TIME("f"),
     /**
@@ -53,7 +54,7 @@ public enum TimestampFormat {
      */
     LONG_DATE_TIME("F"),
     /**
-     * Example: {@code 	2 months ago}
+     * Example: {@code    2 months ago}
      */
     RELATIVE_TIME("R");
 
@@ -65,6 +66,7 @@ public enum TimestampFormat {
 
     /**
      * Get the style (1 character) for this timestamp format. The default format returns an empty string.
+     *
      * @return The style character as a {@code String}
      */
     public String getStyle() {
@@ -79,9 +81,10 @@ public enum TimestampFormat {
      * @return The markdown representation of the {@code Instant} as a String.
      */
     public String format(Instant instant) {
-        if (style.isEmpty())
+        if (style.isEmpty()) {
             return "<t:" + instant.getEpochSecond() + ">";
-        else
+        } else {
             return "<t:" + instant.getEpochSecond() + ":" + style + ">";
+        }
     }
 }

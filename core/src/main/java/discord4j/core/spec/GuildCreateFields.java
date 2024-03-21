@@ -35,11 +35,6 @@ public final class GuildCreateFields {
         static PartialChannel of(String name, Channel.Type type) {
             return ImmutableGuildCreateFields.PartialChannel.of(name, type);
         }
-
-        String name();
-
-        Channel.Type type();
-
         @Override
         default PartialChannelCreateRequest asRequest() {
             return PartialChannelCreateRequest.builder()
@@ -47,5 +42,7 @@ public final class GuildCreateFields {
                     .type(type().getValue())
                     .build();
         }
+        String name();
+        Channel.Type type();
     }
 }

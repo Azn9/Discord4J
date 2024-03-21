@@ -34,14 +34,6 @@ import static discord4j.core.spec.InternalSpecUtils.*;
 @Value.Immutable
 interface GuildPruneSpecGenerator extends AuditSpec<Multimap<String, Object>> {
 
-    Integer days();
-
-    @Nullable
-    Set<Snowflake> roles();
-
-    @Nullable
-    Boolean computePruneCount();
-
     @Override
     default Multimap<String, Object> asRequest() {
         Multimap<String, Object> map = new Multimap<>();
@@ -52,18 +44,23 @@ interface GuildPruneSpecGenerator extends AuditSpec<Multimap<String, Object>> {
         setIfNotNull(map, "compute_prune_count", computePruneCount());
         return map;
     }
+    Integer days();
+    @Nullable
+    Set<Snowflake> roles();
+    @Nullable
+    Boolean computePruneCount();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildPruneMonoGenerator extends Mono<Integer> implements GuildPruneSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super Integer> actual) {
         guild().prune(GuildPruneSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

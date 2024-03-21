@@ -7,12 +7,11 @@ import org.immutables.value.Value;
 @Value.Immutable
 public interface ScheduledEventEntityMetadataSpecGenerator extends Spec<GuildScheduledEventEntityMetadataData> {
 
-    Possible<String> location();
-
     @Override
     default GuildScheduledEventEntityMetadataData asRequest() {
         return GuildScheduledEventEntityMetadataData.builder()
-            .location(location())
-            .build();
+                .location(location())
+                .build();
     }
+    Possible<String> location();
 }

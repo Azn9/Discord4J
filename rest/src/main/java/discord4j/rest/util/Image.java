@@ -31,15 +31,14 @@ import java.util.Objects;
  */
 public final class Image {
 
-    /**
-     * Constructs an {@code Image} utilizing raw image data.
-     *
-     * @param data The raw image data.
-     * @param format The {@link Format} of the data.
-     * @return An {@code Image} with raw image data.
-     */
-    public static Image ofRaw(final byte[] data, final Format format) {
-        return new Image(data, format);
+    /** The raw image data. */
+    private final byte[] data;
+    /** The format of the image. */
+    private final Format format;
+
+    private Image(byte[] data, Format format) {
+        this.data = data;
+        this.format = format;
     }
 
     /**
@@ -59,15 +58,15 @@ public final class Image {
                 }));
     }
 
-    /** The raw image data. */
-    private final byte[] data;
-
-    /** The format of the image. */
-    private final Format format;
-
-    private Image(byte[] data, Format format) {
-        this.data = data;
-        this.format = format;
+    /**
+     * Constructs an {@code Image} utilizing raw image data.
+     *
+     * @param data The raw image data.
+     * @param format The {@link Format} of the data.
+     * @return An {@code Image} with raw image data.
+     */
+    public static Image ofRaw(final byte[] data, final Format format) {
+        return new Image(data, format);
     }
 
     /**
@@ -89,15 +88,6 @@ public final class Image {
     }
 
     /**
-     * Gets the Base64-encoded data of the image.
-     *
-     * @return The Base64-encoded data of the image.
-     */
-    public String getHash() {
-        return Base64.getEncoder().encodeToString(data);
-    }
-
-    /**
      * Gets a data URI for this image.
      *
      * @return The data URI for this image.
@@ -106,12 +96,20 @@ public final class Image {
         return String.format("data:image/%s;base64,%s", format.extension, getHash());
     }
 
+    /**
+     * Gets the Base64-encoded data of the image.
+     *
+     * @return The Base64-encoded data of the image.
+     */
+    public String getHash() {
+        return Base64.getEncoder().encodeToString(data);
+    }
+
     @Override
-    public String toString() {
-        return "Image{" +
-                "data=" + Arrays.toString(data) +
-                ", format=" + format +
-                '}';
+    public int hashCode() {
+        int result = Objects.hash(format);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 
     @Override
@@ -128,10 +126,11 @@ public final class Image {
     }
 
     @Override
-    public int hashCode() {
-        int result = Objects.hash(format);
-        result = 31 * result + Arrays.hashCode(data);
-        return result;
+    public String toString() {
+        return "Image{" +
+                "data=" + Arrays.toString(data) +
+                ", format=" + format +
+                '}';
     }
 
     /**
@@ -171,15 +170,6 @@ public final class Image {
             this.extension = extension;
         }
 
-        /**
-         * Gets the file extension associated with this format.
-         *
-         * @return The file extension associated with this format.
-         */
-        public String getExtension() {
-            return extension;
-        }
-
         private static Format fromContentType(String contentType) {
             switch (contentType) {
                 case "image/jpeg": return JPEG;
@@ -188,6 +178,15 @@ public final class Image {
                 case "image/gif": return GIF;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the file extension associated with this format.
+         *
+         * @return The file extension associated with this format.
+         */
+        public String getExtension() {
+            return extension;
         }
     }
 }

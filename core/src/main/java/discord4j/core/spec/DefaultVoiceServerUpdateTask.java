@@ -34,16 +34,16 @@ public class DefaultVoiceServerUpdateTask implements VoiceServerUpdateTask {
     }
 
     @Override
+    public Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId) {
+        return onVoiceServerUpdates(guildId).next();
+    }
+
+    @Override
     public Flux<VoiceServerOptions> onVoiceServerUpdates(Snowflake guildId) {
         //noinspection DataFlowIssue
         return gateway.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
                 .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
                 .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
-    }
-
-    @Override
-    public Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId) {
-        return onVoiceServerUpdates(guildId).next();
     }
 }

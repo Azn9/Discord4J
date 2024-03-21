@@ -31,14 +31,16 @@ public class InteractionService extends RestService {
     }
 
     @Deprecated
-    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken, InteractionResponseData response) {
+    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken,
+                                                InteractionResponseData response) {
         return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
-            .body(response)
-            .exchange(getRouter())
-            .bodyToMono(Void.class);
+                .body(response)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
-    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken, MultipartRequest<InteractionResponseData> request) {
+    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken,
+                                                MultipartRequest<InteractionResponseData> request) {
         return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
                 .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))

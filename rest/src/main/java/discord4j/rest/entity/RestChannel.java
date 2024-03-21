@@ -171,19 +171,6 @@ public class RestChannel {
     }
 
     /**
-     * Request to create a message using a given {@link MessageCreateRequest} as body. If you want to include
-     * attachments to your message, see {@link #createMessage(MultipartRequest)}.
-     *
-     * @param request request body used to create a new message
-     * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
-     * error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
-     */
-    public Mono<MessageData> createMessage(MessageCreateRequest request) {
-        return restClient.getChannelService().createMessage(id, MultipartRequest.ofRequest(request));
-    }
-
-    /**
      * Request to create a message using a given {@link MultipartRequest} as body. A {@link MultipartRequest} is a
      * custom object allowing you to add attachments to a message.
      *
@@ -206,6 +193,19 @@ public class RestChannel {
      */
     public Mono<MessageData> createMessage(String content) {
         return createMessage(MessageCreateRequest.builder().content(content).build());
+    }
+
+    /**
+     * Request to create a message using a given {@link MessageCreateRequest} as body. If you want to include
+     * attachments to your message, see {@link #createMessage(MultipartRequest)}.
+     *
+     * @param request request body used to create a new message
+     * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
+     * error is received, it is emitted through the {@code Mono}.
+     * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
+     */
+    public Mono<MessageData> createMessage(MessageCreateRequest request) {
+        return restClient.getChannelService().createMessage(id, MultipartRequest.ofRequest(request));
     }
 
     /**
@@ -319,32 +319,32 @@ public class RestChannel {
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
         return Flux.from(messageIds)
-            .distinct()
-            .buffer(100)
-            .flatMap(ids -> {
-                final List<String> eligibleIds = new ArrayList<>(0);
-                final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
+                .distinct()
+                .buffer(100)
+                .flatMap(ids -> {
+                    final List<String> eligibleIds = new ArrayList<>(0);
+                    final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
 
-                for (final Snowflake id : ids) {
-                    if (id.getTimestamp().isBefore(timeLimit)) {
-                        ineligibleIds.add(id);
+                    for (final Snowflake id : ids) {
+                        if (id.getTimestamp().isBefore(timeLimit)) {
+                            ineligibleIds.add(id);
 
-                    } else {
-                        eligibleIds.add(id.asString());
+                        } else {
+                            eligibleIds.add(id.asString());
+                        }
                     }
-                }
 
-                if (eligibleIds.size() == 1) {
-                    ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
-                    eligibleIds.clear();
-                }
+                    if (eligibleIds.size() == 1) {
+                        ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
+                        eligibleIds.clear();
+                    }
 
-                return Mono.just(eligibleIds)
-                    .filter(chunk -> !chunk.isEmpty())
-                    .flatMap(chunk -> restClient.getChannelService()
-                        .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
-                    .thenMany(Flux.fromIterable(ineligibleIds));
-            });
+                    return Mono.just(eligibleIds)
+                            .filter(chunk -> !chunk.isEmpty())
+                            .flatMap(chunk -> restClient.getChannelService()
+                                    .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
+                            .thenMany(Flux.fromIterable(ineligibleIds));
+                });
     }
 
     /**
@@ -470,15 +470,19 @@ public class RestChannel {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestChannel that = (RestChannel) o;
-        return id == that.id;
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestChannel that = (RestChannel) o;
+        return id == that.id;
     }
 }

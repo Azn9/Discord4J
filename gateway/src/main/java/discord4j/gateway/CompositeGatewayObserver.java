@@ -27,13 +27,6 @@ class CompositeGatewayObserver implements GatewayObserver {
         this.observers = observers;
     }
 
-    @Override
-    public void onStateChange(ConnectionObserver.State newState, GatewayClient gatewayClient) {
-        for (GatewayObserver observer : observers) {
-            observer.onStateChange(newState, gatewayClient);
-        }
-    }
-
     static GatewayObserver compose(GatewayObserver first, GatewayObserver second) {
         if (first == GatewayObserver.NOOP_LISTENER) {
             return second;
@@ -80,5 +73,12 @@ class CompositeGatewayObserver implements GatewayObserver {
         }
 
         return new CompositeGatewayObserver(combinedObservers);
+    }
+
+    @Override
+    public void onStateChange(ConnectionObserver.State newState, GatewayClient gatewayClient) {
+        for (GatewayObserver observer : observers) {
+            observer.onStateChange(newState, gatewayClient);
+        }
     }
 }

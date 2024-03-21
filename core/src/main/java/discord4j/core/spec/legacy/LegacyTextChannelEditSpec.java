@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
@@ -23,7 +24,6 @@ import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -108,13 +108,15 @@ public class LegacyTextChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
      * @return This spec.
      */
     public LegacyTextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) : Possible.of(Optional.of(parentId.asString())));
+        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) :
+                Possible.of(Optional.of(parentId.asString())));
         return this;
     }
 
     /**
      * Sets the amount of seconds a user has to wait before sending another message to the modified
-     * {@link TextChannel}, from 0 to 21600 seconds. Does not affect bots or users with {@link Permission#MANAGE_MESSAGES} or
+     * {@link TextChannel}, from 0 to 21600 seconds. Does not affect bots or users with
+     * {@link Permission#MANAGE_MESSAGES} or
      * {@link Permission#MANAGE_CHANNELS} permissions.
      *
      * @param rateLimitPerUser The channel user rate limit, in seconds.
@@ -126,15 +128,15 @@ public class LegacyTextChannelEditSpec implements LegacyAuditSpec<ChannelModifyR
     }
 
     @Override
-    public LegacyTextChannelEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyTextChannelEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

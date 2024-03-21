@@ -39,11 +39,9 @@ import static discord4j.common.LogUtil.format;
  */
 public class LocalShardCoordinator implements ShardCoordinator {
 
-    private static final Logger log = Loggers.getLogger(LocalShardCoordinator.class);
-
     public static final Supplier<PayloadTransformer> DEFAULT_IDENTIFY_LIMITER_FACTORY =
             () -> new RateLimitTransformer(1, Duration.ofSeconds(6));
-
+    private static final Logger log = Loggers.getLogger(LocalShardCoordinator.class);
     private final Map<Integer, PayloadTransformer> limiters = new ConcurrentHashMap<>(1);
     private final Supplier<PayloadTransformer> identifyLimiterFactory;
     private final Set<Integer> shards = ConcurrentHashMap.newKeySet();
@@ -72,6 +70,11 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
+    public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int maxConcurrency) {
+        return limiters.computeIfAbsent(shardInfo.getIndex() % maxConcurrency, k -> identifyLimiterFactory.get());
+    }
+
+    @Override
     public Mono<Void> publishConnected(ShardInfo shardInfo) {
         return Mono.deferContextual(ctx -> {
             boolean isNew = shards.add(shardInfo.getIndex());
@@ -91,11 +94,6 @@ public class LocalShardCoordinator implements ShardCoordinator {
             }
             return Mono.empty();
         });
-    }
-
-    @Override
-    public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int maxConcurrency) {
-        return limiters.computeIfAbsent(shardInfo.getIndex() % maxConcurrency, k -> identifyLimiterFactory.get());
     }
 
     @Override

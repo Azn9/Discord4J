@@ -53,7 +53,8 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest<
     }
 
     @Override
-    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable MultipartRequest<?> body) {
+    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send,
+                                                      @Nullable MultipartRequest<?> body) {
         if (body == null) {
             return Mono.empty(); // or .error() ?
         }

@@ -16,14 +16,14 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.OverwriteData;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.OverwriteData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -46,7 +46,8 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     private final long channelId;
 
     /**
-     * Constructs a {@code ExtendedPermissionOverwrite} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs a {@code ExtendedPermissionOverwrite} with an associated {@link GatewayDiscordClient} and Discord
+     * data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -74,6 +75,15 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public Mono<Role> getRole() {
         return Mono.justOrEmpty(getRoleId()).flatMap(id -> gateway.getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Gets the ID of the guild associated to this overwrite.
+     *
+     * @return The ID of the guild associated to this overwrite.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -112,15 +122,6 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
-     * Gets the ID of the guild associated to this overwrite.
-     *
-     * @return The ID of the guild associated to this overwrite.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the guild associated to this overwrite.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} associated to this overwrite.
@@ -142,15 +143,6 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
-     * Gets the ID of the channel associated to this overwrite.
-     *
-     * @return The ID of the channel associated to this overwrite.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
-    }
-
-    /**
      * Requests to retrieve the channel associated to this overwrite.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} associated to this
@@ -158,6 +150,15 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public Mono<GuildChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(GuildChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel associated to this overwrite.
+     *
+     * @return The ID of the channel associated to this overwrite.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**

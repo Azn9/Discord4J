@@ -56,7 +56,8 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
 
     /** Default maximum amount of time in seconds to wait before a single IP discovery attempt times out. */
     private static final int DEFAULT_DISCOVERY_TIMEOUT = 5;
-
+    private final GatewayDiscordClient gateway;
+    private final VoiceChannel voiceChannel;
     private Duration timeout = Duration.ofSeconds(DEFAULT_TIMEOUT);
     private AudioProvider provider = AudioProvider.NO_OP;
     private AudioReceiver receiver = AudioReceiver.NO_OP;
@@ -66,9 +67,6 @@ public class LegacyVoiceChannelJoinSpec implements LegacySpec<Mono<VoiceConnecti
     private boolean selfMute;
     private Duration ipDiscoveryTimeout = Duration.ofSeconds(DEFAULT_DISCOVERY_TIMEOUT);
     private RetrySpec ipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
-
-    private final GatewayDiscordClient gateway;
-    private final VoiceChannel voiceChannel;
 
     public LegacyVoiceChannelJoinSpec(final GatewayDiscordClient gateway, final VoiceChannel voiceChannel) {
         this.gateway = Objects.requireNonNull(gateway);

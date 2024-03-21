@@ -95,15 +95,15 @@ public class LegacyRoleCreateSpec implements LegacyAuditSpec<RoleCreateRequest> 
     }
 
     @Override
-    public LegacyRoleCreateSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyRoleCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

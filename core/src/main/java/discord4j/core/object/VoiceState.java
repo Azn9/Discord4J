@@ -16,6 +16,7 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -23,7 +24,6 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.VoiceStateData;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -70,6 +70,16 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the guild this voice state is for.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return gateway.getGuildById(getGuildId());
+    }
+
+    /**
      * Gets the guild ID this voice state is for.
      *
      * @return The guild ID this voice state is for.
@@ -79,16 +89,6 @@ public final class VoiceState implements DiscordObject {
         // voice_states for a guild_create, we manually populate the field in GuildDispatchHandlers.guildCreate, so
         // it should always be present, making this safe.
         return Snowflake.of(data.guildId().toOptional().orElseThrow(IllegalStateException::new));
-    }
-
-    /**
-     * Requests to retrieve the guild this voice state is for.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this voice state is for. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -103,15 +103,6 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
-     * Gets the channel ID this user is connected to, if present.
-     *
-     * @return The channel ID this user is connected to, if present.
-     */
-    public Optional<Snowflake> getChannelId() {
-        return data.channelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the channel this user is connected to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
@@ -119,6 +110,15 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<VoiceChannel> getChannel() {
         return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
+    }
+
+    /**
+     * Gets the channel ID this user is connected to, if present.
+     *
+     * @return The channel ID this user is connected to, if present.
+     */
+    public Optional<Snowflake> getChannelId() {
+        return data.channelId().map(Snowflake::of);
     }
 
     /**
@@ -135,15 +135,6 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
-     * Gets the user ID this voice state is for.
-     *
-     * @return The user ID this voice state is for.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(data.userId());
-    }
-
-    /**
      * Requests to retrieve the user this voice state is for.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} this voice state is for. If an
@@ -151,6 +142,15 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<User> getUser() {
         return gateway.getUserById(getUserId());
+    }
+
+    /**
+     * Gets the user ID this voice state is for.
+     *
+     * @return The user ID this voice state is for.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(data.userId());
     }
 
     /**

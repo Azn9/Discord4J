@@ -54,6 +54,45 @@ public class RouteUtils {
         return buf.toString();
     }
 
+    private static String encodeUriPathSegment(@Nullable String source) {
+        if (source == null || source.isEmpty()) {
+            return "";
+        }
+
+        byte[] bytes = source.getBytes(UTF_8);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
+        boolean changed = false;
+        for (byte b : bytes) {
+            if (b < 0) {
+                b += 256;
+            }
+            if (isPathSegmentAllowed(b)) {
+                bos.write(b);
+            } else {
+                bos.write('%');
+                char hex1 = toUpperCase(forDigit((b >> 4) & 0xF, 16));
+                char hex2 = toUpperCase(forDigit(b & 0xF, 16));
+                bos.write(hex1);
+                bos.write(hex2);
+                changed = true;
+            }
+        }
+        return (changed ? new String(bos.toByteArray(), UTF_8) : source);
+    }
+
+    private static boolean isPathSegmentAllowed(int c) {
+        // unreserved      | alpha + digit
+        // unreserved      | - . _ ~
+        // sub-delimiter   | ! $ & ' ( )
+        // sub-delimiter   | * + , ; =
+        // other permitted | : @
+        return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9'
+                || c == '-' || c == '.' || c == '_' || c == '~'
+                || c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')'
+                || c == '*' || c == '+' || c == ',' || c == ';' || c == '='
+                || c == ':' || c == '@';
+    }
+
     @Experimental
     public static Map<String, String> createVariableMap(String template, Object... variables) {
         Map<String, String> variableMap = new LinkedHashMap<>();
@@ -94,44 +133,5 @@ public class RouteUtils {
             return complete.substring(start, end);
         }
         return null;
-    }
-
-    private static String encodeUriPathSegment(@Nullable String source) {
-        if (source == null || source.isEmpty()) {
-            return "";
-        }
-
-        byte[] bytes = source.getBytes(UTF_8);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(bytes.length);
-        boolean changed = false;
-        for (byte b : bytes) {
-            if (b < 0) {
-                b += 256;
-            }
-            if (isPathSegmentAllowed(b)) {
-                bos.write(b);
-            } else {
-                bos.write('%');
-                char hex1 = toUpperCase(forDigit((b >> 4) & 0xF, 16));
-                char hex2 = toUpperCase(forDigit(b & 0xF, 16));
-                bos.write(hex1);
-                bos.write(hex2);
-                changed = true;
-            }
-        }
-        return (changed ? new String(bos.toByteArray(), UTF_8) : source);
-    }
-
-    private static boolean isPathSegmentAllowed(int c) {
-        // unreserved      | alpha + digit
-        // unreserved      | - . _ ~
-        // sub-delimiter   | ! $ & ' ( )
-        // sub-delimiter   | * + , ; =
-        // other permitted | : @
-        return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9'
-                || c == '-' || c == '.' || c == '_' || c == '~'
-                || c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')'
-                || c == '*' || c == '+' || c == ',' || c == ';' || c == '='
-                || c == ':' || c == '@';
     }
 }

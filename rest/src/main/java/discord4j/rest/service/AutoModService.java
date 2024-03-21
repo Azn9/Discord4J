@@ -1,6 +1,8 @@
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.AutoModRuleCreateRequest;
+import discord4j.discordjson.json.AutoModRuleData;
+import discord4j.discordjson.json.AutoModRuleModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
@@ -26,7 +28,8 @@ public class AutoModService extends RestService {
                 .bodyToMono(AutoModRuleData.class);
     }
 
-    public Mono<AutoModRuleData> createAutoModRule(long guildId, AutoModRuleCreateRequest request, @Nullable String reason) {
+    public Mono<AutoModRuleData> createAutoModRule(long guildId, AutoModRuleCreateRequest request,
+                                                   @Nullable String reason) {
         return Routes.AUTO_MOD_RULE_MODIFY.newRequest(guildId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -34,7 +37,8 @@ public class AutoModService extends RestService {
                 .bodyToMono(AutoModRuleData.class);
     }
 
-    public Mono<AutoModRuleData> modifyAutoModRule(long guildId, long ruleId, AutoModRuleModifyRequest request, @Nullable String reason) {
+    public Mono<AutoModRuleData> modifyAutoModRule(long guildId, long ruleId, AutoModRuleModifyRequest request,
+                                                   @Nullable String reason) {
         return Routes.AUTO_MOD_RULE_MODIFY.newRequest(guildId, ruleId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)

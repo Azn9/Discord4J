@@ -16,13 +16,13 @@
  */
 package discord4j.core.event.domain.message;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -48,7 +48,8 @@ public class ReactionRemoveEvent extends MessageEvent {
     private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionRemoveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId,
+    public ReactionRemoveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId,
+                               long messageId,
                                @Nullable Long guildId, ReactionEmoji emoji) {
         super(gateway, shardInfo);
         this.userId = userId;
@@ -56,15 +57,6 @@ public class ReactionRemoveEvent extends MessageEvent {
         this.messageId = messageId;
         this.guildId = guildId;
         this.emoji = emoji;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link User} who's reaction has been removed.
-     *
-     * @return The ID of the {@link User} who's reaction has been removed.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(userId);
     }
 
     /**
@@ -78,13 +70,12 @@ public class ReactionRemoveEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} containing the {@link Message} the reaction
-     * was removed from.
+     * Gets the {@link Snowflake} ID of the {@link User} who's reaction has been removed.
      *
-     * @return The ID of the {@link MessageChannel} involved.
+     * @return The ID of the {@link User} who's reaction has been removed.
      */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     /**
@@ -98,12 +89,13 @@ public class ReactionRemoveEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was removed from.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} containing the {@link Message} the reaction
+     * was removed from.
      *
-     * @return The ID of the {@link Message} involved.
+     * @return The ID of the {@link MessageChannel} involved.
      */
-    public Snowflake getMessageId() {
-        return Snowflake.of(messageId);
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -117,13 +109,12 @@ public class ReactionRemoveEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Message} involved is in, if present.
-     * This may not be available if the {@code Message} was sent in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was removed from.
      *
-     * @return The ID of the {@link Guild} involved, if present.
+     * @return The ID of the {@link Message} involved.
      */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
     }
 
     /**
@@ -135,6 +126,16 @@ public class ReactionRemoveEvent extends MessageEvent {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Message} involved is in, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
+     *
+     * @return The ID of the {@link Guild} involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**

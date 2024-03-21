@@ -42,12 +42,12 @@ public class VoiceSupport {
 
     private final GatewayDiscordClient client;
 
-    public static VoiceSupport create(GatewayDiscordClient client) {
-        return new VoiceSupport(client);
-    }
-
     VoiceSupport(GatewayDiscordClient client) {
         this.client = client;
+    }
+
+    public static VoiceSupport create(GatewayDiscordClient client) {
+        return new VoiceSupport(client);
     }
 
     public Mono<Void> eventHandlers() {

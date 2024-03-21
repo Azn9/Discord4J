@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -26,7 +27,6 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -95,6 +95,20 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the user's username and discriminator separated by a # or its username if the user is using the new system
+     *
+     * @return {@link User#getUsername()}#{@link User#getDiscriminator()} if the user is not migrated,
+     * {@link User#getUsername()} otherwise.
+     */
+    public final String getTag() {
+        if (isMigrated()) {
+            return getUsername();
+        }
+
+        return getUsername() + "#" + getDiscriminator();
+    }
+
+    /**
      * Gets the user's username.
      * May or may not be unique across the platform (due to the system ongoing change)
      *
@@ -102,6 +116,15 @@ public class User implements Entity {
      */
     public final String getUsername() {
         return data.username();
+    }
+
+    /**
+     * Returns whether the user is migrated to the new system or not.
+     *
+     * @return true if the user is migrated to the new system
+     */
+    private boolean isMigrated() {
+        return getDiscriminator() == null || getDiscriminator().equals("0");
     }
 
     /**
@@ -121,35 +144,13 @@ public class User implements Entity {
     }
 
     /**
-     * Returns whether the user is migrated to the new system or not.
+     * Gets the user's avatar. This is the avatar at the url given by {@link #getAvatarUrl(Image.Format)}.
      *
-     * @return true if the user is migrated to the new system
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
-    private boolean isMigrated() {
-        return getDiscriminator() == null || getDiscriminator().equals("0");
-    }
-
-    /**
-     * Gets the user's username and discriminator separated by a # or its username if the user is using the new system
-     *
-     * @return {@link User#getUsername()}#{@link User#getDiscriminator()} if the user is not migrated, {@link User#getUsername()} otherwise.
-     */
-    public final String getTag() {
-        if (isMigrated()) {
-            return getUsername();
-        }
-
-        return getUsername() + "#" + getDiscriminator();
-    }
-
-    /**
-     * Gets if the user's avatar is animated.
-     *
-     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
-     */
-    public final boolean hasAnimatedAvatar() {
-        final String avatar = data.avatar().orElse(null);
-        return (avatar != null) && avatar.startsWith("a_");
+    public Mono<Image> getAvatar(final Image.Format format) {
+        return Mono.justOrEmpty(getAvatarUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -163,6 +164,21 @@ public class User implements Entity {
                 String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
+    @Override
+    public final Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the user's effective avatar. This is the avatar at the url given by {@link #getAvatarUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getAvatar() {
+        return Image.ofUrl(getAvatarUrl());
+    }
+
     /**
      * Gets the user's effective avatar URL.
      *
@@ -174,23 +190,13 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar. This is the avatar at the url given by {@link #getAvatarUrl(Image.Format)}.
+     * Gets if the user's avatar is animated.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
-    public Mono<Image> getAvatar(final Image.Format format) {
-        return Mono.justOrEmpty(getAvatarUrl(format)).flatMap(Image::ofUrl);
-    }
-
-    /**
-     * Gets the user's effective avatar. This is the avatar at the url given by {@link #getAvatarUrl()}.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<Image> getAvatar() {
-        return Image.ofUrl(getAvatarUrl());
+    public final boolean hasAnimatedAvatar() {
+        final String avatar = data.avatar().orElse(null);
+        return (avatar != null) && avatar.startsWith("a_");
     }
 
     /**
@@ -207,13 +213,13 @@ public class User implements Entity {
     }
 
     /**
-     * Gets if the user's banner is animated.
+     * Gets the user's banner. This is the banner at the url given by {@link #getBannerUrl(Image.Format)}.
      *
-     * @return {@code true} if the user's banner is animated, {@code false} otherwise.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
-    public final boolean hasAnimatedBanner() {
-        final String banner = Possible.flatOpt(data.banner()).orElse(null);
-        return (banner != null) && banner.startsWith("a_");
+    public Mono<Image> getBanner(final Image.Format format) {
+        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -228,6 +234,16 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the user's effective banner. This is the banner at the url given by {@link #getBannerUrl()}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Image> getBanner() {
+        return Mono.justOrEmpty(getBannerUrl()).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the user's effective banner URL.
      *
      * @return The user's effective banner URL.
@@ -238,23 +254,13 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's banner. This is the banner at the url given by {@link #getBannerUrl(Image.Format)}.
+     * Gets if the user's banner is animated.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return {@code true} if the user's banner is animated, {@code false} otherwise.
      */
-    public Mono<Image> getBanner(final Image.Format format) {
-        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
-    }
-
-    /**
-     * Gets the user's effective banner. This is the banner at the url given by {@link #getBannerUrl()}.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the user. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<Image> getBanner() {
-        return Mono.justOrEmpty(getBannerUrl()).flatMap(Image::ofUrl);
+    public final boolean hasAnimatedBanner() {
+        final String banner = Possible.flatOpt(data.banner()).orElse(null);
+        return (banner != null) && banner.startsWith("a_");
     }
 
     /**
@@ -284,11 +290,6 @@ public class User implements Entity {
      */
     public final String getMention() {
         return "<@" + getId().asString() + ">";
-    }
-
-    @Override
-    public final Snowflake getId() {
-        return Snowflake.of(data.id());
     }
 
     /**
@@ -341,17 +342,27 @@ public class User implements Entity {
     }
 
     @Override
+    public final int hashCode() {
+        return EntityUtil.hashCode(this);
+    }
+
+    @Override
     public final boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 
     @Override
-    public final int hashCode() {
-        return EntityUtil.hashCode(this);
+    public String toString() {
+        return "User{" +
+                "data=" + data +
+                '}';
     }
 
-    /** Describes the flags of a user.
-     * @see <a href="https://discord.com/developers/docs/resources/user#user-object-user-flags">Discord Docs - User Flags</a>
+    /**
+     * Describes the flags of a user.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/user#user-object-user-flags">Discord Docs - User Flags</a>
      **/
     public enum Flag {
         DISCORD_EMPLOYEE(0),
@@ -401,24 +412,6 @@ public class User implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of user. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -435,12 +428,23 @@ public class User implements Entity {
             }
             return userFlags;
         }
-    }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

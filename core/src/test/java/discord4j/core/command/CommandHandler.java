@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 
 class CommandHandler implements Function<CommandContext, Publisher<Void>>, Predicate<CommandContext> {
 
+    static CommandHandler NOOP_HANDLER = new CommandHandler(ctx -> false, ctx -> Mono.empty());
     final Predicate<? super CommandContext> condition;
     final Function<? super CommandContext, ? extends Publisher<Void>> handler;
 
@@ -45,6 +46,4 @@ class CommandHandler implements Function<CommandContext, Publisher<Void>>, Predi
     public boolean test(CommandContext request) {
         return condition.test(request);
     }
-
-    static CommandHandler NOOP_HANDLER = new CommandHandler(ctx -> false, ctx -> Mono.empty());
 }

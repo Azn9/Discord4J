@@ -39,28 +39,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequest>> {
 
-    Possible<Optional<String>> content();
-
-    Possible<Optional<List<EmbedCreateSpec>>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<Optional<AllowedMentions>> allowedMentions();
-
-    Possible<Optional<List<Message.Flag>>> flags();
-
-    Possible<Optional<List<LayoutComponent>>> components();
-
-    Possible<Optional<List<Attachment>>> attachments();
-
     @Override
     default MultipartRequest<MessageEditRequest> asRequest() {
         MessageEditRequest json = MessageEditRequest.builder()
@@ -84,18 +62,32 @@ interface MessageEditSpecGenerator extends Spec<MultipartRequest<MessageEditRequ
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<Optional<String>> content();
+    Possible<Optional<List<EmbedCreateSpec>>> embeds();
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    Possible<Optional<AllowedMentions>> allowedMentions();
+    Possible<Optional<List<Message.Flag>>> flags();
+    Possible<Optional<List<LayoutComponent>>> components();
+    Possible<Optional<List<Attachment>>> attachments();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class MessageEditMonoGenerator extends Mono<Message> implements MessageEditSpecGenerator {
 
-    abstract Message message();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         message().edit(MessageEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Message message();
 
     @Override
     public abstract String toString();

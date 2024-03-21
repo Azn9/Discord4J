@@ -28,20 +28,6 @@ import java.util.List;
 public interface ExchangeStrategies {
 
     /**
-     * Retrieve the list of writer strategies to convert a request body.
-     *
-     * @return a list of writer strategies
-     */
-    List<WriterStrategy<?>> writers();
-
-    /**
-     * Retrieve the list of reader strategies to convert a response body.
-     *
-     * @return a list of reader strategies
-     */
-    List<ReaderStrategy<?>> readers();
-
-    /**
      * Return an {@link discord4j.rest.http.ExchangeStrategies} using the defaults for processing JSON requests using
      * Jackson.
      *
@@ -60,6 +46,18 @@ public interface ExchangeStrategies {
         readerStrategies.add(new FallbackReaderStrategy());
         return new DefaultExchangeStrategies(writerStrategies, readerStrategies);
     }
+    /**
+     * Retrieve the list of writer strategies to convert a request body.
+     *
+     * @return a list of writer strategies
+     */
+    List<WriterStrategy<?>> writers();
+    /**
+     * Retrieve the list of reader strategies to convert a response body.
+     *
+     * @return a list of reader strategies
+     */
+    List<ReaderStrategy<?>> readers();
 
     /**
      * A mutable builder for creating an {@link discord4j.rest.http.ExchangeStrategies}

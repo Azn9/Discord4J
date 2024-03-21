@@ -25,8 +25,7 @@ import reactor.util.annotation.Nullable;
 /**
  * LegacySpec used to create guild channel {@link Invite} objects.
  *
- * @see
- * <a href="https://discord.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
  */
 public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateRequest> {
 
@@ -118,15 +117,15 @@ public class LegacyInviteCreateSpec implements LegacyAuditSpec<InviteCreateReque
     }
 
     @Override
-    public LegacyInviteCreateSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyInviteCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

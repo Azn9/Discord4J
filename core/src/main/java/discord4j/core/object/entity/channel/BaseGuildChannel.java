@@ -52,10 +52,15 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
 
     @Override
+    public String toString() {
+        return "BaseGuildChannel{} " + super.toString();
+    }
+
+    @Override
     public final Snowflake getGuildId() {
         return getData().guildId().toOptional()
-            .map(Snowflake::of)
-            .orElseThrow(IllegalStateException::new); // TODO
+                .map(Snowflake::of)
+                .orElseThrow(IllegalStateException::new); // TODO
     }
 
     @Override
@@ -71,14 +76,15 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public final Set<ExtendedPermissionOverwrite> getPermissionOverwrites() {
         return getData().permissionOverwrites().toOptional()
-            .map(permissionOverwrites -> {
-                long guildId = getGuildId().asLong();
-                long channelId = getId().asLong();
-                return permissionOverwrites.stream()
-                    .map(overwriteData -> new ExtendedPermissionOverwrite(getClient(), overwriteData, guildId, channelId))
-                    .collect(Collectors.toSet());
-            })
-            .orElse(Collections.emptySet());
+                .map(permissionOverwrites -> {
+                    long guildId = getGuildId().asLong();
+                    long channelId = getId().asLong();
+                    return permissionOverwrites.stream()
+                            .map(overwriteData -> new ExtendedPermissionOverwrite(getClient(), overwriteData,
+                                    guildId, channelId))
+                            .collect(Collectors.toSet());
+                })
+                .orElse(Collections.emptySet());
     }
 
     @Override
@@ -98,7 +104,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
         return getClient().getMemberById(getGuildId(), memberId)
-            .flatMap(this::getEffectivePermissions);
+                .flatMap(this::getEffectivePermissions);
     }
 
     @Override
@@ -119,13 +125,13 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public final String getName() {
         return getData().name().toOptional()
-            .orElseThrow(IllegalStateException::new);
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override
     public int getRawPosition() {
         return getData().position().toOptional()
-            .orElseThrow(IllegalStateException::new);
+                .orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -165,8 +171,5 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
                 .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
     }
 
-    @Override
-    public String toString() {
-        return "BaseGuildChannel{} " + super.toString();
-    }
+
 }

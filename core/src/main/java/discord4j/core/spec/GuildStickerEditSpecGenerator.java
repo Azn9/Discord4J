@@ -27,12 +27,6 @@ import reactor.core.publisher.Mono;
 @Value.Immutable(singleton = true)
 interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<String> description();
-
-    Possible<String> tags();
-
     @Override
     default GuildStickerModifyRequest asRequest() {
         return GuildStickerModifyRequest.builder()
@@ -41,6 +35,9 @@ interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequ
                 .tags(tags())
                 .build();
     }
+    Possible<String> name();
+    Possible<String> description();
+    Possible<String> tags();
 
 }
 
@@ -48,12 +45,12 @@ interface GuildStickerEditSpecGenerator extends AuditSpec<GuildStickerModifyRequ
 @Value.Immutable(builder = false)
 abstract class GuildStickerEditMonoGenerator extends Mono<GuildSticker> implements GuildStickerEditSpecGenerator {
 
-    abstract GuildSticker sticker();
-
     @Override
     public void subscribe(CoreSubscriber<? super GuildSticker> actual) {
         sticker().edit(GuildStickerEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GuildSticker sticker();
 
     @Override
     public abstract String toString();

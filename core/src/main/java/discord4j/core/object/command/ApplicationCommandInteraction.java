@@ -68,7 +68,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
-     * Gets	the id of the invoked command.
+     * Gets the id of the invoked command.
      *
      * @return The id of the invoked command.
      */
@@ -185,9 +185,11 @@ public class ApplicationCommandInteraction implements DiscordObject {
 
     @Override
     public String toString() {
-        return "ApplicationCommandInteraction{" +
-                "data=" + data +
-                ", guildId=" + guildId +
-                '}';
+        return "ApplicationCommandInteraction{"
+                + "data="
+                + data
+                + ", guildId="
+                + guildId
+                + '}';
     }
 }

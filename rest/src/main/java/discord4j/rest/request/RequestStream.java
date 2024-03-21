@@ -84,7 +84,7 @@ class RequestStream {
      */
     private reactor.util.retry.Retry serverErrorRetryFactory() {
         return Retry.withThrowable(reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503,
-                504, 520))
+                        504, 520))
                 .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
@@ -111,6 +111,12 @@ class RequestStream {
                 .subscribe(requestSubscriber);
     }
 
+    private void onDiscard(RequestCorrelation<?> requestCorrelation) {
+        requestsInFlight.decrementAndGet();
+        requestCorrelation.getResponse()
+                .emitError(new DiscardedRequestException(requestCorrelation.getRequest()), FAIL_FAST);
+    }
+
     void stop() {
         stopCallback.emitEmpty(FAIL_FAST);
     }
@@ -123,16 +129,11 @@ class RequestStream {
     }
 
     /**
-     * @return the sum of requests still in the queue, as well as any potential request being processed or waiting for ratelimits to reset
+     * @return the sum of requests still in the queue, as well as any potential request being processed or waiting
+     * for ratelimits to reset
      */
     long countRequestsInFlight() {
         return requestsInFlight.get();
-    }
-
-    private void onDiscard(RequestCorrelation<?> requestCorrelation) {
-        requestsInFlight.decrementAndGet();
-        requestCorrelation.getResponse()
-                .emitError(new DiscardedRequestException(requestCorrelation.getRequest()), FAIL_FAST);
     }
 
     /**
@@ -142,13 +143,9 @@ class RequestStream {
      */
     private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
-        private volatile Instant resetAt = Instant.EPOCH;
         private final Function<ClientResponse, Mono<ClientResponse>> responseFunction;
         private final Runnable processedCallback;
-
-        public Instant getResetAt() {
-            return resetAt;
-        }
+        private volatile Instant resetAt = Instant.EPOCH;
 
         public RequestSubscriber(RateLimitStrategy strategy, Runnable processedCallback) {
             this.processedCallback = processedCallback;
@@ -184,6 +181,10 @@ class RequestStream {
                     return action.thenReturn(response);
                 }
             };
+        }
+
+        public Instant getResetAt() {
+            return resetAt;
         }
 
         @Override
@@ -231,15 +232,16 @@ class RequestStream {
 
         private void next(SignalType signal) {
             Duration wait = Duration.between(Instant.now(), resetAt);
-            Mono<Long> timer = wait.isNegative() || wait.isZero() ? Mono.just(0L) : Mono.delay(wait, timedTaskScheduler);
+            Mono<Long> timer = wait.isNegative() || wait.isZero() ? Mono.just(0L) : Mono.delay(wait,
+                    timedTaskScheduler);
             timer
-                .doFinally(__ -> processedCallback.run())
-                .subscribe(l -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
-                    }
-                    request(1);
-                }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
+                    .doFinally(__ -> processedCallback.run())
+                    .subscribe(l -> {
+                        if (log.isDebugEnabled()) {
+                            log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
+                        }
+                        request(1);
+                    }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
         }
 
         @Override

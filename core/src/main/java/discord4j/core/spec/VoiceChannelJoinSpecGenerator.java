@@ -56,72 +56,6 @@ interface VoiceChannelJoinSpecGenerator extends Spec<Function<VoiceChannel, Mono
      * Default maximum amount of time in seconds to wait before a single IP discovery attempt times out.
      */
     int DEFAULT_DISCOVERY_TIMEOUT = 5;
-
-    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
-        return gateway.getEventDispatcher()
-                .on(VoiceStateUpdateEvent.class)
-                .filter(vsu -> {
-                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
-                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
-                    // this update is for the bot (current) user in this guild
-                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
-                });
-    }
-
-    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
-        return gateway.getEventDispatcher()
-                .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
-                .next();
-    }
-
-    @Value.Default
-    default Duration timeout() {
-        return Duration.ofSeconds(DEFAULT_TIMEOUT);
-    }
-
-    @Value.Default
-    default AudioProvider provider() {
-        return AudioProvider.NO_OP;
-    }
-
-    @Value.Default
-    @Deprecated
-    default AudioReceiver receiver() {
-        return AudioReceiver.NO_OP;
-    }
-
-    @Value.Default
-    default VoiceSendTaskFactory sendTaskFactory() {
-        return new LocalVoiceSendTaskFactory();
-    }
-
-    @Value.Default
-    @Deprecated
-    default VoiceReceiveTaskFactory receiveTaskFactory() {
-        return new LocalVoiceReceiveTaskFactory();
-    }
-
-    @Value.Default
-    default boolean selfDeaf() {
-        return false;
-    }
-
-    @Value.Default
-    default boolean selfMute() {
-        return false;
-    }
-
-    @Value.Default
-    default Duration ipDiscoveryTimeout() {
-        return Duration.ofSeconds(DEFAULT_DISCOVERY_TIMEOUT);
-    }
-
-    @Value.Default
-    default RetrySpec ipDiscoveryRetrySpec() {
-        return RetrySpec.maxInARow(1);
-    }
-
     @Override
     default Function<VoiceChannel, Mono<VoiceConnection>> asRequest() {
         return voiceChannel -> {
@@ -201,18 +135,72 @@ interface VoiceChannelJoinSpecGenerator extends Spec<Function<VoiceChannel, Mono
                     .switchIfEmpty(newConnection);
         };
     }
+    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceStateUpdateEvent.class)
+                .filter(vsu -> {
+                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
+                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
+                    // this update is for the bot (current) user in this guild
+                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
+                });
+    }
+    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceServerUpdateEvent.class)
+                .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
+                .next();
+    }
+    @Value.Default
+    default Duration timeout() {
+        return Duration.ofSeconds(DEFAULT_TIMEOUT);
+    }
+    @Value.Default
+    default AudioProvider provider() {
+        return AudioProvider.NO_OP;
+    }
+    @Value.Default
+    @Deprecated
+    default AudioReceiver receiver() {
+        return AudioReceiver.NO_OP;
+    }
+    @Value.Default
+    default VoiceSendTaskFactory sendTaskFactory() {
+        return new LocalVoiceSendTaskFactory();
+    }
+    @Value.Default
+    @Deprecated
+    default VoiceReceiveTaskFactory receiveTaskFactory() {
+        return new LocalVoiceReceiveTaskFactory();
+    }
+    @Value.Default
+    default boolean selfDeaf() {
+        return false;
+    }
+    @Value.Default
+    default boolean selfMute() {
+        return false;
+    }
+    @Value.Default
+    default Duration ipDiscoveryTimeout() {
+        return Duration.ofSeconds(DEFAULT_DISCOVERY_TIMEOUT);
+    }
+    @Value.Default
+    default RetrySpec ipDiscoveryRetrySpec() {
+        return RetrySpec.maxInARow(1);
+    }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class VoiceChannelJoinMonoGenerator extends Mono<VoiceConnection> implements VoiceChannelJoinSpecGenerator {
 
-    abstract VoiceChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super VoiceConnection> actual) {
         channel().join(VoiceChannelJoinSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract VoiceChannel channel();
 
     @Override
     public abstract String toString();

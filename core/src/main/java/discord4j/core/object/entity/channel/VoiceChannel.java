@@ -103,12 +103,12 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
     @Deprecated
     public Mono<VoiceChannel> edit(final Consumer<? super LegacyVoiceChannelEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyVoiceChannelEditSpec mutatedSpec = new LegacyVoiceChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyVoiceChannelEditSpec mutatedSpec = new LegacyVoiceChannelEditSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getChannelService()
+                                    .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
     }
@@ -134,22 +134,10 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
     public Mono<VoiceChannel> edit(VoiceChannelEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getChannelService()
-                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getChannelService()
+                                .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the voice states of this voice channel.
-     *
-     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<VoiceState> getVoiceStates() {
-        return Flux.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
-                .map(data -> new VoiceState(getClient(), data));
     }
 
     /**
@@ -263,6 +251,18 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
     }
 
     /**
+     * Requests to retrieve the voice states of this voice channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<VoiceState> getVoiceStates() {
+        return Flux.from(getClient().getGatewayResources().getStore()
+                        .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
+                .map(data -> new VoiceState(getClient(), data));
+    }
+
+    /**
      * Returns the current voice connection registered for this voice channel's guild.
      *
      * @return A {@link Mono} of {@link VoiceConnection} for this voice channel's guild if present, or empty otherwise.
@@ -305,16 +305,8 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the video quality mode. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+         * Gets the video quality mode. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will equal
          * ({@link #equals(Object)}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
@@ -326,6 +318,15 @@ public final class VoiceChannel extends BaseTopLevelGuildMessageChannel {
                 case 2: return FULL;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

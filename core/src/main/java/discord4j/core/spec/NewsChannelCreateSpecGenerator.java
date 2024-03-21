@@ -36,20 +36,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable
 interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
-    String name();
-
-    Possible<String> topic();
-
-    Possible<Integer> position();
-
-    Possible<Integer> rateLimitPerUser();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
-    Possible<Snowflake> parentId();
-
-    Possible<Boolean> nsfw();
-
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
@@ -65,18 +51,25 @@ interface NewsChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest>
                 .nsfw(nsfw())
                 .build();
     }
+    String name();
+    Possible<String> topic();
+    Possible<Integer> position();
+    Possible<Integer> rateLimitPerUser();
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Snowflake> parentId();
+    Possible<Boolean> nsfw();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class NewsChannelCreateMonoGenerator extends Mono<NewsChannel> implements NewsChannelCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super NewsChannel> actual) {
         guild().createNewsChannel(NewsChannelCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

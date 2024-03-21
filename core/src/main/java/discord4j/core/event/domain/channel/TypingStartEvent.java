@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -57,21 +57,13 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the user has started typing in.
-     *
-     * @return the ID of the {@link MessageChannel} the {@link User} is typing in.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
-    }
-
-    /**
      * Gets the {@link Snowflake} ID of the {@link Guild} the user has started typing in, if this happened in a guild.
      *
-     * @return The {@link Snowflake} ID of the {@link Guild} the user has started typing in, if this happened in a guild.
+     * @return The {@link Snowflake} ID of the {@link Guild} the user has started typing in, if this happened in a
+     * guild.
      */
     public Optional<Snowflake> getGuildId() {
-       return Optional.ofNullable(guildId).map(Snowflake::of);
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -85,12 +77,12 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link User} who has started typing in this event.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the user has started typing in.
      *
-     * @return The ID of the {@link User} who has started typing.
+     * @return the ID of the {@link MessageChannel} the {@link User} is typing in.
      */
-    public Snowflake getUserId() {
-        return Snowflake.of(userId);
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -101,6 +93,15 @@ public class TypingStartEvent extends ChannelEvent {
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link User} who has started typing in this event.
+     *
+     * @return The ID of the {@link User} who has started typing.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     /**
