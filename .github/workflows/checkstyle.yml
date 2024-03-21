@@ -14,8 +14,9 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: 'github-pr-check'
-          tool_name: 'Validate codestyle'
+          tool_name: 'reviewdog'
           checkstyle_config: 'checkstyle.xml'
           level: 'error'
           fail_on_error: 'true'
           properties_file: 'checkstyle.xml'
+          checkstyle_version: '10.13.0'
