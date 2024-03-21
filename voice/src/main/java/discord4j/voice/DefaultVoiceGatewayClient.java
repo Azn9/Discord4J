@@ -29,7 +29,16 @@ import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.sinks.EmissionStrategy;
 import discord4j.common.util.Snowflake;
-import discord4j.voice.json.*;
+import discord4j.voice.json.Heartbeat;
+import discord4j.voice.json.Hello;
+import discord4j.voice.json.Identify;
+import discord4j.voice.json.Ready;
+import discord4j.voice.json.Resume;
+import discord4j.voice.json.Resumed;
+import discord4j.voice.json.SelectProtocol;
+import discord4j.voice.json.SentSpeaking;
+import discord4j.voice.json.SessionDescription;
+import discord4j.voice.json.VoiceGatewayPayload;
 import discord4j.voice.retry.VoiceGatewayException;
 import discord4j.voice.retry.VoiceGatewayReconnectException;
 import discord4j.voice.retry.VoiceGatewayRetrySpec;
@@ -39,7 +48,10 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.Sinks;
 import reactor.function.TupleUtils;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
@@ -281,10 +293,13 @@ public class DefaultVoiceGatewayClient {
                                             PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
                                             Consumer<Boolean> speakingSender = speaking -> emissionStrategy.emitNext(
                                                     outbound, new SentSpeaking(speaking, 0, ssrc));
-                                            innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
-                                            innerCleanup.add(sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
+                                            innerCleanup.add(() -> log.debug(format(context,
+                                                    "Disposing voice tasks")));
+                                            innerCleanup.add(sendTaskFactory.create(
+                                                    reactorResources.getSendTaskScheduler(),
                                                     speakingSender, voiceSocket::send, audioProvider, transformer));
-                                            innerCleanup.add(receiveTaskFactory.create(reactorResources.getReceiveTaskScheduler(),
+                                            innerCleanup.add(receiveTaskFactory.create(
+                                                    reactorResources.getReceiveTaskScheduler(),
                                                     voiceSocket.getInbound(), transformer, audioReceiver));
                                             voiceConnectionSink.success(acquireConnection());
                                         } else if (payload instanceof Resumed) {
@@ -365,11 +380,6 @@ public class DefaultVoiceGatewayClient {
             }
 
             @Override
-            public Mono<Void> reconnect() {
-                return reconnect(VoiceGatewayReconnectException::new);
-            }
-
-            @Override
             public Mono<Void> reconnect(Function<ContextView, Throwable> errorCause) {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ?
@@ -381,6 +391,11 @@ public class DefaultVoiceGatewayClient {
                                                 .next()) :
                                 Mono.error(new IllegalStateException("Voice connection has already disconnected")))
                         .then();
+            }
+
+            @Override
+            public Mono<Void> reconnect() {
+                return reconnect(VoiceGatewayReconnectException::new);
             }
         };
     }

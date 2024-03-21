@@ -21,17 +21,6 @@ import discord4j.common.store.api.StoreAction;
 
 public class CountInGuildAction implements StoreAction<Long> {
 
-    public enum InGuildEntity {
-        CHANNELS,
-        EMOJIS,
-        STICKERS,
-        MEMBERS,
-        MEMBERS_EXACT,
-        PRESENCES,
-        ROLES,
-        VOICE_STATES
-    }
-
     private final InGuildEntity entity;
     private final long guildId;
 
@@ -46,5 +35,16 @@ public class CountInGuildAction implements StoreAction<Long> {
 
     public long getGuildId() {
         return guildId;
+    }
+
+    public enum InGuildEntity {
+        CHANNELS,
+        EMOJIS,
+        STICKERS,
+        MEMBERS,
+        MEMBERS_EXACT,
+        PRESENCES,
+        ROLES,
+        VOICE_STATES
     }
 }

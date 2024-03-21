@@ -137,15 +137,19 @@ public class RestRole {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestRole restRole = (RestRole) o;
-        return guildId == restRole.guildId && id == restRole.id;
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(guildId, id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestRole restRole = (RestRole) o;
+        return guildId == restRole.guildId && id == restRole.id;
     }
 }

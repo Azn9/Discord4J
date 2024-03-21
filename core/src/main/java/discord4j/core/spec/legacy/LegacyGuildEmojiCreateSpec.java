@@ -16,10 +16,10 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.HashSet;
@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
  */
 public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCreateRequest> {
 
+    private final Set<Snowflake> roles = new HashSet<>();
     private String name;
     private String image;
-    private final Set<Snowflake> roles = new HashSet<>();
     @Nullable
     private String reason;
 
@@ -73,15 +73,15 @@ public class LegacyGuildEmojiCreateSpec implements LegacyAuditSpec<GuildEmojiCre
     }
 
     @Override
-    public LegacyGuildEmojiCreateSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyGuildEmojiCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

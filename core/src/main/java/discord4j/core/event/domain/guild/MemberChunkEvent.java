@@ -65,15 +65,6 @@ public class MemberChunkEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in this event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} involved in the event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
@@ -81,6 +72,15 @@ public class MemberChunkEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in this event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

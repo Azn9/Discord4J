@@ -62,7 +62,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *     .transform(channel::bulkDelete)
      * }
      * </pre>
-     *
+     * <p>
      * If you have a {@code Publisher<Message>}, consider {@link #bulkDeleteMessages(Publisher)}.
      *
      * @param messageIds A {@link Publisher} to supply the message IDs to bulk delete.
@@ -84,7 +84,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *     .transform(channel::bulkDeleteMessages)
      * }
      * </pre>
-     *
+     * <p>
      * If you have a {@code Publisher<Snowflake>}, consider {@link #bulkDelete(Publisher)}.
      *
      * @param messages A {@link Publisher} to supply the messages to bulk delete.

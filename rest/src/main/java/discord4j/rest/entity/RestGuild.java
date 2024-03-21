@@ -70,6 +70,16 @@ public class RestGuild {
     /**
      * Retrieve this guild's data upon subscription.
      *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
+     * entity. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildUpdateData> getData() {
+        return getData(true);
+    }
+
+    /**
+     * Retrieve this guild's data upon subscription.
+     *
      * @param withCounts when true, will return approximate member and presence counts for the guild too.
      * otherwise approximate member and presence counts will be null in {@link GuildUpdateData}.
      * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
@@ -79,16 +89,6 @@ public class RestGuild {
         Map<String, Object> queryParams = new HashMap<>();
         Optional.ofNullable(withCounts).ifPresent(value -> queryParams.put("with_counts", value));
         return restClient.getGuildService().getGuild(id, queryParams);
-    }
-
-    /**
-     * Retrieve this guild's data upon subscription.
-     *
-     * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
-     * entity. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildUpdateData> getData() {
-        return getData(true);
     }
 
     /**
@@ -182,15 +182,15 @@ public class RestGuild {
                 .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
     }
 
-    public Mono<MemberData> getMember(Snowflake userId) {
-        return restClient.getGuildService().getGuildMember(id, userId.asLong());
-    }
-
     public Mono<MemberData> getSelfMember() {
         return restClient.getSelf()
                 .map(UserData::id)
                 .map(Snowflake::of)
                 .flatMap(this::getMember);
+    }
+
+    public Mono<MemberData> getMember(Snowflake userId) {
+        return restClient.getGuildService().getGuildMember(id, userId.asLong());
     }
 
     public Flux<MemberData> getMembers() {
@@ -351,7 +351,7 @@ public class RestGuild {
      * @param eventId The ID of the event
      * @param withUserCount Whether to optionally include the number of subscribed users
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildScheduledEventData}. If an
-     *  error is received, it is emitted through the {@code Mono}.
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildScheduledEventData> getScheduledEvent(Snowflake eventId, @Nullable Boolean withUserCount) {
         Map<String, Object> queryParams = new HashMap<>();
@@ -363,7 +363,8 @@ public class RestGuild {
      * Requests to retrieve the scheduled events under this guild.
      *
      * @param withUserCount Whether to optionally include the number of subscribed users for each event
-     * @return A {@link Flux} that continually emits all the  {@link GuildScheduledEventData} associated with this guild.
+     * @return A {@link Flux} that continually emits all the  {@link GuildScheduledEventData} associated with this
+     * guild.
      * If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<GuildScheduledEventData> getScheduledEvents(@Nullable Boolean withUserCount) {
@@ -412,19 +413,21 @@ public class RestGuild {
         return restClient.getGuildService().deleteScheduledEvent(id, eventId.asLong(), reason);
     }
 
-
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestGuild restGuild = (RestGuild) o;
-        return id == restGuild.id;
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestGuild restGuild = (RestGuild) o;
+        return id == restGuild.id;
     }
 
 }

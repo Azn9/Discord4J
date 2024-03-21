@@ -30,7 +30,10 @@ import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.AuditLogData;
+import discord4j.discordjson.json.AuditLogEntryData;
+import discord4j.discordjson.json.CurrentMemberModifyData;
+import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
@@ -92,11 +95,6 @@ public final class Guild implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
      * Gets the data of the guild.
      *
@@ -116,6 +114,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the icon of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getIcon(final Image.Format format) {
+        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the icon URL of the guild, if present.
      *
      * @param format The format for the URL.
@@ -126,15 +135,20 @@ public final class Guild implements Entity {
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
     /**
-     * Gets the icon of the guild.
+     * Gets the splash of the guild.
      *
      * @param format The format in which to get the image.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the guild. If an
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image splash} of the guild. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Image> getIcon(final Image.Format format) {
-        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
+    public Mono<Image> getSplash(final Image.Format format) {
+        return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -149,14 +163,14 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the splash of the guild.
+     * Gets the discovery splash of the guild.
      *
      * @param format The format in which to get the image.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image splash} of the guild. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image discovery splash} of the guild.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Image> getSplash(final Image.Format format) {
-        return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
+    public Mono<Image> getDiscoverySplash(final Image.Format format) {
+        return Mono.justOrEmpty(getDiscoverySplashUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -172,14 +186,14 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the discovery splash of the guild.
+     * Gets the banner of the guild.
      *
      * @param format The format in which to get the image.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image discovery splash} of the guild.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Image> getDiscoverySplash(final Image.Format format) {
-        return Mono.justOrEmpty(getDiscoverySplashUrl(format)).flatMap(Image::ofUrl);
+    public Mono<Image> getBanner(final Image.Format format) {
+        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -194,26 +208,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the banner of the guild.
-     *
-     * @param format The format in which to get the image.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the guild. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Image> getBanner(final Image.Format format) {
-        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
-    }
-
-    /**
-     * Gets the ID of the owner of the guild.
-     *
-     * @return The ID of the owner of the guild.
-     */
-    public Snowflake getOwnerId() {
-        return Snowflake.of(data.ownerId());
-    }
-
-    /**
      * Requests to retrieve the owner of the guild.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Member owner} of the guild. If an
@@ -224,14 +218,12 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the voice region ID for the guild.
+     * Gets the ID of the owner of the guild.
      *
-     * @return The voice region ID for the guild.
-     * @deprecated Voice region are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
+     * @return The ID of the owner of the guild.
      */
-    @Deprecated
-    public Region.Id getRegionId() {
-        return Region.Id.of(Possible.flatOpt(data.region()).orElse(null));
+    public Snowflake getOwnerId() {
+        return Snowflake.of(data.ownerId());
     }
 
     /**
@@ -247,6 +239,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the voice region ID for the guild.
+     *
+     * @return The voice region ID for the guild.
+     * @deprecated Voice region are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
+     */
+    @Deprecated
+    public Region.Id getRegionId() {
+        return Region.Id.of(Possible.flatOpt(data.region()).orElse(null));
+    }
+
+    /**
      * Requests to retrieve the voice regions for the guild.
      *
      * @return A {@link Flux} that continually emits the guild's {@link Region voice regions}. If an error is received,
@@ -259,15 +262,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the AFK channel, if present.
-     *
-     * @return The ID of the AFK channel, if present.
-     */
-    public Optional<Snowflake> getAfkChannelId() {
-        return data.afkChannelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the AFK channel, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the AFK {@link VoiceChannel channel}, if present.
@@ -275,6 +269,15 @@ public final class Guild implements Entity {
      */
     public Mono<VoiceChannel> getAfkChannel() {
         return Mono.justOrEmpty(getAfkChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
+    }
+
+    /**
+     * Gets the ID of the AFK channel, if present.
+     *
+     * @return The ID of the AFK channel, if present.
+     */
+    public Optional<Snowflake> getAfkChannelId() {
+        return data.afkChannelId().map(Snowflake::of);
     }
 
     /**
@@ -449,7 +452,8 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's stickers.
      *
-     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received,
+     * it is
      * emitted through the {@code Flux}.
      */
     public Flux<GuildSticker> getStickers() {
@@ -469,7 +473,8 @@ public final class Guild implements Entity {
      * Requests to retrieve the guild's stickers, using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the stickers
-     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received, it is
+     * @return A {@link Flux} that continually emits guild's {@link GuildSticker stickers}. If an error is received,
+     * it is
      * emitted through the {@code Flux}.
      */
     public Flux<GuildSticker> getStickers(EntityRetrievalStrategy retrievalStrategy) {
@@ -574,12 +579,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether or not the server widget is enabled.
+     * Requests to retrieve the channel for the server widget, if present.
      *
-     * @return Whether or not the server widget is enabled.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel channel} for the server
+     * widget, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public boolean isWidgetEnabled() {
-        return data.widgetEnabled().toOptional().orElse(false);
+    public Mono<GuildChannel> getWidgetChannel() {
+        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -589,16 +595,6 @@ public final class Guild implements Entity {
      */
     public Optional<Snowflake> getWidgetChannelId() {
         return Possible.flatOpt(data.widgetChannelId()).map(Snowflake::of);
-    }
-
-    /**
-     * Requests to retrieve the channel for the server widget, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel channel} for the server
-     * widget, if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getWidgetChannel() {
-        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -615,16 +611,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
-     *
-     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if
-     * present.
-     */
-    public Optional<Snowflake> getSystemChannelId() {
-        return data.systemChannelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the channel to which system messages are sent, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} to which system
@@ -632,6 +618,16 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getSystemChannel() {
         return Mono.justOrEmpty(getSystemChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
+     *
+     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if
+     * present.
+     */
+    public Optional<Snowflake> getSystemChannelId() {
+        return data.systemChannelId().map(Snowflake::of);
     }
 
     /**
@@ -658,15 +654,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where Community guilds display rules and/or guidelines, if present.
-     *
-     * @return The id of the channel where Community guilds display rules and/or guidelines, if present.
-     */
-    public Optional<Snowflake> getRulesChannelId() {
-        return data.rulesChannelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the channel where Community guilds display rules and/or guidelines, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where Community
@@ -675,6 +662,15 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getRulesChannel() {
         return Mono.justOrEmpty(getRulesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the id of the channel where Community guilds display rules and/or guidelines, if present.
+     *
+     * @return The id of the channel where Community guilds display rules and/or guidelines, if present.
+     */
+    public Optional<Snowflake> getRulesChannelId() {
+        return data.rulesChannelId().map(Snowflake::of);
     }
 
     /**
@@ -693,17 +689,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where admins and moderators of Community guilds receive notices from Discord, if
-     * present.
-     *
-     * @return The id of the channel where admins and moderators of Community guilds receive notices from Discord, if
-     * present.
-     */
-    public Optional<Snowflake> getPublicUpdatesChannelId() {
-        return data.publicUpdatesChannelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the channel where admins and moderators of Community guilds receive notices from Discord,
      * if present.
      *
@@ -713,6 +698,17 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getPublicUpdatesChannel() {
         return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the id of the channel where admins and moderators of Community guilds receive notices from Discord, if
+     * present.
+     *
+     * @return The id of the channel where admins and moderators of Community guilds receive notices from Discord, if
+     * present.
+     */
+    public Optional<Snowflake> getPublicUpdatesChannelId() {
+        return data.publicUpdatesChannelId().map(Snowflake::of);
     }
 
     /**
@@ -735,7 +731,8 @@ public final class Guild implements Entity {
      * Gets the id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
      * present.
      *
-     * @return The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord, if
+     * @return The id of the channel where admins and moderators of Community guilds receive safety alerts from
+     * Discord, if
      * present.
      */
     public Optional<Snowflake> getSafetyAlertsChannelId() {
@@ -792,6 +789,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether or not the server widget is enabled.
+     *
+     * @return Whether or not the server widget is enabled.
+     */
+    public boolean isWidgetEnabled() {
+        return data.widgetEnabled().toOptional().orElse(false);
+    }
+
+    /**
      * Gets the total number of members in the guild. If this {@link Guild} object was
      * {@link EntityRetrievalStrategy retrieved} using REST API, then calling this method will always return the same
      * value.
@@ -830,7 +836,7 @@ public final class Guild implements Entity {
      */
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(gateway.getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
+                        .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -896,17 +902,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the member as represented by the supplied ID.
-     *
-     * @param id The ID of the member.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Member> getMemberById(final Snowflake id) {
-        return gateway.getMemberById(getId(), id);
-    }
-
-    /**
      * Requests to retrieve the member as represented by the supplied ID, using the given retrieval strategy.
      *
      * @param id The ID of the member.
@@ -926,6 +921,17 @@ public final class Guild implements Entity {
      */
     public Mono<Member> getSelfMember() {
         return this.getMemberById(gateway.getSelfId());
+    }
+
+    /**
+     * Requests to retrieve the member as represented by the supplied ID.
+     *
+     * @param id The ID of the member.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
+     * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMemberById(final Snowflake id) {
+        return gateway.getMemberById(getId(), id);
     }
 
     /**
@@ -994,7 +1000,7 @@ public final class Guild implements Entity {
      */
     public Flux<Presence> getPresences() {
         return Flux.from(gateway.getGatewayResources().getStore()
-                .execute(ReadActions.getPresencesInGuild(getId().asLong())))
+                        .execute(ReadActions.getPresencesInGuild(getId().asLong())))
                 .map(Presence::new);
     }
 
@@ -1047,12 +1053,12 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<Guild> edit(final Consumer<? super LegacyGuildEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildEditSpec mutatedSpec = new LegacyGuildEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyGuildEditSpec mutatedSpec = new LegacyGuildEditSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
@@ -1080,8 +1086,8 @@ public final class Guild implements Entity {
     public Mono<Guild> edit(GuildEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .modifyGuild(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .modifyGuild(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
@@ -1100,12 +1106,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<GuildEmoji> createEmoji(final Consumer<? super LegacyGuildEmojiCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildEmojiCreateSpec mutatedSpec = new LegacyGuildEmojiCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getEmojiService()
-                            .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyGuildEmojiCreateSpec mutatedSpec = new LegacyGuildEmojiCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getEmojiService()
+                                    .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 
@@ -1113,7 +1120,7 @@ public final class Guild implements Entity {
      * Requests to create an emoji. Properties specifying how to create an emoji can be set via the {@code withXxx}
      * methods of the returned {@link GuildEmojiCreateMono}.
      *
-     * @param name  the name of the emoji to create
+     * @param name the name of the emoji to create
      * @param image the image of the emoji to create
      * @return A {@link GuildEmojiCreateMono} where, upon successful completion, emits the created {@link GuildEmoji}.
      * If an error is received, it is emitted through the {@code GuildEmojiCreateMono}.
@@ -1132,8 +1139,8 @@ public final class Guild implements Entity {
     public Mono<GuildEmoji> createEmoji(GuildEmojiCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getEmojiService()
-                        .createGuildEmoji(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getEmojiService()
+                                .createGuildEmoji(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 
@@ -1147,9 +1154,9 @@ public final class Guild implements Entity {
     public Mono<GuildSticker> createSticker(GuildStickerCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getStickerService()
-                    .createGuildSticker(getId().asLong(), spec.asRequest(), spec.reason()))
-            .map(data -> new GuildSticker(gateway, data, getId().asLong()));
+                        () -> gateway.getRestClient().getStickerService()
+                                .createGuildSticker(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new GuildSticker(gateway, data, getId().asLong()));
     }
 
     /**
@@ -1164,12 +1171,12 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<GuildTemplate> createTemplate(final Consumer<? super LegacyGuildTemplateCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildTemplateCreateSpec mutatedSpec = new LegacyGuildTemplateCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService()
-                            .createTemplate(getId().asLong(), mutatedSpec.asRequest());
-                })
+                        () -> {
+                            LegacyGuildTemplateCreateSpec mutatedSpec = new LegacyGuildTemplateCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getTemplateService()
+                                    .createTemplate(getId().asLong(), mutatedSpec.asRequest());
+                        })
                 .map(data -> new GuildTemplate(gateway, data));
     }
 
@@ -1195,7 +1202,8 @@ public final class Guild implements Entity {
     public Mono<GuildTemplate> createTemplate(GuildTemplateCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getTemplateService().createTemplate(getId().asLong(), spec.asRequest()))
+                        () -> gateway.getRestClient().getTemplateService().createTemplate(getId().asLong(),
+                                spec.asRequest()))
                 .map(data -> new GuildTemplate(gateway, data));
     }
 
@@ -1211,12 +1219,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<Role> createRole(final Consumer<? super LegacyRoleCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyRoleCreateSpec mutatedSpec = new LegacyRoleCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyRoleCreateSpec mutatedSpec = new LegacyRoleCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .createGuildRole(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> new Role(gateway, data, getId().asLong()));
     }
 
@@ -1241,8 +1250,8 @@ public final class Guild implements Entity {
     public Mono<Role> createRole(RoleCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .createGuildRole(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildRole(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Role(gateway, data, getId().asLong()));
     }
 
@@ -1258,12 +1267,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<NewsChannel> createNewsChannel(final Consumer<? super LegacyNewsChannelCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyNewsChannelCreateSpec mutatedSpec = new LegacyNewsChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyNewsChannelCreateSpec mutatedSpec = new LegacyNewsChannelCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(NewsChannel.class);
     }
@@ -1290,8 +1300,8 @@ public final class Guild implements Entity {
     public Mono<NewsChannel> createNewsChannel(NewsChannelCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(NewsChannel.class);
     }
@@ -1308,12 +1318,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<Category> createCategory(final Consumer<? super LegacyCategoryCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyCategoryCreateSpec mutatedSpec = new LegacyCategoryCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyCategoryCreateSpec mutatedSpec = new LegacyCategoryCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
@@ -1340,8 +1351,8 @@ public final class Guild implements Entity {
     public Mono<Category> createCategory(CategoryCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
@@ -1358,12 +1369,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<TextChannel> createTextChannel(final Consumer<? super LegacyTextChannelCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyTextChannelCreateSpec mutatedSpec = new LegacyTextChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyTextChannelCreateSpec mutatedSpec = new LegacyTextChannelCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
@@ -1390,8 +1402,8 @@ public final class Guild implements Entity {
     public Mono<TextChannel> createTextChannel(TextChannelCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
@@ -1408,12 +1420,13 @@ public final class Guild implements Entity {
     @Deprecated
     public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super LegacyVoiceChannelCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyVoiceChannelCreateSpec mutatedSpec = new LegacyVoiceChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyVoiceChannelCreateSpec mutatedSpec = new LegacyVoiceChannelCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getGuildService()
+                                    .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }
@@ -1440,8 +1453,8 @@ public final class Guild implements Entity {
     public Mono<VoiceChannel> createVoiceChannel(VoiceChannelCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getGuildService()
-                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }
@@ -1456,7 +1469,8 @@ public final class Guild implements Entity {
      * @return A {@link AutoModRuleCreateMono} where, upon successful completion, emits the created {@link
      * AutoModRule}. If an error is received, it is emitted through the {@code AutoModRuleCreateMono}.
      */
-    public AutoModRuleCreateMono createAutoModRule(String name, AutoModRule.EventType eventType, AutoModRule.TriggerType triggerType) {
+    public AutoModRuleCreateMono createAutoModRule(String name, AutoModRule.EventType eventType,
+                                                   AutoModRule.TriggerType triggerType) {
         return AutoModRuleCreateMono.of(name, eventType.getValue(), triggerType.getValue(), this);
     }
 
@@ -1539,7 +1553,7 @@ public final class Guild implements Entity {
      * Requests to ban the specified user.
      *
      * @param userId The ID of the user to ban.
-     * @param spec   A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      * @deprecated use {@link #ban(Snowflake, BanQuerySpec)} or {@link #ban(Snowflake)} which offer an immutable
@@ -1573,7 +1587,7 @@ public final class Guild implements Entity {
      * Requests to ban the specified user.
      *
      * @param userId The ID of the user to ban.
-     * @param spec   an immutable object that specifies how to ban the user
+     * @param spec an immutable object that specifies how to ban the user
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -1854,8 +1868,8 @@ public final class Guild implements Entity {
      */
     public Flux<GuildTemplate> getTemplates() {
         return gateway.getRestClient().getTemplateService()
-            .getTemplates(getId().asLong())
-            .map(data -> new GuildTemplate(gateway, data));
+                .getTemplates(getId().asLong())
+                .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1909,8 +1923,8 @@ public final class Guild implements Entity {
      */
     public Mono<AutoModRule> getAutoModRule(Snowflake autoModRuleId) {
         return gateway.getRestClient().getAutoModService()
-            .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
-            .map(data -> new AutoModRule(gateway, data));
+                .getAutoModRule(getId().asLong(), autoModRuleId.asLong())
+                .map(data -> new AutoModRule(gateway, data));
     }
 
     /**
@@ -1922,7 +1936,7 @@ public final class Guild implements Entity {
      */
     public Mono<ScheduledEvent> getScheduledEventById(Snowflake eventId, boolean withUserCount) {
         return gateway.getRestClient().getScheduledEventById(getId(), eventId).getData(withUserCount)
-            .map(data -> new ScheduledEvent(gateway, data));
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     /**
@@ -1936,19 +1950,25 @@ public final class Guild implements Entity {
         queryParams.put("with_user_count", withUserCount);
 
         return gateway.getRestClient().getGuildService().getScheduledEvents(getId().asLong(), queryParams)
-            .map(data -> new ScheduledEvent(gateway, data));
+                .map(data -> new ScheduledEvent(gateway, data));
     }
 
     /**
      * Requests to create a guild scheduled event with the provided spec on this guild
      *
      * @param spec spec specifying {@link ScheduledEvent} parameters
-     * @return A {@link Mono} which, upon completion, emits the created {@link ScheduledEvent} object. Any error, if occurs,
+     * @return A {@link Mono} which, upon completion, emits the created {@link ScheduledEvent} object. Any error, if
+     * occurs,
      * is emitted through the {@link Mono}.
      */
     public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
         return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
-            .map(data -> new ScheduledEvent(gateway, data));
+                .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 
     @Override
@@ -1957,8 +1977,10 @@ public final class Guild implements Entity {
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public String toString() {
+        return "Guild{" +
+                "data=" + data +
+                '}';
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
@@ -1989,15 +2011,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the content filter level of the guild. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -2011,6 +2024,15 @@ public final class Guild implements Entity {
                 case 2: return ALL_MEMBERS;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2042,15 +2064,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the multi-factor authentication level of the guild. It is guaranteed that invoking {@link #getValue()}
          * from the returned enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -2063,6 +2076,15 @@ public final class Guild implements Entity {
                 case 1: return ELEVATED;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2094,15 +2116,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the notification level of the guild. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -2115,6 +2128,15 @@ public final class Guild implements Entity {
                 case 1: return ONLY_MENTIONS;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2155,15 +2177,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()}
          * from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
@@ -2179,6 +2192,15 @@ public final class Guild implements Entity {
                 case 3: return TIER_3;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2219,15 +2241,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the verification level of the guild. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -2243,6 +2256,15 @@ public final class Guild implements Entity {
                 case 4: return VERY_HIGH;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2282,24 +2304,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of system channel. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -2315,6 +2319,24 @@ public final class Guild implements Entity {
                 }
             }
             return flags;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -2343,15 +2365,6 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the NSFW level of the guild. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
@@ -2367,12 +2380,14 @@ public final class Guild implements Entity {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "Guild{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

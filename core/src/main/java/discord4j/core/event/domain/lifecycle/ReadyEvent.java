@@ -99,6 +99,15 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         return data.trace();
     }
 
+    @Override
+    public String toString() {
+        return "ReadyEvent{" +
+                "data=" + data +
+                ", self=" + self +
+                ", guilds=" + guilds +
+                '}';
+    }
+
     /**
      * An incomplete Guild provided by Discord upon the ready event.
      */
@@ -132,6 +141,11 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(id, available);
+        }
+
+        @Override
         public boolean equals(@Nullable Object o) {
             if (this == o) {
                 return true;
@@ -145,25 +159,11 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(id, available);
-        }
-
-        @Override
         public String toString() {
             return "Guild{" +
                     "id=" + id +
                     ", available=" + available +
                     '}';
         }
-    }
-
-    @Override
-    public String toString() {
-        return "ReadyEvent{" +
-                "data=" + data +
-                ", self=" + self +
-                ", guilds=" + guilds +
-                '}';
     }
 }

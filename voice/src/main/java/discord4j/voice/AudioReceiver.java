@@ -24,7 +24,6 @@ import java.nio.ByteBuffer;
  * The receiver uses a shared buffer. Keep this in mind when implementing.
  *
  * @see #receive()
- *
  * @deprecated Discord does not officially support bots receiving audio. It is not guaranteed that this functionality
  * works properly. Use at your own risk.
  */
@@ -48,10 +47,6 @@ public abstract class AudioReceiver {
         this.buffer = buffer;
     }
 
-    public ByteBuffer getBuffer() {
-        return buffer;
-    }
-
     /**
      * Called when audio is received. After reading, the implementor is expected to clear the buffer.
      */
@@ -69,8 +64,13 @@ public abstract class AudioReceiver {
         getBuffer().clear();
     }
 
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+
     /**
      * Called when audio is received, automatically extracting useful information.
+     *
      * @param sequence The sequence of the packet.
      * @param timestamp The timestamp of the packet.
      * @param ssrc The ssrc of the audio source.

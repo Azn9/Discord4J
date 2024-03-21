@@ -29,52 +29,52 @@ public class ValidationUtilTest {
     @Test
     public void shouldLetAQueryForAllMembersHappenIfIntentsAreAbsent() {
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
+                Possible.absent()
         );
     }
 
     @Test
     public void shouldMakeSureExactlyOneOfQueryOrUserIds() {
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("prefix").limit(0).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").query("prefix").limit(0).build(),
+                Possible.absent()
         );
 
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").addUserId("9876").limit(1).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").addUserId("9876").limit(1).build(),
+                Possible.absent()
         );
 
         assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("prefix").addUserId("5678").limit(0).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").query("prefix").addUserId("5678").limit(0).build(),
+                Possible.absent()
         ));
 
         assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").limit(0).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").limit(0).build(),
+                Possible.absent()
         ));
     }
 
     @Test
     public void shouldRequireGuildPresencesIntentsIfRequestingEntireMemberListAndUsingIntents() {
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
-            Possible.absent()
+                RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
+                Possible.absent()
         );
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("prefix").limit(0).build(),
-            Possible.of(IntentSet.none())
+                RequestGuildMembers.builder().guildId("1234").query("prefix").limit(0).build(),
+                Possible.of(IntentSet.none())
         );
         ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("").limit(100).build(),
-            Possible.of(IntentSet.none())
+                RequestGuildMembers.builder().guildId("1234").query("").limit(100).build(),
+                Possible.of(IntentSet.none())
         );
 
         assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
-            RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
-            Possible.of(IntentSet.none())
+                RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
+                Possible.of(IntentSet.none())
         ));
     }
 }

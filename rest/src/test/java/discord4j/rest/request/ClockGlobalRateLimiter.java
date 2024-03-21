@@ -79,21 +79,21 @@ public class ClockGlobalRateLimiter implements GlobalRateLimiter {
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
         AtomicLong retryIn = new AtomicLong();
         return Mono.create(
-                sink -> {
-                    retryIn.set(0);
-                    long now = System.nanoTime();
-                    if (permitsRemaining.decrementAndGet() < 0) {
-                        retryIn.set(permitsResetAfter.get() - now);
-                    }
-                    if (now < limitedUntil.get()) {
-                        retryIn.set(Math.max(retryIn.get(), limitedUntil.get() - now));
-                    }
-                    if (retryIn.get() > 0) {
-                        sink.error(new RuntimeException());
-                    } else {
-                        sink.success();
-                    }
-                })
+                        sink -> {
+                            retryIn.set(0);
+                            long now = System.nanoTime();
+                            if (permitsRemaining.decrementAndGet() < 0) {
+                                retryIn.set(permitsResetAfter.get() - now);
+                            }
+                            if (now < limitedUntil.get()) {
+                                retryIn.set(Math.max(retryIn.get(), limitedUntil.get() - now));
+                            }
+                            if (retryIn.get() > 0) {
+                                sink.error(new RuntimeException());
+                            } else {
+                                sink.success();
+                            }
+                        })
                 .retryWhen(Retry.withThrowable(reactor.retry.Retry.any()
                         .backoff(ctx -> new BackoffDelay(Duration.ofNanos(retryIn.get())))))
                 .thenMany(stage);

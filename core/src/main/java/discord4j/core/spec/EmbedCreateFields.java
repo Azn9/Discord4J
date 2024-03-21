@@ -43,11 +43,6 @@ public final class EmbedCreateFields {
             return ImmutableEmbedCreateFields.Footer.of(text, iconUrl);
         }
 
-        String text();
-
-        @Nullable
-        String iconUrl();
-
         @Override
         default EmbedFooterData asRequest() {
             return EmbedFooterData.builder()
@@ -55,6 +50,11 @@ public final class EmbedCreateFields {
                     .iconUrl(toPossible(iconUrl()))
                     .build();
         }
+
+        String text();
+
+        @Nullable
+        String iconUrl();
     }
 
     @Value.Immutable
@@ -63,14 +63,6 @@ public final class EmbedCreateFields {
         static Author of(String name, @Nullable String url, @Nullable String iconUrl) {
             return ImmutableEmbedCreateFields.Author.of(name, url, iconUrl);
         }
-
-        String name();
-
-        @Nullable
-        String url();
-
-        @Nullable
-        String iconUrl();
 
         @Override
         default EmbedAuthorData asRequest() {
@@ -81,6 +73,14 @@ public final class EmbedCreateFields {
                     .iconUrl(toPossible(iconUrl()))
                     .build();
         }
+
+        String name();
+
+        @Nullable
+        String url();
+
+        @Nullable
+        String iconUrl();
     }
 
     @Value.Immutable
@@ -89,13 +89,6 @@ public final class EmbedCreateFields {
         static Field of(String name, String value, boolean inline) {
             return ImmutableEmbedCreateFields.Field.of(name, value, inline);
         }
-
-        String name();
-
-        String value();
-
-        boolean inline();
-
         @Override
         default EmbedFieldData asRequest() {
             return EmbedFieldData.builder()
@@ -104,5 +97,8 @@ public final class EmbedCreateFields {
                     .inline(inline())
                     .build();
         }
+        String name();
+        String value();
+        boolean inline();
     }
 }

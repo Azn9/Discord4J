@@ -16,11 +16,11 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -44,7 +44,8 @@ public class MemberLeaveEvent extends GuildEvent {
     @Nullable
     private final Member member;
 
-    public MemberLeaveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
+    public MemberLeaveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId,
+                            @Nullable Member member) {
         super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;
@@ -61,15 +62,6 @@ public class MemberLeaveEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} that the {@link User} has left in this event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} that the {@link User} has left in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} that the {@link User} has left.
@@ -77,6 +69,15 @@ public class MemberLeaveEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} that the {@link User} has left in this event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

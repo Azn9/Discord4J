@@ -38,46 +38,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<Optional<Region>> region();
-
-    Possible<Optional<Guild.VerificationLevel>> verificationLevel();
-
-    Possible<Optional<Guild.NotificationLevel>> defaultMessageNotificationsLevel();
-
-    Possible<Optional<Guild.ContentFilterLevel>> explicitContentFilter();
-
-    Possible<Optional<Snowflake>> afkChannelId();
-
-    Possible<Integer> afkTimeout();
-
-    Possible<Optional<Image>> icon();
-
-    Possible<Snowflake> ownerId();
-
-    Possible<Optional<Image>> splash();
-
-    Possible<Optional<Image>> discoverySplash();
-
-    Possible<Optional<Image>> banner();
-
-    Possible<Optional<Snowflake>> systemChannelId();
-
-    Possible<Guild.SystemChannelFlag> systemChannelFlags();
-
-    Possible<Optional<Snowflake>> rulesChannelId();
-
-    Possible<Optional<Snowflake>> publicUpdatesChannelId();
-
-    Possible<Optional<Locale>> preferredLocale();
-
-    Possible<List<String>> features();
-
-    Possible<Optional<String>> description();
-
-    Possible<Optional<Snowflake>> safetyAlertsChannelId();
-
     @Override
     default GuildModifyRequest asRequest() {
         return GuildModifyRequest.builder()
@@ -104,18 +64,38 @@ interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
                 .description(description())
                 .build();
     }
+    Possible<String> name();
+    Possible<Optional<Region>> region();
+    Possible<Optional<Guild.VerificationLevel>> verificationLevel();
+    Possible<Optional<Guild.NotificationLevel>> defaultMessageNotificationsLevel();
+    Possible<Optional<Guild.ContentFilterLevel>> explicitContentFilter();
+    Possible<Optional<Snowflake>> afkChannelId();
+    Possible<Integer> afkTimeout();
+    Possible<Optional<Image>> icon();
+    Possible<Snowflake> ownerId();
+    Possible<Optional<Image>> splash();
+    Possible<Optional<Image>> discoverySplash();
+    Possible<Optional<Image>> banner();
+    Possible<Optional<Snowflake>> systemChannelId();
+    Possible<Guild.SystemChannelFlag> systemChannelFlags();
+    Possible<Optional<Snowflake>> rulesChannelId();
+    Possible<Optional<Snowflake>> publicUpdatesChannelId();
+    Possible<Optional<Locale>> preferredLocale();
+    Possible<List<String>> features();
+    Possible<Optional<String>> description();
+    Possible<Optional<Snowflake>> safetyAlertsChannelId();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildEditMonoGenerator extends Mono<Guild> implements GuildEditSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super Guild> actual) {
         guild().edit(GuildEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

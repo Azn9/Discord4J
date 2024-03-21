@@ -79,15 +79,6 @@ public final class GuildTemplate implements DiscordObject {
     }
 
     /**
-     * Gets the template code (unique ID).
-     *
-     * @return The template code (unique ID).
-     */
-    public String getCode() {
-        return data.code();
-    }
-
-    /**
      * Gets the ID of the guild this template is associated with.
      *
      * @return The source guild ID.
@@ -172,7 +163,7 @@ public final class GuildTemplate implements DiscordObject {
      * Requests to create a new guild from this template.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildCreateFromTemplateSpec} to be operated
-     *             on.
+     * on.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild created guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      * @deprecated use {@link #createGuild(GuildCreateFromTemplateSpec)} or {@link #createGuild(String)} which offer an
@@ -181,13 +172,22 @@ public final class GuildTemplate implements DiscordObject {
     @Deprecated
     public Mono<Guild> createGuild(final Consumer<? super LegacyGuildCreateFromTemplateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildCreateFromTemplateSpec mutatedSpec = new LegacyGuildCreateFromTemplateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService()
-                            .createGuild(getCode(), mutatedSpec.asRequest());
-                })
+                        () -> {
+                            LegacyGuildCreateFromTemplateSpec mutatedSpec = new LegacyGuildCreateFromTemplateSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getTemplateService()
+                                    .createGuild(getCode(), mutatedSpec.asRequest());
+                        })
                 .map(data -> new Guild(gateway, data));
+    }
+
+    /**
+     * Gets the template code (unique ID).
+     *
+     * @return The template code (unique ID).
+     */
+    public String getCode() {
+        return data.code();
     }
 
     /**
@@ -239,12 +239,12 @@ public final class GuildTemplate implements DiscordObject {
     @Deprecated
     public Mono<GuildTemplate> edit(final Consumer<? super LegacyGuildTemplateEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildTemplateEditSpec mutatedSpec = new LegacyGuildTemplateEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService()
-                            .modifyTemplate(guildId, getCode(), mutatedSpec.asRequest());
-                })
+                        () -> {
+                            LegacyGuildTemplateEditSpec mutatedSpec = new LegacyGuildTemplateEditSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getTemplateService()
+                                    .modifyTemplate(guildId, getCode(), mutatedSpec.asRequest());
+                        })
                 .map(data -> new GuildTemplate(gateway, data));
     }
 
@@ -269,7 +269,8 @@ public final class GuildTemplate implements DiscordObject {
     public Mono<GuildTemplate> edit(GuildTemplateEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getTemplateService().modifyTemplate(guildId, getCode(), spec.asRequest()))
+                        () -> gateway.getRestClient().getTemplateService().modifyTemplate(guildId, getCode(),
+                                spec.asRequest()))
                 .map(data -> new GuildTemplate(gateway, data));
     }
 

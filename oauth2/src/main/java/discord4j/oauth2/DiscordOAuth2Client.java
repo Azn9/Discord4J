@@ -19,7 +19,17 @@ package discord4j.oauth2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.annotations.Experimental;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.AccessTokenData;
+import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
+import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
+import discord4j.discordjson.json.AuthorizationInfoData;
+import discord4j.discordjson.json.ClientCredentialsGrantRequest;
+import discord4j.discordjson.json.ConnectionData;
+import discord4j.discordjson.json.GuildApplicationCommandPermissionsData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.TokenRefreshRequest;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.UserGuildData;
 import discord4j.oauth2.object.AccessToken;
 import discord4j.oauth2.service.OAuth2Service;
 import discord4j.rest.RestClient;
@@ -122,7 +132,7 @@ public class DiscordOAuth2Client {
      */
     public static DiscordOAuth2Client createFromToken(RestClient restClient, long clientId, String clientSecret,
                                                       AccessTokenData data) {
-        return new DiscordOAuth2Client(restClient, clientId, clientSecret, __ -> Mono.just(new AccessToken(data)));
+        return new DiscordOAuth2Client(restClient, clientId, clientSecret, unused -> Mono.just(new AccessToken(data)));
     }
 
     /**
@@ -150,6 +160,34 @@ public class DiscordOAuth2Client {
     }
 
     /**
+     * Returns info about the current authorization. Uses {@link #withAuthorizedClient(DiscordWebRequest)} to retrieve
+     * and use the Bearer token tied to this client.
+     *
+     * @return a Mono with authorization details given by this token in this client, or an
+     * error Mono in case any request fails
+     */
+    public Mono<AuthorizationInfoData> getAuthorizationInfo() {
+        return exchange(Routes.AUTHORIZATION_INFO_GET.newRequest(), AuthorizationInfoData.class);
+    }
+
+    /**
+     * Execute a given {@link DiscordWebRequest} on behalf of a user and mapping the response to the given type, using
+     * the credentials stored under this client. The token fetching, refreshing (if required) and API request are run
+     * once this Mono is subscribed. For more control on the authorized request and response see
+     * {@link #withAuthorizedClient(DiscordWebRequest)}.
+     *
+     * @param request the compiled Discord REST API request to be run on behalf of a user
+     * @param responseType the expected response type from the API
+     * @param <T> the response type
+     * @return a Mono with the mapped response if successful, otherwise an error Mono
+     */
+    public <T> Mono<T> exchange(DiscordWebRequest request, Class<T> responseType) {
+        return withAuthorizedClient(request)
+                .map(it -> it.exchange(getRouter()))
+                .flatMap(res -> res.bodyToMono(responseType));
+    }
+
+    /**
      * Return the {@link Router} tied to this instance to execute requests to Discord API.
      *
      * @return an abstraction to perform API requests
@@ -159,14 +197,42 @@ public class DiscordOAuth2Client {
     }
 
     /**
-     * Returns info about the current authorization. Uses {@link #withAuthorizedClient(DiscordWebRequest)} to retrieve
-     * and use the Bearer token tied to this client.
+     * Prepare a given {@link DiscordWebRequest} on behalf of a user, using the credentials stored under this client.
+     * The token fetching, refreshing (if required) and API request are run once this Mono is subscribed.
      *
-     * @return a Mono with authorization details given by this token in this client, or an
-     * error Mono in case any request fails
+     * @param request the compiled Discord REST API request to be run on behalf of a user
+     * @return a Mono of a request including required steps to include proper authorization
      */
-    public Mono<AuthorizationInfoData> getAuthorizationInfo() {
-        return exchange(Routes.AUTHORIZATION_INFO_GET.newRequest(), AuthorizationInfoData.class);
+    public Mono<DiscordWebRequest> withAuthorizedClient(DiscordWebRequest request) {
+        return getBearerToken().map(token -> request.copy().bearerAuth(token));
+    }
+
+    private Mono<String> getBearerToken() {
+        return Mono.fromCallable(accessToken::get)
+                .flatMap(token -> {
+                    if (token.hasExpired()) {
+                        return oAuth2Service.refreshToken(TokenRefreshRequest.builder()
+                                        .clientId(clientId)
+                                        .clientSecret(clientSecret)
+                                        .refreshToken(token.getRefreshToken()
+                                                .orElseThrow(UnsupportedOperationException::new))
+                                        .build())
+                                .map(data -> {
+                                    accessToken.set(new AccessToken(data));
+                                    return data.accessToken();
+                                });
+                    }
+                    return Mono.just(token.getAccessToken());
+                })
+                .switchIfEmpty(Mono.defer(() -> tokenFactory.apply(oAuth2Service)
+                        .map(newToken -> {
+                            accessToken.set(newToken);
+                            return newToken.getAccessToken();
+                        })))
+                .onErrorResume(ex -> {
+                    accessToken.set(null);
+                    return Mono.error(ex);
+                });
     }
 
     /**
@@ -242,67 +308,13 @@ public class DiscordOAuth2Client {
      * @param request a request body containing the permissions to be set
      * @return a Mono with command permissions object for the requested guild, or an error Mono in case a request fails
      */
-    public Mono<GuildApplicationCommandPermissionsData> modifyApplicationCommandPermissions(long applicationId,
-                                                                                            long guildId,
-                                                                                            long commandId,
-                                                                                            ApplicationCommandPermissionsRequest request) {
+    public Mono<GuildApplicationCommandPermissionsData> modifyApplicationCommandPermissions(
+            long applicationId,
+            long guildId,
+            long commandId,
+            ApplicationCommandPermissionsRequest request) {
         return exchange(Routes.APPLICATION_COMMAND_PERMISSIONS_MODIFY.newRequest(applicationId, guildId, commandId),
                 GuildApplicationCommandPermissionsData.class);
-    }
-
-    /**
-     * Execute a given {@link DiscordWebRequest} on behalf of a user and mapping the response to the given type, using
-     * the credentials stored under this client. The token fetching, refreshing (if required) and API request are run
-     * once this Mono is subscribed. For more control on the authorized request and response see
-     * {@link #withAuthorizedClient(DiscordWebRequest)}.
-     *
-     * @param request the compiled Discord REST API request to be run on behalf of a user
-     * @param responseType the expected response type from the API
-     * @param <T> the response type
-     * @return a Mono with the mapped response if successful, otherwise an error Mono
-     */
-    public <T> Mono<T> exchange(DiscordWebRequest request, Class<T> responseType) {
-        return withAuthorizedClient(request)
-                .map(it -> it.exchange(getRouter()))
-                .flatMap(res -> res.bodyToMono(responseType));
-    }
-
-    /**
-     * Prepare a given {@link DiscordWebRequest} on behalf of a user, using the credentials stored under this client.
-     * The token fetching, refreshing (if required) and API request are run once this Mono is subscribed.
-     *
-     * @param request the compiled Discord REST API request to be run on behalf of a user
-     * @return a Mono of a request including required steps to include proper authorization
-     */
-    public Mono<DiscordWebRequest> withAuthorizedClient(DiscordWebRequest request) {
-        return getBearerToken().map(token -> request.copy().bearerAuth(token));
-    }
-
-    private Mono<String> getBearerToken() {
-        return Mono.fromCallable(accessToken::get)
-                .flatMap(token -> {
-                    if (token.hasExpired()) {
-                        return oAuth2Service.refreshToken(TokenRefreshRequest.builder()
-                                        .clientId(clientId)
-                                        .clientSecret(clientSecret)
-                                        .refreshToken(token.getRefreshToken().orElseThrow(UnsupportedOperationException::new))
-                                        .build())
-                                .map(data -> {
-                                    accessToken.set(new AccessToken(data));
-                                    return data.accessToken();
-                                });
-                    }
-                    return Mono.just(token.getAccessToken());
-                })
-                .switchIfEmpty(Mono.defer(() -> tokenFactory.apply(oAuth2Service)
-                        .map(newToken -> {
-                            accessToken.set(newToken);
-                            return newToken.getAccessToken();
-                        })))
-                .onErrorResume(ex -> {
-                    accessToken.set(null);
-                    return Mono.error(ex);
-                });
     }
 
 }

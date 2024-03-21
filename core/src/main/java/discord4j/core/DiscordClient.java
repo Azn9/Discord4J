@@ -100,24 +100,6 @@ public final class DiscordClient extends RestClient {
     }
 
     /**
-     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
-     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
-     * <p>
-     * To further configure the bot features, refer to using {@link #gateway()}.
-     * <p>
-     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
-     * can compose within the scope of the given {@link Function}.
-     *
-     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
-     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
-     * @return an empty {@link Mono} completing after all resources have released
-     */
-    public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
-        return gateway().withGateway(whileConnectedFunction);
-    }
-
-    /**
      * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
      * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
      * {@link EventDispatcher} to publish Gateway updates and {@link Store} for entity caching.
@@ -141,5 +123,23 @@ public final class DiscordClient extends RestClient {
      */
     public GatewayBootstrap<GatewayOptions> gateway() {
         return GatewayBootstrap.create(this);
+    }
+
+    /**
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
+     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
+     * <p>
+     * To further configure the bot features, refer to using {@link #gateway()}.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}.
+     *
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @return an empty {@link Mono} completing after all resources have released
+     */
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
+        return gateway().withGateway(whileConnectedFunction);
     }
 }

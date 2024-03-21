@@ -67,12 +67,12 @@ public class ExampleGatewayClient {
         GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
 
         gatewayClient.receiver(
-                buf -> Mono.fromCallable(() -> {
-                    byte[] array = new byte[buf.readableBytes()];
-                    buf.readBytes(array);
-                    buf.release();
-                    return array;
-                }))
+                        buf -> Mono.fromCallable(() -> {
+                            byte[] array = new byte[buf.readableBytes()];
+                            buf.readBytes(array);
+                            buf.release();
+                            return array;
+                        }))
                 .map(String::new)
                 .doOnNext(str -> log.info("Received: {}", str))
                 .subscribe();

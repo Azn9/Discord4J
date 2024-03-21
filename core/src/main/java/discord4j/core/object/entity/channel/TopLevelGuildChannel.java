@@ -36,26 +36,20 @@ public interface TopLevelGuildChannel extends GuildChannel {
 
     @Override
     Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId);
-
+    @Override
+    int getRawPosition();
+    @Override
+    Mono<Integer> getPosition();
     @Override
     default Mono<Void> addMemberOverwrite(final Snowflake memberId, final PermissionOverwrite overwrite) {
         return addMemberOverwrite(memberId, overwrite, null);
     }
-
     @Override
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
-
     @Override
     default Mono<Void> addRoleOverwrite(final Snowflake roleId, final PermissionOverwrite overwrite) {
         return addRoleOverwrite(roleId, overwrite, null);
     }
-
     @Override
     Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason);
-
-    @Override
-    int getRawPosition();
-
-    @Override
-    Mono<Integer> getPosition();
 }

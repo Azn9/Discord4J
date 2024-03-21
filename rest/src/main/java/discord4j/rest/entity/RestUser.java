@@ -85,15 +85,19 @@ public class RestUser {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestUser restUser = (RestUser) o;
-        return id == restUser.id;
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestUser restUser = (RestUser) o;
+        return id == restUser.id;
     }
 }

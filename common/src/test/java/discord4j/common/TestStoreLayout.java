@@ -393,12 +393,14 @@ public class TestStoreLayout implements StoreLayout, DataAccessor, GatewayDataUp
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex,
+                                                                     GuildScheduledEventUpdate dispatch) {
         return Mono.<GuildScheduledEventData>empty().log(name + ".onGuildScheduledEventUpdate");
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex,
+                                                                     GuildScheduledEventDelete dispatch) {
         return Mono.<GuildScheduledEventData>empty().log(name + ".onGuildScheduledEventDelete");
     }
 

@@ -16,12 +16,12 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.GuildMemberModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildMemberModifyRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -64,7 +64,8 @@ public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberMod
     }
 
     /**
-     * Sets whether the targeted {@link Member} is deafened in voice channels, if they are connected to voice. Requires the
+     * Sets whether the targeted {@link Member} is deafened in voice channels, if they are connected to voice.
+     * Requires the
      * {@link Permission#DEAFEN_MEMBERS} permission.
      *
      * @param deaf {@code true} if the {@link Member} should be deafened, {@code false} otherwise.
@@ -99,15 +100,15 @@ public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberMod
     }
 
     @Override
-    public LegacyGuildMemberEditSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyGuildMemberEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

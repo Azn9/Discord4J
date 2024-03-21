@@ -108,6 +108,11 @@ public class Interaction implements DiscordObject {
         return data.guildId().toOptional().map(Snowflake::of);
     }
 
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
     /**
      * Gets the guild it was sent from, if invoked in a guild.
      *
@@ -118,21 +123,21 @@ public class Interaction implements DiscordObject {
     }
 
     /**
-     * Gets the channel id it was sent from.
-     *
-     * @return The channel id it was sent from.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
-    }
-
-    /**
      * Gets the channel it was sent from.
      *
      * @return The channel it was sent from.
      */
     public Mono<MessageChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
+    }
+
+    /**
+     * Gets the channel id it was sent from.
+     *
+     * @return The channel id it was sent from.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(data.channelId().get());
     }
 
     /**
@@ -189,8 +194,8 @@ public class Interaction implements DiscordObject {
      * <br>
      * This is not present on {@code PING} interactions and will therefore default to {@code en-US}
      *
-     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
      * @return The invoking user's client locale.
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
      */
     public String getUserLocale() {
         return data.locale().toOptional().orElse("en-US");
@@ -202,16 +207,11 @@ public class Interaction implements DiscordObject {
      * <br>
      * This is not present on {@code PING} interactions
      *
-     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
      * @return The locale of the guild where the interaction was invoked, otherwise {@link Optional#empty()}
+     * @see <a href="https://discord.com/developers/docs/reference#locales">Discord Locales</a>
      */
     public Optional<String> getGuildLocale() {
         return data.guildLocale().toOptional();
-    }
-
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
     }
 
     /** Represents the various types of interaction. */
@@ -237,15 +237,6 @@ public class Interaction implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
@@ -261,6 +252,15 @@ public class Interaction implements DiscordObject {
                 case 5: return MODAL_SUBMIT;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

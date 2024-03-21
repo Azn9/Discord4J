@@ -56,27 +56,6 @@ public class RestClient {
     private final AutoModService autoModService;
 
     /**
-     * Create a {@link RestClient} with default options, using the given token for authentication.
-     *
-     * @param token the bot token used for authentication
-     * @return a {@link RestClient} configured with the default options
-     */
-    public static RestClient create(String token) {
-        return RestClientBuilder.createRest(token).build();
-    }
-
-    /**
-     * Obtain a {@link RestClientBuilder} able to create {@link RestClient} instances, using the given token for
-     * authentication.
-     *
-     * @param token the bot token used for authentication
-     * @return a {@link RestClientBuilder}
-     */
-    public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
-        return RestClientBuilder.createRest(token);
-    }
-
-    /**
      * Create a new {@link RestClient} using the given {@link Router} as connector to perform requests.
      *
      * @param restResources a set of REST API resources required to operate this client
@@ -102,6 +81,47 @@ public class RestClient {
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
                 .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
+    }
+
+    /**
+     * Requests to retrieve the application info.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfoData}. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ApplicationInfoData> getApplicationInfo() {
+        return this.getApplicationService()
+                .getCurrentApplicationInfo();
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Application resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public ApplicationService getApplicationService() {
+        return applicationService;
+    }
+
+    /**
+     * Create a {@link RestClient} with default options, using the given token for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link RestClient} configured with the default options
+     */
+    public static RestClient create(String token) {
+        return RestClientBuilder.createRest(token).build();
+    }
+
+    /**
+     * Obtain a {@link RestClientBuilder} able to create {@link RestClient} instances, using the given token for
+     * authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link RestClientBuilder}
+     */
+    public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
+        return RestClientBuilder.createRest(token);
     }
 
     /**
@@ -173,7 +193,7 @@ public class RestClient {
      */
     public RestEmoji restGuildEmoji(Snowflake guildId, EmojiData data) {
         return RestEmoji.create(this, guildId,
-            Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+                Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
     }
 
     /**
@@ -196,7 +216,7 @@ public class RestClient {
      */
     public RestSticker restGuildSticker(Snowflake guildId, StickerData data) {
         return RestSticker.create(this, guildId,
-            Snowflake.of(data.id()));
+                Snowflake.of(data.id()));
     }
 
     /**
@@ -330,17 +350,6 @@ public class RestClient {
     }
 
     /**
-     * Requests to retrieve the application info.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfoData}. If
-     * an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<ApplicationInfoData> getApplicationInfo() {
-        return this.getApplicationService()
-                .getCurrentApplicationInfo();
-    }
-
-    /**
      * Requests to retrieve the guilds the current client is in.
      *
      * @return A {@link Flux} that continually emits the {@link PartialGuildData guilds} that the current client is
@@ -355,6 +364,17 @@ public class RestClient {
     }
 
     /**
+     * Access a low-level representation of the API endpoints for the User resource. It is recommended you use
+     * methods like {@link #getUserById(Snowflake)}, {@link #restUser(UserData)} or
+     * {@link RestUser#create(RestClient, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public UserService getUserService() {
+        return userService;
+    }
+
+    /**
      * Requests to retrieve the voice regions that are available.
      *
      * @return A {@link Flux} that continually emits the {@link RegionData regions} that are available. If an error is
@@ -362,6 +382,15 @@ public class RestClient {
      */
     public Flux<RegionData> getRegions() {
         return this.getVoiceService().getVoiceRegions();
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Voice Region resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public VoiceService getVoiceService() {
+        return voiceService;
     }
 
     /**
@@ -379,7 +408,7 @@ public class RestClient {
      *
      * @param guildId The ID of the guild
      * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is
-     *         received, it is emitted through the {@code Mono}.
+     * received, it is emitted through the {@code Mono}.
      */
     public Mono<MemberData> getSelfMember(Snowflake guildId) {
         return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());
@@ -451,15 +480,6 @@ public class RestClient {
     }
 
     /**
-     * Access a low-level representation of the API endpoints for the Application resource.
-     *
-     * @return a handle to perform low-level requests to the API
-     */
-    public ApplicationService getApplicationService() {
-        return applicationService;
-    }
-
-    /**
      * Access a low-level representation of the API endpoints for the Audit Log resource.
      *
      * @return a handle to perform low-level requests to the API
@@ -492,7 +512,8 @@ public class RestClient {
 
     /**
      * Access a low-level representation of the API endpoints for the Guild Sticker resource. It is recommended you use
-     * methods like {@link #getGuildStickerById(Snowflake, Snowflake)}, {@link #restGuildSticker(Snowflake, StickerData)} or
+     * methods like {@link #getGuildStickerById(Snowflake, Snowflake)},
+     * {@link #restGuildSticker(Snowflake, StickerData)} or
      * {@link RestSticker#create(RestClient, Snowflake, Snowflake)}.
      *
      * @return a handle to perform low-level requests to the API
@@ -523,6 +544,7 @@ public class RestClient {
 
     /**
      * Access a low-level representation of the API endpoints for the Interaction resource.
+     *
      * @return a handle to perform low-level requests to the API
      */
     public InteractionService getInteractionService() {
@@ -547,26 +569,6 @@ public class RestClient {
      */
     public TemplateService getTemplateService() {
         return templateService;
-    }
-
-    /**
-     * Access a low-level representation of the API endpoints for the User resource. It is recommended you use
-     * methods like {@link #getUserById(Snowflake)}, {@link #restUser(UserData)} or
-     * {@link RestUser#create(RestClient, Snowflake)}.
-     *
-     * @return a handle to perform low-level requests to the API
-     */
-    public UserService getUserService() {
-        return userService;
-    }
-
-    /**
-     * Access a low-level representation of the API endpoints for the Voice Region resource.
-     *
-     * @return a handle to perform low-level requests to the API
-     */
-    public VoiceService getVoiceService() {
-        return voiceService;
     }
 
     /**

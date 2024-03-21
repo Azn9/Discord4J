@@ -19,7 +19,7 @@ package discord4j.common.store.action.gateway;
 
 import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
 
-public class GuildScheduledEventUserRemoveAction extends ShardAwareAction<Void>{
+public class GuildScheduledEventUserRemoveAction extends ShardAwareAction<Void> {
 
     private final GuildScheduledEventUserRemove userRemove;
 

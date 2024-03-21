@@ -39,30 +39,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreateRequest>> {
 
-    Possible<String> content();
-
-    Possible<String> nonce();
-
-    Possible<Boolean> tts();
-
-    Possible<List<EmbedCreateSpec>> embeds();
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<Snowflake> messageReference();
-
-    Possible<List<LayoutComponent>> components();
-
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -85,18 +61,33 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<String> content();
+    Possible<String> nonce();
+    Possible<Boolean> tts();
+    Possible<List<EmbedCreateSpec>> embeds();
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    Possible<AllowedMentions> allowedMentions();
+    Possible<Snowflake> messageReference();
+    Possible<List<LayoutComponent>> components();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class MessageCreateMonoGenerator extends Mono<Message> implements MessageCreateSpecGenerator {
 
-    abstract MessageChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         channel().createMessage(MessageCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract MessageChannel channel();
 
     @Override
     public abstract String toString();

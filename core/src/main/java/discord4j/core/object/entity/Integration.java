@@ -70,15 +70,6 @@ public class Integration implements Entity {
     }
 
     /**
-     * Gets the ID of the guild this integration is associated to.
-     *
-     * @return The ID of the guild this integration is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Gets the data of the integration.
      *
      * @return The data of the integration.
@@ -124,15 +115,6 @@ public class Integration implements Entity {
     }
 
     /**
-     * Gets the id that this integration uses for "subscribers".
-     *
-     * @return The id that this integration uses for "subscribers".
-     */
-    public Optional<Snowflake> getSubscriberRoleId() {
-        return data.roleId().toOptional().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the role that this integration uses for "subscribers".
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Role role} that this integration uses
@@ -141,6 +123,24 @@ public class Integration implements Entity {
     public Mono<Role> getSubscriberRole() {
         return Mono.justOrEmpty(getSubscriberRoleId())
                 .flatMap(id -> gateway.getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Gets the ID of the guild this integration is associated to.
+     *
+     * @return The ID of the guild this integration is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Gets the id that this integration uses for "subscribers".
+     *
+     * @return The id that this integration uses for "subscribers".
+     */
+    public Optional<Snowflake> getSubscriberRoleId() {
+        return data.roleId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -239,13 +239,13 @@ public class Integration implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public boolean equals(@Nullable final Object obj) {
+        return EntityUtil.equals(this, obj);
     }
 
     @Override
@@ -280,15 +280,6 @@ public class Integration implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the integration expire behaviors. It is guaranteed that invoking {@link #getValue()} from the returned
          * enum will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
@@ -301,6 +292,15 @@ public class Integration implements Entity {
                 case 1: return KICK;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 

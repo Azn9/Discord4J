@@ -36,13 +36,6 @@ public final class PaginationUtil {
         return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "after", false);
     }
 
-    public static <T> Flux<T> paginateBefore(final Function<Map<String, Object>, Flux<T>> tProducer,
-                                             final ToLongFunction<T> keyExtractor, final long startAt,
-                                             final int pageSize) {
-
-        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "before", true);
-    }
-
     private static <T> Flux<T> paginateWithQueryParams(final Function<Map<String, Object>, Flux<T>> tProducer,
                                                        final ToLongFunction<T> keyExtractor, final long startAt,
                                                        final int pageSize, final String queryKey,
@@ -74,5 +67,12 @@ public final class PaginationUtil {
                 .doOnNext(list -> previousStart.set(updateLast.applyAsLong(list)))
                 .flatMapMany(Flux::fromIterable)
                 .repeat(() -> previousStart.get() != startAt);
+    }
+
+    public static <T> Flux<T> paginateBefore(final Function<Map<String, Object>, Flux<T>> tProducer,
+                                             final ToLongFunction<T> keyExtractor, final long startAt,
+                                             final int pageSize) {
+
+        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "before", true);
     }
 }

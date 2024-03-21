@@ -56,16 +56,6 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
-    @Override
-    public RestChannel getRestChannel() {
-        return rest;
-    }
-
-    @Override
     public final Type getType() {
         return Type.of(data.type());
     }
@@ -75,6 +65,11 @@ class BaseChannel implements Channel {
         return rest.delete(reason);
     }
 
+    @Override
+    public RestChannel getRestChannel() {
+        return rest;
+    }
+
     /**
      * Gets the raw data as represented by Discord.
      *
@@ -82,6 +77,11 @@ class BaseChannel implements Channel {
      */
     ChannelData getData() {
         return data;
+    }
+
+    @Override
+    public final int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 
     @Override
@@ -97,8 +97,8 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final int hashCode() {
-        return EntityUtil.hashCode(this);
+    public final Snowflake getId() {
+        return Snowflake.of(data.id());
     }
 
     @Override

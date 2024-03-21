@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -44,15 +44,6 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the guild that had a webhook updated in this event.
-     *
-     * @return The ID of the guild involved.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} that had a webhook updated in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
@@ -63,12 +54,12 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the channel the webhook belongs to.
+     * Gets the {@link Snowflake} ID of the guild that had a webhook updated in this event.
      *
-     * @return The ID of the channel involved.
+     * @return The ID of the guild involved.
      */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -79,6 +70,15 @@ public class WebhooksUpdateEvent extends Event {
      */
     public Mono<TextChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the channel the webhook belongs to.
+     *
+     * @return The ID of the channel involved.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     @Override

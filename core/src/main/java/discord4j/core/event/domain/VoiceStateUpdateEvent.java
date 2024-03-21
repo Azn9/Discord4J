@@ -39,7 +39,8 @@ public class VoiceStateUpdateEvent extends Event {
     private final VoiceState current;
     private final VoiceState old;
 
-    public VoiceStateUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceState current, @Nullable VoiceState old) {
+    public VoiceStateUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceState current,
+                                 @Nullable VoiceState old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;
@@ -88,7 +89,7 @@ public class VoiceStateUpdateEvent extends Event {
      * @return {@code true} if this is a voice channel move event, {@code false} otherwise.
      */
     public boolean isMoveEvent() {
-        if(old == null) {
+        if (old == null) {
             return false;
         }
         return !current.getChannelId().flatMap(current -> old.getChannelId().map(current::equals)).orElse(true);

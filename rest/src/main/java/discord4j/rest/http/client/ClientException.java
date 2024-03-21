@@ -89,52 +89,16 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Return the {@link ClientRequest} encapsulating a Discord API request.
+     * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
+     * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
-     * @return the request that caused this exception
+     * @param code the status code for which this {@link Predicate} should return {@code true}
+     * @return a {@link Predicate} that returns {@code true} if the given {@link RetryContext} exception is a
+     * {@link ClientException} containing the given HTTP status code
      */
-    public ClientRequest getRequest() {
-        return request;
-    }
-
-    /**
-     * Return the {@link HttpClientResponse} encapsulating a low-level Discord API response.
-     *
-     * @return the low-level response that caused this exception
-     */
-    public HttpClientResponse getResponse() {
-        return response;
-    }
-
-    /**
-     * Return the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
-     * obtained through {@link HttpResponseStatus#code()}.
-     *
-     * @return the HTTP error associated to this exception
-     */
-    public HttpResponseStatus getStatus() {
-        return getResponse().status();
-    }
-
-    /**
-     * Return the {@link HttpHeaders} from the error <strong>response</strong>. To get request headers refer to
-     * {@link #getRequest()} and then {@link ClientRequest#getHeaders()}.
-     *
-     * @return the HTTP response headers
-     */
-    public HttpHeaders getHeaders() {
-        return getResponse().responseHeaders();
-    }
-
-    /**
-     * Return the HTTP response body in the form of a Discord {@link ErrorResponse}, if present. {@link ErrorResponse}
-     * is a common object that contains an internal status code and messages, and could be used to further clarify
-     * the source of the API error.
-     *
-     * @return the Discord error response, if present
-     */
-    public Optional<ErrorResponse> getErrorResponse() {
-        return Optional.ofNullable(errorResponse);
+    public static Predicate<RetryContext<?>> isRetryContextStatusCode(int code) {
+        return ctx -> isStatusCode(code).test(ctx.exception());
     }
 
     /**
@@ -156,6 +120,29 @@ public class ClientException extends RuntimeException {
     }
 
     /**
+     * Return the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
+     * obtained through {@link HttpResponseStatus#code()}.
+     *
+     * @return the HTTP error associated to this exception
+     */
+    public HttpResponseStatus getStatus() {
+        return getResponse().status();
+    }
+
+    /**
+     * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
+     * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
+     *
+     * @param codes the status codes for which this {@link Predicate} should return {@code true}
+     * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
+     * containing the given HTTP status code
+     */
+    public static Predicate<RetryContext<?>> isRetryContextStatusCode(Integer... codes) {
+        return ctx -> isStatusCode(codes).test(ctx.exception());
+    }
+
+    /**
      * {@link Predicate} helper to further classify a {@link ClientException} depending on the underlying HTTP status
      * code.
      *
@@ -171,32 +158,6 @@ public class ClientException extends RuntimeException {
             }
             return false;
         };
-    }
-
-    /**
-     * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
-     * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
-     *
-     * @param code the status code for which this {@link Predicate} should return {@code true}
-     * @return a {@link Predicate} that returns {@code true} if the given {@link RetryContext} exception is a
-     * {@link ClientException} containing the given HTTP status code
-     */
-    public static Predicate<RetryContext<?>> isRetryContextStatusCode(int code) {
-        return ctx -> isStatusCode(code).test(ctx.exception());
-    }
-
-    /**
-     * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
-     * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
-     *
-     * @param codes the status codes for which this {@link Predicate} should return {@code true}
-     * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
-     * containing the given HTTP status code
-     */
-    public static Predicate<RetryContext<?>> isRetryContextStatusCode(Integer... codes) {
-        return ctx -> isStatusCode(codes).test(ctx.exception());
     }
 
     /**
@@ -225,5 +186,44 @@ public class ClientException extends RuntimeException {
      */
     public static <T> Function<Mono<T>, Publisher<T>> retryOnceOnStatus(int code) {
         return mono -> mono.retryWhen(Retry.backoff(1, Duration.ofSeconds(1)).filter(isStatusCode(code)));
+    }
+
+    /**
+     * Return the {@link ClientRequest} encapsulating a Discord API request.
+     *
+     * @return the request that caused this exception
+     */
+    public ClientRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Return the {@link HttpHeaders} from the error <strong>response</strong>. To get request headers refer to
+     * {@link #getRequest()} and then {@link ClientRequest#getHeaders()}.
+     *
+     * @return the HTTP response headers
+     */
+    public HttpHeaders getHeaders() {
+        return getResponse().responseHeaders();
+    }
+
+    /**
+     * Return the {@link HttpClientResponse} encapsulating a low-level Discord API response.
+     *
+     * @return the low-level response that caused this exception
+     */
+    public HttpClientResponse getResponse() {
+        return response;
+    }
+
+    /**
+     * Return the HTTP response body in the form of a Discord {@link ErrorResponse}, if present. {@link ErrorResponse}
+     * is a common object that contains an internal status code and messages, and could be used to further clarify
+     * the source of the API error.
+     *
+     * @return the Discord error response, if present
+     */
+    public Optional<ErrorResponse> getErrorResponse() {
+        return Optional.ofNullable(errorResponse);
     }
 }

@@ -62,8 +62,8 @@ public class WebhookServiceTest {
     @Test
     public void testModifyWebhook() {
         WebhookModifyRequest req = WebhookModifyRequest.builder()
-            .name("Permanent Webhook")
-            .build();
+                .name("Permanent Webhook")
+                .build();
         webhookService.modifyWebhook(permanentWebhook, req, null).block();
     }
 

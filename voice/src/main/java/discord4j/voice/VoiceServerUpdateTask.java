@@ -29,6 +29,16 @@ import reactor.core.publisher.Mono;
 public interface VoiceServerUpdateTask {
 
     /**
+     * Return a Flux sequence containing {@link VoiceServerOptions} instances indicating a voice server update payload
+     * was received from the gateway connection for the given guild.
+     *
+     * @param guildId the guild ID listening for voice server updates
+     * @return a Flux with a VoiceServerOptions payload
+     */
+    default Flux<VoiceServerOptions> onVoiceServerUpdates(Snowflake guildId) {
+        return onVoiceServerUpdate(guildId).repeat();
+    }
+    /**
      * Return a Mono sequence containing an eventual {@link VoiceServerOptions} instance indicating a voice server
      * update payload was received from the gateway connection for the given guild.
      *
@@ -39,16 +49,5 @@ public interface VoiceServerUpdateTask {
      */
     @Deprecated
     Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId);
-
-    /**
-     * Return a Flux sequence containing {@link VoiceServerOptions} instances indicating a voice server update payload
-     * was received from the gateway connection for the given guild.
-     *
-     * @param guildId the guild ID listening for voice server updates
-     * @return a Flux with a VoiceServerOptions payload
-     */
-    default Flux<VoiceServerOptions> onVoiceServerUpdates(Snowflake guildId) {
-        return onVoiceServerUpdate(guildId).repeat();
-    }
 
 }

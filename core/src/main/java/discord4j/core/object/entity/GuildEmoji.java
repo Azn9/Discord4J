@@ -77,13 +77,6 @@ public final class GuildEmoji implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return data.id()
-                .map(Snowflake::of)
-                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
-    }
-
     /**
      * Gets the data of the emoji.
      *
@@ -94,13 +87,16 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Gets the emoji name.
+     * Requests to retrieve the roles this emoji is whitelisted to.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
      *
-     * @return The emoji name.
+     * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
+     * is received, it is emitted through the {@code Flux}.
      */
-    public String getName() {
-        return data.name()
-                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
+    public Flux<Role> getRoles() {
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> gateway.getRoleById(getGuildId(), id));
     }
 
     /**
@@ -117,16 +113,12 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Requests to retrieve the roles this emoji is whitelisted to.
-     * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
-     * to consistently order roles.
+     * Gets the ID of the guild this emoji is associated to.
      *
-     * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
-     * is received, it is emitted through the {@code Flux}.
+     * @return The ID of the guild this emoji is associated to.
      */
-    public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> gateway.getRoleById(getGuildId(), id));
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -159,6 +151,13 @@ public final class GuildEmoji implements Entity {
                 .map(data -> new User(gateway, user));
     }
 
+    @Override
+    public Snowflake getId() {
+        return data.id()
+                .map(Snowflake::of)
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
+    }
+
     /**
      * Gets whether this emoji must be wrapped in colons.
      *
@@ -180,32 +179,14 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Gets whether this emoji is animated.
-     *
-     * @return {@code true} if this emoji is animated, {@code false} otherwise.
-     */
-    public boolean isAnimated() {
-        return data.animated().toOptional()
-                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
-    }
-
-    /**
      * Gets whether this emoji is available for use.
      *
-     * @return {@code true} if this emoji is available, {@code false} otherwise (due to loss of Server Boosts for example).
+     * @return {@code true} if this emoji is available, {@code false} otherwise (due to loss of Server Boosts for
+     * example).
      */
     public boolean isAvailable() {
         return data.available().toOptional()
                 .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
-    }
-
-    /**
-     * Gets the ID of the guild this emoji is associated to.
-     *
-     * @return The ID of the guild this emoji is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -241,13 +222,13 @@ public final class GuildEmoji implements Entity {
     @Deprecated
     public Mono<GuildEmoji> edit(final Consumer<? super LegacyGuildEmojiEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyGuildEmojiEditSpec mutatedSpec = new LegacyGuildEmojiEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getEmojiService()
-                            .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyGuildEmojiEditSpec mutatedSpec = new LegacyGuildEmojiEditSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getEmojiService()
+                                    .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                            mutatedSpec.getReason());
+                        })
                 .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 
@@ -272,9 +253,9 @@ public final class GuildEmoji implements Entity {
     public Mono<GuildEmoji> edit(GuildEmojiEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getEmojiService()
-                        .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
-                                spec.reason()))
+                        () -> gateway.getRestClient().getEmojiService()
+                                .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
+                                        spec.reason()))
                 .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 
@@ -301,6 +282,16 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
+     * Gets the image for this guild emoji.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image image} of the emoji. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getImage() {
+        return Image.ofUrl(getImageUrl());
+    }
+
+    /**
      * Gets the URL for this guild emoji.
      *
      * @return The URL for this guild emoji.
@@ -311,13 +302,13 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Gets the image for this guild emoji.
+     * Gets whether this emoji is animated.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Image image} of the emoji. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return {@code true} if this emoji is animated, {@code false} otherwise.
      */
-    public Mono<Image> getImage() {
-        return Image.ofUrl(getImageUrl());
+    public boolean isAnimated() {
+        return data.animated().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -329,14 +320,24 @@ public final class GuildEmoji implements Entity {
         return '<' + (isAnimated() ? "a" : "") + ':' + getName() + ':' + getId().asString() + '>';
     }
 
-    @Override
-    public boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
+    /**
+     * Gets the emoji name.
+     *
+     * @return The emoji name.
+     */
+    public String getName() {
+        return data.name()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object obj) {
+        return EntityUtil.equals(this, obj);
     }
 
     @Override

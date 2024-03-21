@@ -132,19 +132,6 @@ public enum Scope {
         this.requiresDiscordApproval = requiresDiscordApproval;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * Gets whether this {@code Scope} requires approval from Discord to use.
-     *
-     * @return Whether this {@code Scope} requires approval from Discord to use.
-     */
-    public boolean requiresDiscordApproval() {
-        return requiresDiscordApproval;
-    }
-
     /**
      * Constructs a {@code Scope} from the given value.
      *
@@ -196,5 +183,18 @@ public enum Scope {
         return EnumSet.of(first, rest).stream()
                 .map(Scope::getValue)
                 .collect(Collectors.joining(" "));
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Gets whether this {@code Scope} requires approval from Discord to use.
+     *
+     * @return Whether this {@code Scope} requires approval from Discord to use.
+     */
+    public boolean requiresDiscordApproval() {
+        return requiresDiscordApproval;
     }
 }

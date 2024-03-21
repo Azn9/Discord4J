@@ -80,15 +80,6 @@ public final class ApplicationTeam implements Entity {
     }
 
     /**
-     * Gets the user id of the current team owner.
-     *
-     * @return The user id of the current team owner.
-     */
-    public Snowflake getOwnerId() {
-        return Snowflake.of(data.ownerUserId().asLong());
-    }
-
-    /**
      * Requests to retrieve the current team owner.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} associated with the current
@@ -96,6 +87,15 @@ public final class ApplicationTeam implements Entity {
      */
     public Mono<User> getOwner() {
         return gateway.getUserById(getOwnerId());
+    }
+
+    /**
+     * Gets the user id of the current team owner.
+     *
+     * @return The user id of the current team owner.
+     */
+    public Snowflake getOwnerId() {
+        return Snowflake.of(data.ownerUserId().asLong());
     }
 
     /**

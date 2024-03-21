@@ -52,6 +52,111 @@ public abstract class ReactiveEventAdapter {
     // ================= Gateway lifecycle events ================= //
 
     /**
+     * Create a composite {@link ReactiveEventAdapter} from multiple adapters.
+     *
+     * @param adapters an array of adapters to combine
+     * @return a composite adapter
+     */
+    public static ReactiveEventAdapter from(ReactiveEventAdapter... adapters) {
+        return new CompositeReactiveEventAdapter(adapters);
+    }
+
+    public Publisher<?> hookOnEvent(Event event) {
+        // @formatter:off
+        final List<Publisher<?>> compatibleHooks = new ArrayList<>();
+        if (event instanceof ReadyEvent) compatibleHooks.add(onReady((ReadyEvent) event));
+        if (event instanceof ResumeEvent) compatibleHooks.add(onResume((ResumeEvent) event));
+        if (event instanceof MessageCreateEvent) compatibleHooks.add(onMessageCreate((MessageCreateEvent) event));
+        if (event instanceof MessageDeleteEvent) compatibleHooks.add(onMessageDelete((MessageDeleteEvent) event));
+        if (event instanceof MessageUpdateEvent) compatibleHooks.add(onMessageUpdate((MessageUpdateEvent) event));
+        if (event instanceof MessageBulkDeleteEvent) compatibleHooks.add(onMessageBulkDelete((MessageBulkDeleteEvent) event));
+        if (event instanceof ReactionAddEvent) compatibleHooks.add(onReactionAdd((ReactionAddEvent) event));
+        if (event instanceof ReactionRemoveEvent) compatibleHooks.add(onReactionRemove((ReactionRemoveEvent) event));
+        if (event instanceof ReactionRemoveEmojiEvent) compatibleHooks.add(onReactionRemoveEmoji((ReactionRemoveEmojiEvent) event));
+        if (event instanceof ReactionRemoveAllEvent) compatibleHooks.add(onReactionRemoveAll((ReactionRemoveAllEvent) event));
+        if (event instanceof GuildCreateEvent) compatibleHooks.add(onGuildCreate((GuildCreateEvent) event));
+        if (event instanceof GuildDeleteEvent) compatibleHooks.add(onGuildDelete((GuildDeleteEvent) event));
+        if (event instanceof GuildUpdateEvent) compatibleHooks.add(onGuildUpdate((GuildUpdateEvent) event));
+        if (event instanceof MemberJoinEvent) compatibleHooks.add(onMemberJoin((MemberJoinEvent) event));
+        if (event instanceof MemberLeaveEvent) compatibleHooks.add(onMemberLeave((MemberLeaveEvent) event));
+        if (event instanceof MemberUpdateEvent) compatibleHooks.add(onMemberUpdate((MemberUpdateEvent) event));
+        if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
+        if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
+        if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
+        if (event instanceof AuditLogEntryCreateEvent) compatibleHooks.add(onAuditLogEntryCreate((AuditLogEntryCreateEvent) event));
+        if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
+        if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
+        if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
+        if (event instanceof WebhooksUpdateEvent) compatibleHooks.add(onWebhooksUpdate((WebhooksUpdateEvent) event));
+        if (event instanceof TextChannelCreateEvent) compatibleHooks.add(onTextChannelCreate((TextChannelCreateEvent) event));
+        if (event instanceof TextChannelDeleteEvent) compatibleHooks.add(onTextChannelDelete((TextChannelDeleteEvent) event));
+        if (event instanceof TextChannelUpdateEvent) compatibleHooks.add(onTextChannelUpdate((TextChannelUpdateEvent) event));
+        if (event instanceof VoiceChannelCreateEvent) compatibleHooks.add(onVoiceChannelCreate((VoiceChannelCreateEvent) event));
+        if (event instanceof VoiceChannelDeleteEvent) compatibleHooks.add(onVoiceChannelDelete((VoiceChannelDeleteEvent) event));
+        if (event instanceof VoiceChannelUpdateEvent) compatibleHooks.add(onVoiceChannelUpdate((VoiceChannelUpdateEvent) event));
+        if (event instanceof CategoryCreateEvent) compatibleHooks.add(onCategoryCreate((CategoryCreateEvent) event));
+        if (event instanceof CategoryDeleteEvent) compatibleHooks.add(onCategoryDelete((CategoryDeleteEvent) event));
+        if (event instanceof CategoryUpdateEvent) compatibleHooks.add(onCategoryUpdate((CategoryUpdateEvent) event));
+        if (event instanceof NewsChannelCreateEvent) compatibleHooks.add(onNewsChannelCreate((NewsChannelCreateEvent) event));
+        if (event instanceof NewsChannelDeleteEvent) compatibleHooks.add(onNewsChannelDelete((NewsChannelDeleteEvent) event));
+        if (event instanceof NewsChannelUpdateEvent) compatibleHooks.add(onNewsChannelUpdate((NewsChannelUpdateEvent) event));
+        if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
+        if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
+        if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
+        if (event instanceof UnknownChannelCreateEvent) compatibleHooks.add(onUnknownChannelCreate((UnknownChannelCreateEvent) event));
+        if (event instanceof UnknownChannelDeleteEvent) compatibleHooks.add(onUnknownChannelDelete((UnknownChannelDeleteEvent) event));
+        if (event instanceof UnknownChannelUpdateEvent) compatibleHooks.add(onUnknownChannelUpdate((UnknownChannelUpdateEvent) event));
+        if (event instanceof TypingStartEvent) compatibleHooks.add(onTypingStart((TypingStartEvent) event));
+        if (event instanceof PinsUpdateEvent) compatibleHooks.add(onPinsUpdate((PinsUpdateEvent) event));
+        if (event instanceof RoleCreateEvent) compatibleHooks.add(onRoleCreate((RoleCreateEvent) event));
+        if (event instanceof RoleDeleteEvent) compatibleHooks.add(onRoleDelete((RoleDeleteEvent) event));
+        if (event instanceof RoleUpdateEvent) compatibleHooks.add(onRoleUpdate((RoleUpdateEvent) event));
+        if (event instanceof InviteCreateEvent) compatibleHooks.add(onInviteCreate((InviteCreateEvent) event));
+        if (event instanceof InviteDeleteEvent) compatibleHooks.add(onInviteDelete((InviteDeleteEvent) event));
+        if (event instanceof UserUpdateEvent) compatibleHooks.add(onUserUpdate((UserUpdateEvent) event));
+        if (event instanceof PresenceUpdateEvent) compatibleHooks.add(onPresenceUpdate((PresenceUpdateEvent) event));
+        if (event instanceof VoiceStateUpdateEvent) compatibleHooks.add(onVoiceStateUpdate((VoiceStateUpdateEvent) event));
+        if (event instanceof VoiceServerUpdateEvent) compatibleHooks.add(onVoiceServerUpdate((VoiceServerUpdateEvent) event));
+        if (event instanceof ConnectEvent) compatibleHooks.add(onConnect((ConnectEvent) event));
+        if (event instanceof ReconnectEvent) compatibleHooks.add(onReconnect((ReconnectEvent) event));
+        if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
+        if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
+        if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
+        if (event instanceof SessionInvalidatedEvent) compatibleHooks.add(onSessionInvalidated((SessionInvalidatedEvent) event));
+        if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
+        if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
+        if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
+        if (event instanceof UserInteractionEvent) compatibleHooks.add(onUserInteraction((UserInteractionEvent) event));
+        if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
+        if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
+        if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
+        if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
+        if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
+        if (event instanceof ModalSubmitInteractionEvent) compatibleHooks.add(onModalSubmitInteraction((ModalSubmitInteractionEvent) event));
+        if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
+        if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
+        if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
+        if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));
+        if (event instanceof ApplicationCommandDeleteEvent) compatibleHooks.add(onApplicationCommandDelete((ApplicationCommandDeleteEvent) event));
+        if (event instanceof IntegrationCreateEvent) compatibleHooks.add(onIntegrationCreate((IntegrationCreateEvent) event));
+        if (event instanceof IntegrationUpdateEvent) compatibleHooks.add(onIntegrationUpdate((IntegrationUpdateEvent) event));
+        if (event instanceof IntegrationDeleteEvent) compatibleHooks.add(onIntegrationDelete((IntegrationDeleteEvent) event));
+        if (event instanceof AutoModRuleCreateEvent) compatibleHooks.add(onAutoModRuleCreate((AutoModRuleCreateEvent) event));
+        if (event instanceof AutoModRuleUpdateEvent) compatibleHooks.add(onAutoModRuleUpdate((AutoModRuleUpdateEvent) event));
+        if (event instanceof AutoModRuleDeleteEvent) compatibleHooks.add(onAutoModRuleDelete((AutoModRuleDeleteEvent) event));
+        if (event instanceof AutoModActionExecutedEvent) compatibleHooks.add(onAutoModActionExecution((AutoModActionExecutedEvent) event));
+        if (event instanceof ScheduledEventCreateEvent) compatibleHooks.add(onScheduledEventCreate((ScheduledEventCreateEvent) event));
+        if (event instanceof ScheduledEventUpdateEvent) compatibleHooks.add(onScheduledEventUpdate((ScheduledEventUpdateEvent) event));
+        if (event instanceof ScheduledEventDeleteEvent) compatibleHooks.add(onScheduledEventDelete((ScheduledEventDeleteEvent) event));
+        if (event instanceof ScheduledEventUserAddEvent) compatibleHooks.add(onScheduledEventUserAdd((ScheduledEventUserAddEvent) event));
+        if (event instanceof ScheduledEventUserRemoveEvent) compatibleHooks.add(onScheduledEventUserRemove((ScheduledEventUserRemoveEvent) event));
+        // @formatter:on
+        return Mono.whenDelayError(compatibleHooks);
+    }
+
+    // ================= Message related events ================= //
+
+    /**
      * Invoked as Discord has established a fresh Gateway session. This event can be used to track the bot connection
      * details and contains the initial state required to operate with the real-time Gateway. See {@link ReadyEvent}
      * and Discord documentation for more details about this event.
@@ -74,8 +179,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onResume(ResumeEvent event) {
         return Mono.empty();
     }
-
-    // ================= Message related events ================= //
 
     /**
      * Invoked when a message is sent in a message channel.
@@ -146,6 +249,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ========== Application Command related events ========== //
+
     /**
      * Invoked when the reactions for one emoji are removed from a message. Guild ID might be missing if this event
      * fires for a DM channel.
@@ -170,8 +275,6 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ========== Application Command related events ========== //
-
     /**
      * Invoked when an application command relevant to the current user is created. Guild ID might be missing
      * if this event fires for a DM channel.
@@ -183,6 +286,8 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onApplicationCommandCreate(ApplicationCommandCreateEvent event) {
         return Mono.empty();
     }
+
+    // ================= Guild related events ================= //
 
     /**
      * Invoked when an application command relevant to the current user is updated. Guild ID might be missing
@@ -207,8 +312,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onApplicationCommandDelete(ApplicationCommandDeleteEvent event) {
         return Mono.empty();
     }
-
-    // ================= Guild related events ================= //
 
     /**
      * Invoked when the bot receives initial information on startup, after it joins a guild, or after an outage is
@@ -343,6 +446,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Channel related events ================= //
+
     /**
      * Invoked when guild integrations are updated.
      *
@@ -365,8 +470,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onWebhooksUpdate(WebhooksUpdateEvent event) {
         return Mono.empty();
     }
-
-    // ================= Channel related events ================= //
 
     /**
      * Invoked when a guild text channel is created.
@@ -569,6 +672,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Role related events ================= //
+
     /**
      * Invoked when a user has started typing a message.
      *
@@ -591,8 +696,6 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= Role related events ================= //
-
     /**
      * Invoked when a role is created in a guild.
      *
@@ -603,6 +706,8 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onRoleCreate(RoleCreateEvent event) {
         return Mono.empty();
     }
+
+    // ================= Invite related events ================= //
 
     /**
      * Invoked when a role is deleted from a guild.
@@ -626,7 +731,7 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= Invite related events ================= //
+    // ================= User related events ================= //
 
     /**
      * Invoked when an invite to a channel is created.
@@ -650,7 +755,7 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= User related events ================= //
+    // ================= Voice connections related events ================= //
 
     /**
      * Invoked when one or more user's properties were updated.
@@ -674,7 +779,7 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= Voice connections related events ================= //
+    // ================= Connection lifecycle events ================= //
 
     /**
      * Invoked when a user's connected voice channel and status, was requested or has updated.
@@ -697,8 +802,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onVoiceServerUpdate(VoiceServerUpdateEvent event) {
         return Mono.empty();
     }
-
-    // ================= Connection lifecycle events ================= //
 
     /**
      * Invoked when connecting to the Gateway for the first time only.
@@ -744,6 +847,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Interactions events ================= //
+
     /**
      * Invoked when a resumption or reconnection attempt has failed but can be retried.
      *
@@ -765,8 +870,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onSessionInvalidated(SessionInvalidatedEvent event) {
         return Mono.empty();
     }
-
-    // ================= Interactions events ================= //
 
     /**
      * Invoked when a user starts an interaction.
@@ -878,6 +981,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Integration related events ================= //
+
     /**
      * Invoked when a user is typing a chat input command option that has auto-complete enabled.
      *
@@ -900,8 +1005,6 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= Integration related events ================= //
-
     /**
      * Invoked when an integration has been created.
      *
@@ -912,6 +1015,8 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onIntegrationCreate(IntegrationCreateEvent event) {
         return Mono.empty();
     }
+
+    // ================= AutoMod related events ================= //
 
     /**
      * Invoked when an integration has been updated.
@@ -935,8 +1040,6 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    // ================= AutoMod related events ================= //
-
     /**
      * Invoked when an automod rule has been created.
      *
@@ -959,6 +1062,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Scheduled event methods ================= //
+
     /**
      * Invoked when an automod rule has been deleted.
      *
@@ -980,8 +1085,6 @@ public abstract class ReactiveEventAdapter {
     public Publisher<?> onAutoModActionExecution(AutoModActionExecutedEvent event) {
         return Mono.empty();
     }
-
-    // ================= Scheduled event methods ================= //
 
     /**
      * Invoked when a scheduled event is created.
@@ -1016,6 +1119,8 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Core methods ================= //
+
     /**
      * Invoked when a user subscribes to a scheduled event.
      *
@@ -1036,111 +1141,6 @@ public abstract class ReactiveEventAdapter {
      */
     public Publisher<?> onScheduledEventUserRemove(ScheduledEventUserRemoveEvent event) {
         return Mono.empty();
-    }
-
-    // ================= Core methods ================= //
-
-    /**
-     * Create a composite {@link ReactiveEventAdapter} from multiple adapters.
-     *
-     * @param adapters an array of adapters to combine
-     * @return a composite adapter
-     */
-    public static ReactiveEventAdapter from(ReactiveEventAdapter... adapters) {
-        return new CompositeReactiveEventAdapter(adapters);
-    }
-
-    public Publisher<?> hookOnEvent(Event event) {
-        // @formatter:off
-        final List<Publisher<?>> compatibleHooks = new ArrayList<>();
-        if (event instanceof ReadyEvent) compatibleHooks.add(onReady((ReadyEvent) event));
-        if (event instanceof ResumeEvent) compatibleHooks.add(onResume((ResumeEvent) event));
-        if (event instanceof MessageCreateEvent) compatibleHooks.add(onMessageCreate((MessageCreateEvent) event));
-        if (event instanceof MessageDeleteEvent) compatibleHooks.add(onMessageDelete((MessageDeleteEvent) event));
-        if (event instanceof MessageUpdateEvent) compatibleHooks.add(onMessageUpdate((MessageUpdateEvent) event));
-        if (event instanceof MessageBulkDeleteEvent) compatibleHooks.add(onMessageBulkDelete((MessageBulkDeleteEvent) event));
-        if (event instanceof ReactionAddEvent) compatibleHooks.add(onReactionAdd((ReactionAddEvent) event));
-        if (event instanceof ReactionRemoveEvent) compatibleHooks.add(onReactionRemove((ReactionRemoveEvent) event));
-        if (event instanceof ReactionRemoveEmojiEvent) compatibleHooks.add(onReactionRemoveEmoji((ReactionRemoveEmojiEvent) event));
-        if (event instanceof ReactionRemoveAllEvent) compatibleHooks.add(onReactionRemoveAll((ReactionRemoveAllEvent) event));
-        if (event instanceof GuildCreateEvent) compatibleHooks.add(onGuildCreate((GuildCreateEvent) event));
-        if (event instanceof GuildDeleteEvent) compatibleHooks.add(onGuildDelete((GuildDeleteEvent) event));
-        if (event instanceof GuildUpdateEvent) compatibleHooks.add(onGuildUpdate((GuildUpdateEvent) event));
-        if (event instanceof MemberJoinEvent) compatibleHooks.add(onMemberJoin((MemberJoinEvent) event));
-        if (event instanceof MemberLeaveEvent) compatibleHooks.add(onMemberLeave((MemberLeaveEvent) event));
-        if (event instanceof MemberUpdateEvent) compatibleHooks.add(onMemberUpdate((MemberUpdateEvent) event));
-        if (event instanceof MemberChunkEvent) compatibleHooks.add(onMemberChunk((MemberChunkEvent) event));
-        if (event instanceof EmojisUpdateEvent) compatibleHooks.add(onEmojisUpdate((EmojisUpdateEvent) event));
-        if (event instanceof StickersUpdateEvent) compatibleHooks.add(onStickersUpdate((StickersUpdateEvent) event));
-        if (event instanceof AuditLogEntryCreateEvent) compatibleHooks.add(onAuditLogEntryCreate((AuditLogEntryCreateEvent) event));
-        if (event instanceof BanEvent) compatibleHooks.add(onBan((BanEvent) event));
-        if (event instanceof UnbanEvent) compatibleHooks.add(onUnban((UnbanEvent) event));
-        if (event instanceof IntegrationsUpdateEvent) compatibleHooks.add(onIntegrationsUpdate((IntegrationsUpdateEvent) event));
-        if (event instanceof WebhooksUpdateEvent) compatibleHooks.add(onWebhooksUpdate((WebhooksUpdateEvent) event));
-        if (event instanceof TextChannelCreateEvent) compatibleHooks.add(onTextChannelCreate((TextChannelCreateEvent) event));
-        if (event instanceof TextChannelDeleteEvent) compatibleHooks.add(onTextChannelDelete((TextChannelDeleteEvent) event));
-        if (event instanceof TextChannelUpdateEvent) compatibleHooks.add(onTextChannelUpdate((TextChannelUpdateEvent) event));
-        if (event instanceof VoiceChannelCreateEvent) compatibleHooks.add(onVoiceChannelCreate((VoiceChannelCreateEvent) event));
-        if (event instanceof VoiceChannelDeleteEvent) compatibleHooks.add(onVoiceChannelDelete((VoiceChannelDeleteEvent) event));
-        if (event instanceof VoiceChannelUpdateEvent) compatibleHooks.add(onVoiceChannelUpdate((VoiceChannelUpdateEvent) event));
-        if (event instanceof CategoryCreateEvent) compatibleHooks.add(onCategoryCreate((CategoryCreateEvent) event));
-        if (event instanceof CategoryDeleteEvent) compatibleHooks.add(onCategoryDelete((CategoryDeleteEvent) event));
-        if (event instanceof CategoryUpdateEvent) compatibleHooks.add(onCategoryUpdate((CategoryUpdateEvent) event));
-        if (event instanceof NewsChannelCreateEvent) compatibleHooks.add(onNewsChannelCreate((NewsChannelCreateEvent) event));
-        if (event instanceof NewsChannelDeleteEvent) compatibleHooks.add(onNewsChannelDelete((NewsChannelDeleteEvent) event));
-        if (event instanceof NewsChannelUpdateEvent) compatibleHooks.add(onNewsChannelUpdate((NewsChannelUpdateEvent) event));
-        if (event instanceof StoreChannelCreateEvent) compatibleHooks.add(onStoreChannelCreate((StoreChannelCreateEvent) event));
-        if (event instanceof StoreChannelDeleteEvent) compatibleHooks.add(onStoreChannelDelete((StoreChannelDeleteEvent) event));
-        if (event instanceof StoreChannelUpdateEvent) compatibleHooks.add(onStoreChannelUpdate((StoreChannelUpdateEvent) event));
-        if (event instanceof UnknownChannelCreateEvent) compatibleHooks.add(onUnknownChannelCreate((UnknownChannelCreateEvent) event));
-        if (event instanceof UnknownChannelDeleteEvent) compatibleHooks.add(onUnknownChannelDelete((UnknownChannelDeleteEvent) event));
-        if (event instanceof UnknownChannelUpdateEvent) compatibleHooks.add(onUnknownChannelUpdate((UnknownChannelUpdateEvent) event));
-        if (event instanceof TypingStartEvent) compatibleHooks.add(onTypingStart((TypingStartEvent) event));
-        if (event instanceof PinsUpdateEvent) compatibleHooks.add(onPinsUpdate((PinsUpdateEvent) event));
-        if (event instanceof RoleCreateEvent) compatibleHooks.add(onRoleCreate((RoleCreateEvent) event));
-        if (event instanceof RoleDeleteEvent) compatibleHooks.add(onRoleDelete((RoleDeleteEvent) event));
-        if (event instanceof RoleUpdateEvent) compatibleHooks.add(onRoleUpdate((RoleUpdateEvent) event));
-        if (event instanceof InviteCreateEvent) compatibleHooks.add(onInviteCreate((InviteCreateEvent) event));
-        if (event instanceof InviteDeleteEvent) compatibleHooks.add(onInviteDelete((InviteDeleteEvent) event));
-        if (event instanceof UserUpdateEvent) compatibleHooks.add(onUserUpdate((UserUpdateEvent) event));
-        if (event instanceof PresenceUpdateEvent) compatibleHooks.add(onPresenceUpdate((PresenceUpdateEvent) event));
-        if (event instanceof VoiceStateUpdateEvent) compatibleHooks.add(onVoiceStateUpdate((VoiceStateUpdateEvent) event));
-        if (event instanceof VoiceServerUpdateEvent) compatibleHooks.add(onVoiceServerUpdate((VoiceServerUpdateEvent) event));
-        if (event instanceof ConnectEvent) compatibleHooks.add(onConnect((ConnectEvent) event));
-        if (event instanceof ReconnectEvent) compatibleHooks.add(onReconnect((ReconnectEvent) event));
-        if (event instanceof DisconnectEvent) compatibleHooks.add(onDisconnect((DisconnectEvent) event));
-        if (event instanceof ReconnectStartEvent) compatibleHooks.add(onReconnectStart((ReconnectStartEvent) event));
-        if (event instanceof ReconnectFailEvent) compatibleHooks.add(onReconnectFail((ReconnectFailEvent) event));
-        if (event instanceof SessionInvalidatedEvent) compatibleHooks.add(onSessionInvalidated((SessionInvalidatedEvent) event));
-        if (event instanceof ApplicationCommandInteractionEvent) compatibleHooks.add(onApplicationCommandInteraction((ApplicationCommandInteractionEvent) event));
-        if (event instanceof ChatInputInteractionEvent) compatibleHooks.add(onChatInputInteraction((ChatInputInteractionEvent) event));
-        if (event instanceof MessageInteractionEvent) compatibleHooks.add(onMessageInteraction((MessageInteractionEvent) event));
-        if (event instanceof UserInteractionEvent) compatibleHooks.add(onUserInteraction((UserInteractionEvent) event));
-        if (event instanceof ButtonInteractionEvent) compatibleHooks.add(onButtonInteraction((ButtonInteractionEvent) event));
-        if (event instanceof SelectMenuInteractionEvent) compatibleHooks.add(onSelectMenuInteraction((SelectMenuInteractionEvent) event));
-        if (event instanceof ComponentInteractionEvent) compatibleHooks.add(onComponentInteraction((ComponentInteractionEvent) event));
-        if (event instanceof AutoCompleteInteractionEvent) compatibleHooks.add(onAutoCompleteInteraction((AutoCompleteInteractionEvent) event));
-        if (event instanceof ChatInputAutoCompleteEvent) compatibleHooks.add(onChatInputAutoCompleteInteraction((ChatInputAutoCompleteEvent) event));
-        if (event instanceof ModalSubmitInteractionEvent) compatibleHooks.add(onModalSubmitInteraction((ModalSubmitInteractionEvent) event));
-        if (event instanceof DeferrableInteractionEvent) compatibleHooks.add(onDeferrableInteraction((DeferrableInteractionEvent) event));
-        if (event instanceof InteractionCreateEvent) compatibleHooks.add(onInteractionCreate((InteractionCreateEvent) event));
-        if (event instanceof ApplicationCommandCreateEvent) compatibleHooks.add(onApplicationCommandCreate((ApplicationCommandCreateEvent) event));
-        if (event instanceof ApplicationCommandUpdateEvent) compatibleHooks.add(onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event));
-        if (event instanceof ApplicationCommandDeleteEvent) compatibleHooks.add(onApplicationCommandDelete((ApplicationCommandDeleteEvent) event));
-        if (event instanceof IntegrationCreateEvent) compatibleHooks.add(onIntegrationCreate((IntegrationCreateEvent) event));
-        if (event instanceof IntegrationUpdateEvent) compatibleHooks.add(onIntegrationUpdate((IntegrationUpdateEvent) event));
-        if (event instanceof IntegrationDeleteEvent) compatibleHooks.add(onIntegrationDelete((IntegrationDeleteEvent) event));
-        if (event instanceof AutoModRuleCreateEvent) compatibleHooks.add(onAutoModRuleCreate((AutoModRuleCreateEvent) event));
-        if (event instanceof AutoModRuleUpdateEvent) compatibleHooks.add(onAutoModRuleUpdate((AutoModRuleUpdateEvent) event));
-        if (event instanceof AutoModRuleDeleteEvent) compatibleHooks.add(onAutoModRuleDelete((AutoModRuleDeleteEvent) event));
-        if (event instanceof AutoModActionExecutedEvent) compatibleHooks.add(onAutoModActionExecution((AutoModActionExecutedEvent) event));
-        if (event instanceof ScheduledEventCreateEvent) compatibleHooks.add(onScheduledEventCreate((ScheduledEventCreateEvent) event));
-        if (event instanceof ScheduledEventUpdateEvent) compatibleHooks.add(onScheduledEventUpdate((ScheduledEventUpdateEvent) event));
-        if (event instanceof ScheduledEventDeleteEvent) compatibleHooks.add(onScheduledEventDelete((ScheduledEventDeleteEvent) event));
-        if (event instanceof ScheduledEventUserAddEvent) compatibleHooks.add(onScheduledEventUserAdd((ScheduledEventUserAddEvent) event));
-        if (event instanceof ScheduledEventUserRemoveEvent) compatibleHooks.add(onScheduledEventUserRemove((ScheduledEventUserRemoveEvent) event));
-        // @formatter:on
-        return Mono.whenDelayError(compatibleHooks);
     }
 
     private static class CompositeReactiveEventAdapter extends ReactiveEventAdapter {

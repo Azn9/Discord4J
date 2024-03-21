@@ -104,19 +104,6 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                 .orElseGet(Collections::emptyMap);
     }
 
-
-    /**
-     * Gets the resolved user with the given ID, if present.
-     *
-     * @param userId the ID of the user to get
-     * @return the resolved user, if present
-     */
-    public Optional<User> getUser(Snowflake userId) {
-        return data.users().toOptional()
-                .map(users -> users.get(userId.asString()))
-                .map(data -> new User(gateway, data));
-    }
-
     /**
      * Gets a map containing the resolved users associated by their IDs
      *
@@ -144,6 +131,18 @@ public class ApplicationCommandInteractionResolved implements DiscordObject {
                 .map(memberData -> new ResolvedMember(gateway, memberData,
                         getUser(memberId).map(User::getUserData).orElseThrow(IllegalStateException::new),
                         Objects.requireNonNull(guildId)));
+    }
+
+    /**
+     * Gets the resolved user with the given ID, if present.
+     *
+     * @param userId the ID of the user to get
+     * @return the resolved user, if present
+     */
+    public Optional<User> getUser(Snowflake userId) {
+        return data.users().toOptional()
+                .map(users -> users.get(userId.asString()))
+                .map(data -> new User(gateway, data));
     }
 
     /**

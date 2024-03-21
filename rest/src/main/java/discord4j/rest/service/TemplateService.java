@@ -21,7 +21,6 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 public class TemplateService extends RestService {
 
@@ -31,46 +30,47 @@ public class TemplateService extends RestService {
 
     public Mono<TemplateData> getTemplate(String templateCode) {
         return Routes.GUILD_TEMPLATE_GET.newRequest(templateCode)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData.class);
+                .exchange(getRouter())
+                .bodyToMono(TemplateData.class);
     }
 
     public Mono<GuildData> createGuild(String templateCode, TemplateCreateGuildRequest request) {
         return Routes.TEMPLATE_GUILD_CREATE.newRequest(templateCode)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(GuildData.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(GuildData.class);
     }
+
     public Flux<TemplateData> getTemplates(long guildId) {
         return Routes.GUILD_TEMPLATE_LIST_GET.newRequest(guildId)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData[].class)
-            .flatMapMany(Flux::fromArray);
+                .exchange(getRouter())
+                .bodyToMono(TemplateData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<TemplateData> createTemplate(long guildId, TemplateCreateRequest request) {
         return Routes.GUILD_TEMPLATE_CREATE.newRequest(guildId)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(TemplateData.class);
     }
 
     public Mono<TemplateData> syncTemplate(long guildId, String templateCode) {
         return Routes.GUILD_TEMPLATE_SYNC.newRequest(guildId, templateCode)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData.class);
+                .exchange(getRouter())
+                .bodyToMono(TemplateData.class);
     }
 
     public Mono<TemplateData> modifyTemplate(long guildId, String templateCode, TemplateModifyRequest request) {
         return Routes.GUILD_TEMPLATE_MODIFY.newRequest(guildId, templateCode)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(TemplateData.class);
     }
 
     public Mono<TemplateData> deleteTemplate(long guildId, String templateCode) {
         return Routes.GUILD_TEMPLATE_DELETE.newRequest(guildId, templateCode)
-            .exchange(getRouter())
-            .bodyToMono(TemplateData.class);
+                .exchange(getRouter())
+                .bodyToMono(TemplateData.class);
     }
 }

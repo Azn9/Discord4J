@@ -26,29 +26,6 @@ import reactor.netty.ConnectionObserver;
 public interface GatewayObserver {
 
     GatewayObserver NOOP_LISTENER = (newState, client) -> {};
-
-    static GatewayObserver emptyListener() {
-        return NOOP_LISTENER;
-    }
-
-    /**
-     * React on websocket state change.
-     *
-     * @param newState the new state
-     * @param client the gateway client observing this change
-     */
-    void onStateChange(ConnectionObserver.State newState, GatewayClient client);
-
-    /**
-     * Chain together another {@link GatewayObserver}.
-     *
-     * @param other the next {@link GatewayObserver}
-     * @return a new composite {@link GatewayObserver}
-     */
-    default GatewayObserver then(GatewayObserver other) {
-        return CompositeGatewayObserver.compose(this, other);
-    }
-
     /**
      * Propagated when a gateway connection has been established.
      */
@@ -58,7 +35,6 @@ public interface GatewayObserver {
             return "[gateway_connected]";
         }
     };
-
     /**
      * Propagated when a gateway connection has been fully closed.
      */
@@ -68,7 +44,6 @@ public interface GatewayObserver {
             return "[gateway_disconnected]";
         }
     };
-
     /**
      * Propagated when a gateway connection has been closed but is still open for a RESUME attempt.
      */
@@ -78,7 +53,6 @@ public interface GatewayObserver {
             return "[gateway_disconnected_resume]";
         }
     };
-
     /**
      * Propagated when a reconnection attempt with RESUME has started.
      */
@@ -88,7 +62,6 @@ public interface GatewayObserver {
             return "[retry_resume_started]";
         }
     };
-
     /**
      * Propagated when a reconnection attempt with IDENTIFY has started.
      */
@@ -98,7 +71,6 @@ public interface GatewayObserver {
             return "[retry_started]";
         }
     };
-
     /**
      * Propagated when a reconnection attempt has succeeded.
      */
@@ -108,7 +80,6 @@ public interface GatewayObserver {
             return "[retry_succeeded]";
         }
     };
-
     /**
      * Propagated when a reconnection attempt has failed.
      */
@@ -118,7 +89,6 @@ public interface GatewayObserver {
             return "[retry_failed]";
         }
     };
-
     /**
      * Propagated when the current session sequence value has updated.
      */
@@ -128,4 +98,23 @@ public interface GatewayObserver {
             return "[sequence]";
         }
     };
+    static GatewayObserver emptyListener() {
+        return NOOP_LISTENER;
+    }
+    /**
+     * React on websocket state change.
+     *
+     * @param newState the new state
+     * @param client the gateway client observing this change
+     */
+    void onStateChange(ConnectionObserver.State newState, GatewayClient client);
+    /**
+     * Chain together another {@link GatewayObserver}.
+     *
+     * @param other the next {@link GatewayObserver}
+     * @return a new composite {@link GatewayObserver}
+     */
+    default GatewayObserver then(GatewayObserver other) {
+        return CompositeGatewayObserver.compose(this, other);
+    }
 }

@@ -47,15 +47,6 @@ public class Activity {
     }
 
     /**
-     * Gets the type for this activity.
-     *
-     * @return The type for this activity.
-     */
-    public Type getType() {
-        return Type.of(data.type());
-    }
-
-    /**
      * Returns this activity's name. For custom activities, this returns {@link #getState()} or an empty string if not
      * present.
      *
@@ -66,6 +57,15 @@ public class Activity {
             return Possible.flatOpt(data.state()).orElse("");
         }
         return data.name();
+    }
+
+    /**
+     * Gets the type for this activity.
+     *
+     * @return The type for this activity.
+     */
+    public Type getType() {
+        return Type.of(data.type());
     }
 
     /**
@@ -275,6 +275,14 @@ public class Activity {
                 .orElse(EnumSet.noneOf(Flag.class));
     }
 
+    @Override
+    public String toString() {
+        return "Activity{"
+                + "data="
+                + data
+                + '}';
+    }
+
     /** The type of "action" for an activity. */
     public enum Type {
 
@@ -312,15 +320,6 @@ public class Activity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of activity. It is guaranteed that invoking {@link #getValue()} from the returned enum will
          * equal ({@code ==}) the supplied {@code value}.
          *
@@ -338,6 +337,15 @@ public class Activity {
                 default: return UNKNOWN;
             }
         }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 
     public enum Flag {
@@ -352,16 +360,13 @@ public class Activity {
         PLAY(1 << 5),
         PARTY_PRIVACY_FRIENDS(1 << 6),
         PARTY_PRIVACY_VOICE_CHANNEL(1 << 7),
-        EMBEDDED(1 << 8),;
+        EMBEDDED(1 << 8),
+        ;
 
         private final int value;
 
         Flag(int value) {
             this.value = value;
-        }
-
-        public int getValue() {
-            return value;
         }
 
         public static Flag of(final int value) {
@@ -378,12 +383,9 @@ public class Activity {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "Activity{" +
-                "data=" + data +
-                '}';
+        public int getValue() {
+            return value;
+        }
     }
 }

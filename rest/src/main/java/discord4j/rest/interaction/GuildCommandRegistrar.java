@@ -71,7 +71,7 @@ public class GuildCommandRegistrar {
     private Flux<ApplicationCommandData> bulkOverwriteCommands(Snowflake guildId,
                                                                List<ApplicationCommandRequest> requests) {
         return applicationId.flatMapMany(id -> restClient.getApplicationService()
-            .bulkOverwriteGuildApplicationCommand(id, guildId.asLong(), requests)
-            .doOnNext(it -> log.debug("Registered command {} at guild {}", it.name(), guildId.asLong())));
+                .bulkOverwriteGuildApplicationCommand(id, guildId.asLong(), requests)
+                .doOnNext(it -> log.debug("Registered command {} at guild {}", it.name(), guildId.asLong())));
     }
 }

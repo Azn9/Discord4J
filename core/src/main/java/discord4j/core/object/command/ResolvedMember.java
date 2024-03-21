@@ -63,8 +63,8 @@ public class ResolvedMember implements DiscordObject {
      * Constructs a {@code ResolvedMember} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
-     * @param user    The raw user associated to the member, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
+     * @param user The raw user associated to the member, must be non-null.
      * @param guildId the ID of the guild the user is member of
      */
     public ResolvedMember(final GatewayDiscordClient gateway, final ResolvedMemberData data, final UserData user,
@@ -82,24 +82,6 @@ public class ResolvedMember implements DiscordObject {
      */
     public ResolvedMemberData getData() {
         return data;
-    }
-
-    /**
-     * Gets the ID of this member.
-     *
-     * @return The ID of this member;
-     */
-    public Snowflake getId() {
-        return Snowflake.of(user.id());
-    }
-
-    /**
-     * Gets the ID of the guild this user is associated to.
-     *
-     * @return The ID of the guild this user is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -161,6 +143,15 @@ public class ResolvedMember implements DiscordObject {
     }
 
     /**
+     * Gets the ID of this member.
+     *
+     * @return The ID of this member;
+     */
+    public Snowflake getId() {
+        return Snowflake.of(user.id());
+    }
+
+    /**
      * Gets the total permissions of the member in the channel, including overwrites.
      *
      * @return The permissions of the member.
@@ -177,6 +168,15 @@ public class ResolvedMember implements DiscordObject {
      */
     public Mono<Member> asFullMember() {
         return gateway.getMemberById(getGuildId(), getId());
+    }
+
+    /**
+     * Gets the ID of the guild this user is associated to.
+     *
+     * @return The ID of the guild this user is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

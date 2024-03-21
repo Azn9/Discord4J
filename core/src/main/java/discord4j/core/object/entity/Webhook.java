@@ -56,7 +56,7 @@ public final class Webhook implements Entity {
      * Constructs a {@code Webhook} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
     public Webhook(final GatewayDiscordClient gateway, final WebhookData data) {
         this.gateway = Objects.requireNonNull(gateway);
@@ -66,11 +66,6 @@ public final class Webhook implements Entity {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
     }
 
     /**
@@ -92,15 +87,6 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the ID of the guild this webhook is associated to.
-     *
-     * @return The ID of the guild this webhook is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId().get().get()); // TODO FIXME: really Possible?
-    }
-
-    /**
      * Requests to retrieve the guild this webhook is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this webhook is
@@ -108,6 +94,15 @@ public final class Webhook implements Entity {
      */
     public Mono<Guild> getGuild() {
         return gateway.getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the ID of the guild this webhook is associated to.
+     *
+     * @return The ID of the guild this webhook is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(data.guildId().get().get()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -122,15 +117,6 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the ID of the channel this webhook is associated to.
-     *
-     * @return The ID of the channel this webhook is associated to.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
-    }
-
-    /**
      * Requests to retrieve the channel this webhook is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildMessageChannel channel} this
@@ -138,6 +124,15 @@ public final class Webhook implements Entity {
      */
     public Mono<GuildMessageChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(GuildMessageChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel this webhook is associated to.
+     *
+     * @return The ID of the channel this webhook is associated to.
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(data.channelId().get());
     }
 
     /**
@@ -179,15 +174,6 @@ public final class Webhook implements Entity {
      */
     public Optional<String> getAvatar() {
         return data.avatar();
-    }
-
-    /**
-     * Gets the secure token of this webhook. The token is present for {@link Type#INCOMING} webhooks.
-     *
-     * @return The secure token of this webhook.
-     */
-    public Optional<String> getToken() {
-        return data.token().toOptional();
     }
 
     /**
@@ -264,6 +250,11 @@ public final class Webhook implements Entity {
                 .deleteWebhook(getId().asLong(), reason);
     }
 
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
     /**
      * Requests to delete this webhook.
      *
@@ -281,6 +272,15 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Gets the secure token of this webhook. The token is present for {@link Type#INCOMING} webhooks.
+     *
+     * @return The secure token of this webhook.
+     */
+    public Optional<String> getToken() {
+        return data.token().toOptional();
+    }
+
+    /**
      * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookEditSpec} to be operated on.
@@ -292,12 +292,12 @@ public final class Webhook implements Entity {
     @Deprecated
     public Mono<Webhook> edit(final Consumer<? super LegacyWebhookEditSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyWebhookEditSpec mutatedSpec = new LegacyWebhookEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
-                            .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyWebhookEditSpec mutatedSpec = new LegacyWebhookEditSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getWebhookService()
+                                    .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> new Webhook(gateway, data));
     }
 
@@ -322,8 +322,8 @@ public final class Webhook implements Entity {
     public Mono<Webhook> edit(WebhookEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getWebhookService()
-                        .modifyWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> gateway.getRestClient().getWebhookService()
+                                .modifyWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Webhook(gateway, data));
     }
 
@@ -339,15 +339,16 @@ public final class Webhook implements Entity {
     @Deprecated
     public Mono<Webhook> editWithToken(final Consumer<? super LegacyWebhookEditWithTokenSpec> spec) {
         return Mono.defer(
-                () -> {
-                    if (!getToken().isPresent()) {
-                        throw new IllegalStateException("Can't edit webhook.");
-                    }
-                    LegacyWebhookEditWithTokenSpec mutatedSpec = new LegacyWebhookEditWithTokenSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
-                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest());
-                })
+                        () -> {
+                            if (!getToken().isPresent()) {
+                                throw new IllegalStateException("Can't edit webhook.");
+                            }
+                            LegacyWebhookEditWithTokenSpec mutatedSpec = new LegacyWebhookEditWithTokenSpec();
+                            spec.accept(mutatedSpec);
+                            return gateway.getRestClient().getWebhookService()
+                                    .modifyWebhookWithToken(getId().asLong(), getToken().get(),
+                                            mutatedSpec.asRequest());
+                        })
                 .map(data -> new Webhook(gateway, data));
     }
 
@@ -372,8 +373,9 @@ public final class Webhook implements Entity {
     public Mono<Webhook> editWithToken(WebhookEditWithTokenSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getWebhookService().modifyWebhookWithToken(getId().asLong(), getToken()
-                        .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
+                        () -> gateway.getRestClient().getWebhookService().modifyWebhookWithToken(getId().asLong(),
+                                getToken()
+                                .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
                 .map(data -> new Webhook(gateway, data));
     }
 
@@ -392,34 +394,10 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Executes this webhook. Properties specifying how to execute this webhook, including whether to wait for
-     * confirmation that the message was created, can be set via the {@code withXxx} methods of the returned {@link
-     * WebhookExecuteMono}.
-     *
-     * @return A {@link WebhookExecuteMono} where, upon successful webhook execution, emits a Message if {@code
-     * withWaitForMessage(true)}. If the message fails to save, an error is emitted through the {@code
-     * WebhookExecuteMono} only if {@code withWaitForMessage(true)}.
-     */
-    public WebhookExecuteMono execute() {
-        return WebhookExecuteMono.of(false,this);
-    }
-
-    /**
-     * Executes this webhook without waiting for a confirmation that a message was created.
-     *
-     * @param spec an immutable object that specifies how to execute this webhook
-     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save, an
-     * error IS NOT emitted through the {@code Mono}.
-     */
-    public Mono<Void> execute(WebhookExecuteSpec spec) {
-        return execute(false, spec).then();
-    }
-
-    /**
      * Executes this webhook.
      *
      * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
-     *             saving the message.
+     * saving the message.
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookExecuteSpec} to be operated on.
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
      * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
@@ -442,10 +420,34 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Executes this webhook. Properties specifying how to execute this webhook, including whether to wait for
+     * confirmation that the message was created, can be set via the {@code withXxx} methods of the returned {@link
+     * WebhookExecuteMono}.
+     *
+     * @return A {@link WebhookExecuteMono} where, upon successful webhook execution, emits a Message if {@code
+     * withWaitForMessage(true)}. If the message fails to save, an error is emitted through the {@code
+     * WebhookExecuteMono} only if {@code withWaitForMessage(true)}.
+     */
+    public WebhookExecuteMono execute() {
+        return WebhookExecuteMono.of(false, this);
+    }
+
+    /**
+     * Executes this webhook without waiting for a confirmation that a message was created.
+     *
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save, an
+     * error IS NOT emitted through the {@code Mono}.
+     */
+    public Mono<Void> execute(WebhookExecuteSpec spec) {
+        return execute(false, spec).then();
+    }
+
+    /**
      * Executes this webhook.
      *
      * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
-     *             saving the message.
+     * saving the message.
      * @param spec an immutable object that specifies how to execute this webhook
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
      * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
@@ -498,14 +500,14 @@ public final class Webhook implements Entity {
     public Mono<Message> getMessage(Snowflake messageId) {
         Objects.requireNonNull(messageId);
         return Mono.defer(
-            () -> {
-                if (!getToken().isPresent()) {
-                    throw new IllegalArgumentException("Can't get message with this webhook.");
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalArgumentException("Can't get message with this webhook.");
+                    }
+                    return gateway.getRestClient().getWebhookService()
+                            .getWebhookMessage(getId().asLong(), getToken().get(), messageId.asString())
+                            .map(data -> new Message(gateway, data));
                 }
-                return gateway.getRestClient().getWebhookService()
-                    .getWebhookMessage(getId().asLong(), getToken().get(), messageId.asString())
-                    .map(data -> new Message(gateway, data));
-            }
         );
     }
 
@@ -519,7 +521,7 @@ public final class Webhook implements Entity {
      * message edit fails, an error is emitted through the {@link WebhookMessageEditMono}.
      */
     public WebhookMessageEditMono editMessage(Snowflake messageId) {
-        return WebhookMessageEditMono.of(messageId,this);
+        return WebhookMessageEditMono.of(messageId, this);
     }
 
     /**
@@ -534,14 +536,15 @@ public final class Webhook implements Entity {
         Objects.requireNonNull(messageId);
         Objects.requireNonNull(spec);
         return Mono.defer(
-            () -> {
-                if (!getToken().isPresent()) {
-                    throw new IllegalArgumentException("Can't edit message with this webhook.");
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalArgumentException("Can't edit message with this webhook.");
+                    }
+                    return gateway.getRestClient().getWebhookService()
+                            .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(),
+                                    spec.asRequest())
+                            .map(data -> new Message(gateway, data));
                 }
-                return gateway.getRestClient().getWebhookService()
-                    .modifyWebhookMessage(getId().asLong(), getToken().get(), messageId.asString(), spec.asRequest())
-                    .map(data -> new Message(gateway, data));
-            }
         );
     }
 
@@ -555,24 +558,24 @@ public final class Webhook implements Entity {
     public Mono<Void> deleteMessage(Snowflake messageId) {
         Objects.requireNonNull(messageId);
         return Mono.defer(
-            () -> {
-                if (!getToken().isPresent()) {
-                    throw new IllegalArgumentException("Can't delete message with this webhook.");
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalArgumentException("Can't delete message with this webhook.");
+                    }
+                    return gateway.getRestClient().getWebhookService()
+                            .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString());
                 }
-                return gateway.getRestClient().getWebhookService()
-                    .deleteWebhookMessage(getId().asLong(), getToken().get(), messageId.asString());
-            }
         );
-    }
-
-    @Override
-    public boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
     }
 
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object obj) {
+        return EntityUtil.equals(this, obj);
     }
 
     @Override

@@ -31,10 +31,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface UserEditSpecGenerator extends Spec<UserModifyRequest> {
 
-    Possible<String> username();
-
-    Possible<Image> avatar();
-
     @Override
     default UserModifyRequest asRequest() {
         return UserModifyRequest.builder()
@@ -42,18 +38,20 @@ interface UserEditSpecGenerator extends Spec<UserModifyRequest> {
                 .avatar(mapPossible(avatar(), Image::getDataUri))
                 .build();
     }
+    Possible<String> username();
+    Possible<Image> avatar();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class UserEditMonoGenerator extends Mono<User> implements UserEditSpecGenerator {
 
-    abstract GatewayDiscordClient gateway();
-
     @Override
     public void subscribe(CoreSubscriber<? super User> actual) {
         gateway().edit(UserEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GatewayDiscordClient gateway();
 
     @Override
     public abstract String toString();

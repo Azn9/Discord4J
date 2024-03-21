@@ -138,6 +138,25 @@ public final class Role implements Entity {
     }
 
     /**
+     * Requests to retrieve the guild this role is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return gateway.getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the ID of the guild this role is associated to.
+     *
+     * @return The ID of the guild this role is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
      * Requests to retrieve the position of the role relative to other roles in the guild, using the given retrieval
      * strategy.
      * <p>
@@ -174,6 +193,17 @@ public final class Role implements Entity {
     }
 
     /**
+     * Requests to retrieve the guild this role is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
+    }
+
+    /**
      * Gets the icon URL of the role, if present.
      *
      * @param format The format for the URL.
@@ -181,7 +211,12 @@ public final class Role implements Entity {
      */
     public Optional<String> getIconUrl(final Image.Format format) {
         return Possible.flatOpt(data.icon())
-            .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+                .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -248,45 +283,6 @@ public final class Role implements Entity {
     }
 
     /**
-     * Gets whether this role corresponds to the @everyone role.
-     *
-     * @return {@code true} if this role represents the @everyone role, {@code false} otherwise.
-     */
-    public boolean isEveryone() {
-        return getId().equals(getGuildId());
-    }
-
-    /**
-     * Gets the ID of the guild this role is associated to.
-     *
-     * @return The ID of the guild this role is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
-     * Requests to retrieve the guild this role is associated to.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
-     * to. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return gateway.getGuildById(getGuildId());
-    }
-
-    /**
-     * Requests to retrieve the guild this role is associated to, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the guild
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
-     * to. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
-    }
-
-    /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another role (assuming the role
      * exists in context of the mention).
      *
@@ -297,6 +293,15 @@ public final class Role implements Entity {
             return "@everyone";
         }
         return "<@&" + getId().asString() + ">";
+    }
+
+    /**
+     * Gets whether this role corresponds to the @everyone role.
+     *
+     * @return {@code true} if this role represents the @everyone role, {@code false} otherwise.
+     */
+    public boolean isEveryone() {
+        return getId().equals(getGuildId());
     }
 
     /**
@@ -319,11 +324,6 @@ public final class Role implements Entity {
             return Flag.of(flags);
         }
         return EnumSet.noneOf(Flag.class);
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
     }
 
     /**
@@ -403,13 +403,13 @@ public final class Role implements Entity {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 
     @Override
-    public int hashCode() {
-        return EntityUtil.hashCode(this);
+    public boolean equals(@Nullable final Object obj) {
+        return EntityUtil.equals(this, obj);
     }
 
     @Override
@@ -423,8 +423,7 @@ public final class Role implements Entity {
     /**
      * Describes the flags of a Role.
      *
-     * @see
-     * <a href="https://discord.com/developers/docs/topics/permissions#role-object-role-flags">Discord</a>
+     * @see <a href="https://discord.com/developers/docs/topics/permissions#role-object-role-flags">Discord</a>
      */
     public enum Flag {
         /**
@@ -447,24 +446,6 @@ public final class Role implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the flag value as represented by Discord.
-         *
-         * @return The flag value as represented by Discord.
-         */
-        public int getFlag() {
-            return flag;
-        }
-
-        /**
          * Gets the flags of a role. It is guaranteed that invoking {@link #getValue()} from the returned enum
          * will be equal ({@code ==}) to the supplied {@code value}.
          *
@@ -480,6 +461,24 @@ public final class Role implements Entity {
                 }
             }
             return flagSet;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

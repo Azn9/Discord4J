@@ -37,18 +37,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyRequest> {
 
-    Possible<Optional<Snowflake>> newVoiceChannel();
-
-    Possible<Boolean> mute();
-
-    Possible<Boolean> deafen();
-
-    Possible<Optional<String>> nickname();
-
-    Possible<List<Snowflake>> roles();
-
-    Possible<Optional<Instant>> communicationDisabledUntil();
-
     @Override
     default GuildMemberModifyRequest asRequest() {
         return GuildMemberModifyRequest.builder()
@@ -60,18 +48,24 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
                 .communicationDisabledUntil(mapPossibleOptional(communicationDisabledUntil(), Instant::toString))
                 .build();
     }
+    Possible<Optional<Snowflake>> newVoiceChannel();
+    Possible<Boolean> mute();
+    Possible<Boolean> deafen();
+    Possible<Optional<String>> nickname();
+    Possible<List<Snowflake>> roles();
+    Possible<Optional<Instant>> communicationDisabledUntil();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildMemberEditMonoGenerator extends Mono<Member> implements GuildMemberEditSpecGenerator {
 
-    abstract PartialMember member();
-
     @Override
     public void subscribe(CoreSubscriber<? super Member> actual) {
         member().edit(GuildMemberEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract PartialMember member();
 
     @Override
     public abstract String toString();

@@ -52,15 +52,15 @@ public final class BucketKey {
         this.majorParam = RouteUtils.getMajorParam(uriTemplate, completeUri);
     }
 
-    public static BucketKey of(String uriTemplate, String completeUri) {
-        return new BucketKey(uriTemplate, completeUri);
-    }
-
     public static BucketKey of(DiscordWebRequest request) {
         if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
             return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
         }
         return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
+    }
+
+    public static BucketKey of(String uriTemplate, String completeUri) {
+        return new BucketKey(uriTemplate, completeUri);
     }
 
     @Override

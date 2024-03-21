@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.NewsChannel;
@@ -23,7 +24,6 @@ import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -113,15 +113,15 @@ public class LegacyNewsChannelCreateSpec implements LegacyAuditSpec<ChannelCreat
     }
 
     @Override
-    public LegacyNewsChannelCreateSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyNewsChannelCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

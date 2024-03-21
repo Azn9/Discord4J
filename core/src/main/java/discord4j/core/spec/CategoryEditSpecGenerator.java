@@ -31,12 +31,6 @@ import java.util.stream.Collectors;
 @Value.Immutable(singleton = true)
 interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<Integer> position();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
@@ -47,18 +41,24 @@ interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
                         .collect(Collectors.toList())))
                 .build();
     }
+
+    Possible<String> name();
+
+    Possible<Integer> position();
+
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
 
-    abstract Category category();
-
     @Override
     public void subscribe(CoreSubscriber<? super Category> actual) {
         category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Category category();
 
     @Override
     public abstract String toString();

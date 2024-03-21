@@ -53,9 +53,9 @@ public class StatefulDispatch<D, S> {
     @Override
     public String toString() {
         return "StatefulDispatch{" +
-            "shardInfo=" + shardInfo +
-            ", dispatch=" + dispatch +
-            ", oldState=" + oldState +
-            '}';
+                "shardInfo=" + shardInfo +
+                ", dispatch=" + dispatch +
+                ", oldState=" + oldState +
+                '}';
     }
 }

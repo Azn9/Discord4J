@@ -111,15 +111,6 @@ public interface Channel extends Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of channel. It is guaranteed that invoking {@link #getValue()} from the returned enum will
          * equal ({@code ==}) the supplied {@code value}.
          *
@@ -138,6 +129,15 @@ public interface Channel extends Entity {
                 case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }

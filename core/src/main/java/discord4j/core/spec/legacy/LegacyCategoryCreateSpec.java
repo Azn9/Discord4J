@@ -74,15 +74,15 @@ public class LegacyCategoryCreateSpec implements LegacyAuditSpec<ChannelCreateRe
     }
 
     @Override
-    public LegacyCategoryCreateSpec setReason(@Nullable final String reason) {
-        this.reason = reason;
-        return this;
-    }
-
-    @Override
     @Nullable
     public String getReason() {
         return reason;
+    }
+
+    @Override
+    public LegacyCategoryCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

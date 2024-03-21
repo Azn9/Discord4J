@@ -30,10 +30,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface WebhookEditWithTokenSpecGenerator extends AuditSpec<WebhookModifyWithTokenRequest> {
 
-    Possible<String> name();
-
-    Possible<Image> avatar();
-
     @Override
     default WebhookModifyWithTokenRequest asRequest() {
         return WebhookModifyWithTokenRequest.builder()
@@ -41,18 +37,20 @@ interface WebhookEditWithTokenSpecGenerator extends AuditSpec<WebhookModifyWithT
                 .avatar(mapPossible(avatar(), Image::getDataUri))
                 .build();
     }
+    Possible<String> name();
+    Possible<Image> avatar();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class WebhookEditWithTokenMonoGenerator extends Mono<Webhook> implements WebhookEditWithTokenSpecGenerator {
 
-    abstract Webhook webhook();
-
     @Override
     public void subscribe(CoreSubscriber<? super Webhook> actual) {
         webhook().editWithToken(WebhookEditWithTokenSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Webhook webhook();
 
     @Override
     public abstract String toString();

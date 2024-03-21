@@ -20,7 +20,39 @@ import discord4j.common.store.Store;
 import discord4j.common.store.action.gateway.GatewayActions;
 import discord4j.common.store.api.StoreAction;
 import discord4j.common.store.api.object.InvalidationCause;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -98,7 +130,7 @@ public class DispatchStoreLayer {
     /**
      * Creates a new {@link DispatchStoreLayer} operating on the given store and shard.
      *
-     * @param store     the store to execute actions on
+     * @param store the store to execute actions on
      * @param shardInfo the shard info where dispatches are received from
      * @return a new {@link DispatchStoreLayer}
      */
@@ -140,8 +172,8 @@ public class DispatchStoreLayer {
             actualDispatch = dispatch;
         }
         return Flux.fromStream(DISPATCH_TO_ACTION.stream()
-                .filter(entry -> entry.predicate.test(actualDispatch))
-                .map(entry -> entry.actionFactory))
+                        .filter(entry -> entry.predicate.test(actualDispatch))
+                        .map(entry -> entry.actionFactory))
                 .singleOrEmpty()
                 .map(actionFactory -> actionFactory.apply(shardInfo.getIndex(), actualDispatch))
                 .flatMap(action -> Mono.from(store.execute(action)))

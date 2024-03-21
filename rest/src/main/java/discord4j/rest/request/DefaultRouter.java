@@ -67,16 +67,17 @@ public class DefaultRouter implements Router {
     public DiscordWebResponse exchange(DiscordWebRequest request) {
         Sinks.Empty<Void> cancelSink = Sinks.empty();
         return new DiscordWebResponse(Mono.deferContextual(
-                ctx -> {
-                    Sinks.One<ClientResponse> callback = Sinks.one();
-                    housekeepIfNecessary();
-                    BucketKey bucketKey = BucketKey.of(request);
-                    RequestStream stream = streamMap.computeIfAbsent(bucketKey, key -> createStream(key, request));
-                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx, cancelSink))) {
-                        callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
-                    }
-                    return callback.asMono();
-                })
+                        ctx -> {
+                            Sinks.One<ClientResponse> callback = Sinks.one();
+                            housekeepIfNecessary();
+                            BucketKey bucketKey = BucketKey.of(request);
+                            RequestStream stream = streamMap.computeIfAbsent(bucketKey, key -> createStream(key,
+                                    request));
+                            if (!stream.push(new RequestCorrelation<>(request, callback, ctx, cancelSink))) {
+                                callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
+                            }
+                            return callback.asMono();
+                        })
                 .doOnCancel(() -> cancelSink.emitEmpty(FAIL_FAST))
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
@@ -84,7 +85,7 @@ public class DefaultRouter implements Router {
     private RequestStream createStream(BucketKey bucketKey, DiscordWebRequest request) {
         if (log.isTraceEnabled()) {
             log.trace("Creating RequestStream with key {} for request: {} -> {}",
-                bucketKey, request.getRoute().getUriTemplate(), request.getCompleteUri());
+                    bucketKey, request.getRoute().getUriTemplate(), request.getCompleteUri());
         }
         RequestStream stream = new RequestStream(bucketKey, routerOptions, httpClient, HEADER_STRATEGY);
         stream.start();
@@ -113,19 +114,19 @@ public class DefaultRouter implements Router {
 
     private void doHousekeep(Instant now) {
         streamMap.keySet().forEach(key ->
-            streamMap.compute(key, (bucketKey , stream) -> {
-                if (stream == null) {
-                    return null;
-                }
-                if (stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Evicting RequestStream with bucket ID {}", bucketKey);
+                streamMap.compute(key, (bucketKey, stream) -> {
+                    if (stream == null) {
+                        return null;
                     }
-                    stream.stop();
-                    return null;
-                }
-                return stream;
-            })
+                    if (stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1) {
+                        if (log.isTraceEnabled()) {
+                            log.trace("Evicting RequestStream with bucket ID {}", bucketKey);
+                        }
+                        stream.stop();
+                        return null;
+                    }
+                    return stream;
+                })
         );
     }
 }

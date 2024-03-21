@@ -37,7 +37,8 @@ public class CategoryUpdateEvent extends ChannelEvent {
     private final Category current;
     private final Category old;
 
-    public CategoryUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Category current, @Nullable Category old) {
+    public CategoryUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Category current,
+                               @Nullable Category old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

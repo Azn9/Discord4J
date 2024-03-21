@@ -16,11 +16,11 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Invite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -66,15 +66,6 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
-     *
-     * @return The ID of the guild involved, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} that had an invite created in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
@@ -82,6 +73,15 @@ public class InviteCreateEvent extends Event {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
+     *
+     * @return The ID of the guild involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -148,21 +148,21 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
+     * Gets the instant this invite expires, if possible.
+     *
+     * @return The instant this invite expires, if possible.
+     */
+    public Optional<Instant> getExpiration() {
+        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
+    }
+
+    /**
      * Gets when this invite was created.
      *
      * @return When this invite was created.
      */
     public Instant getCreation() {
         return createdAt;
-    }
-
-    /**
-     * Gets the instant this invite expires, if possible.
-     *
-     * @return The instant this invite expires, if possible.
-     */
-    public Optional<Instant> getExpiration() {
-        return maxAge > 0 ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)): Optional.empty();
     }
 
     /**
@@ -178,15 +178,15 @@ public class InviteCreateEvent extends Event {
     @Override
     public String toString() {
         return "InviteCreateEvent{" +
-            "code='" + code + '\'' +
-            ", guildId=" + guildId +
-            ", channelId=" + channelId +
-            ", inviter=" + inviter +
-            ", uses=" + uses +
-            ", maxUses=" + maxUses +
-            ", maxAge=" + maxAge +
-            ", temporary=" + temporary +
-            ", createdAt='" + createdAt + '\'' +
-            '}';
+                "code='" + code + '\'' +
+                ", guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", inviter=" + inviter +
+                ", uses=" + uses +
+                ", maxUses=" + maxUses +
+                ", maxAge=" + maxAge +
+                ", temporary=" + temporary +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
     }
 }

@@ -31,14 +31,13 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface InteractionCallbackSpecGenerator extends Spec<InteractionApplicationCommandCallbackData> {
 
-    Possible<Boolean> ephemeral();
-
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
                 .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getFlag() : 0))
                 .build();
     }
+    Possible<Boolean> ephemeral();
 }
 
 @SuppressWarnings("immutables:subtype")
@@ -46,12 +45,12 @@ interface InteractionCallbackSpecGenerator extends Spec<InteractionApplicationCo
 abstract class InteractionCallbackSpecDeferReplyMonoGenerator extends Mono<Void>
         implements InteractionCallbackSpecGenerator {
 
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().deferReply(InteractionCallbackSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();
@@ -62,12 +61,12 @@ abstract class InteractionCallbackSpecDeferReplyMonoGenerator extends Mono<Void>
 abstract class InteractionCallbackSpecDeferEditMonoGenerator extends Mono<Void>
         implements InteractionCallbackSpecGenerator {
 
-    abstract ComponentInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().deferEdit(InteractionCallbackSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract ComponentInteractionEvent event();
 
     @Override
     public abstract String toString();

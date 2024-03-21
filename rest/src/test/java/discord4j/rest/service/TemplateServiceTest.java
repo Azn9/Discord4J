@@ -47,15 +47,15 @@ public class TemplateServiceTest {
     public void testCreateTemplate() {
         // Delete existing templates - we can only create one per guild
         StepVerifier.create(templateService.getTemplates(guild)
-                .flatMap(it -> templateService.deleteTemplate(guild, it.code()))
-                .then())
+                        .flatMap(it -> templateService.deleteTemplate(guild, it.code()))
+                        .then())
                 .verifyComplete();
 
         // To create a new one and verify it's valid
         StepVerifier.create(templateService.createTemplate(guild, TemplateCreateRequest.builder()
-                .name("Test template")
-                .descriptionOrNull("A template created from a test method")
-                .build()))
+                        .name("Test template")
+                        .descriptionOrNull("A template created from a test method")
+                        .build()))
                 .expectNextMatches(it -> it.sourceGuildId().equals(Id.of(guild)))
                 .verifyComplete();
 

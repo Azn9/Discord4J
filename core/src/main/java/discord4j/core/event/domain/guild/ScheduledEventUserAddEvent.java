@@ -48,15 +48,6 @@ public class ScheduledEventUserAddEvent extends GuildEvent {
     }
 
     /**
-     * Return the guild ID of the scheduled event.
-     *
-     * @return a guild snowflake
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Return the guild of the scheduled event.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -67,12 +58,12 @@ public class ScheduledEventUserAddEvent extends GuildEvent {
     }
 
     /**
-     * Return the scheduled event ID.
+     * Return the guild ID of the scheduled event.
      *
-     * @return a scheduled event snowflake
+     * @return a guild snowflake
      */
-    public Snowflake getScheduledEventId() {
-        return Snowflake.of(scheduledEventId);
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -86,12 +77,12 @@ public class ScheduledEventUserAddEvent extends GuildEvent {
     }
 
     /**
-     * Return the subscribing user ID.
+     * Return the scheduled event ID.
      *
-     * @return a user snowflake
+     * @return a scheduled event snowflake
      */
-    public Snowflake getUserId() {
-        return Snowflake.of(userId);
+    public Snowflake getScheduledEventId() {
+        return Snowflake.of(scheduledEventId);
     }
 
     /**
@@ -102,6 +93,15 @@ public class ScheduledEventUserAddEvent extends GuildEvent {
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
+    }
+
+    /**
+     * Return the subscribing user ID.
+     *
+     * @return a user snowflake
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     /**

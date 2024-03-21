@@ -34,8 +34,6 @@ import java.util.Optional;
 
 public interface CommandContext {
 
-    MessageCreateEvent event();
-
     String command();
 
     String parameters();
@@ -48,19 +46,21 @@ public interface CommandContext {
         return event().getClient();
     }
 
-    default Message getMessage() {
-        return event().getMessage();
-    }
-
-    default Optional<User> getAuthor() {
-        return event().getMessage().getAuthor();
-    }
+    MessageCreateEvent event();
 
     default Mono<Boolean> hasPermission(PermissionSet requiredPermissions) {
         return Mono.justOrEmpty(getAuthor().map(User::getId))
                 .flatMap(authorId -> getMessage().getChannel().ofType(GuildChannel.class)
                         .flatMap(channel -> channel.getEffectivePermissions(authorId))
                         .map(set -> set.containsAll(requiredPermissions)));
+    }
+
+    default Message getMessage() {
+        return event().getMessage();
+    }
+
+    default Optional<User> getAuthor() {
+        return event().getMessage().getAuthor();
     }
 
     CommandContext withDirectMessage();

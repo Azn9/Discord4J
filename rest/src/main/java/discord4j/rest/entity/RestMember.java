@@ -81,32 +81,12 @@ public class RestMember {
     }
 
     /**
-     * Create a {@link RestGuild} with data from this Member. This method does not perform any API request.
-     *
-     * @return a {@code RestGuild} represented by the data from this Member
-     */
-    public RestGuild guild() {
-        return RestGuild.create(restClient, guildId);
-    }
-
-    /**
      * Create a {@link RestUser} with daa from this Member. This method does not perform any API request.
      *
      * @return a {@code RestUser} represented by the data from this Member
      */
     public RestUser user() {
         return RestUser.create(restClient, id);
-    }
-
-    /**
-     * Requests to retrieve the Member's {@link MemberData}
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the Member's {@link MemberData}. If an error
-     * is received, it is emitted through the Mono.
-     */
-    public Mono<MemberData> getData() {
-        return restClient.getGuildService()
-                .getGuildMember(guildId, id);
     }
 
     /**
@@ -124,6 +104,32 @@ public class RestMember {
                                 .map(id -> restClient.getRoleById(Snowflake.of(guildId), Snowflake.of(id)))
                                 .flatMap(RestRole::getData),
                         OrderUtil.ROLE_ORDER));
+    }
+
+    /**
+     * Requests to retrieve the Member's {@link MemberData}
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Member's {@link MemberData}. If an error
+     * is received, it is emitted through the Mono.
+     */
+    public Mono<MemberData> getData() {
+        return restClient.getGuildService()
+                .getGuildMember(guildId, id);
+    }
+
+    /**
+     * Requests to determine if this member is nigher in the role hierarchy than the member as represented by the
+     * supplied ID or signal {@code IllegalArgumentException} if the member as represented by the supplied ID is in a
+     * different guild than this member.
+     * This is determined by the positions of each of the members' highest roles.
+     *
+     * @param id The ID of the member to compare in the role hierarchy with this member.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the
+     * role hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Boolean> isHigher(Snowflake id) {
+        return Mono.just(restClient.getMemberById(Snowflake.of(guildId), id)).flatMap(this::isHigher);
     }
 
     /**
@@ -165,18 +171,12 @@ public class RestMember {
     }
 
     /**
-     * Requests to determine if this member is nigher in the role hierarchy than the member as represented by the
-     * supplied ID or signal {@code IllegalArgumentException} if the member as represented by the supplied ID is in a
-     * different guild than this member.
-     * This is determined by the positions of each of the members' highest roles.
+     * Create a {@link RestGuild} with data from this Member. This method does not perform any API request.
      *
-     * @param id The ID of the member to compare in the role hierarchy with this member.
-     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the
-     * role hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is
-     * received, it is emitted through the {@code Mono}.
+     * @return a {@code RestGuild} represented by the data from this Member
      */
-    public Mono<Boolean> isHigher(Snowflake id) {
-        return Mono.just(restClient.getMemberById(Snowflake.of(guildId), id)).flatMap(this::isHigher);
+    public RestGuild guild() {
+        return RestGuild.create(restClient, guildId);
     }
 
     /**
@@ -224,15 +224,19 @@ public class RestMember {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestMember that = (RestMember) o;
-        return guildId == that.guildId && id == that.id;
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(guildId, id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestMember that = (RestMember) o;
+        return guildId == that.guildId && id == that.id;
     }
 }

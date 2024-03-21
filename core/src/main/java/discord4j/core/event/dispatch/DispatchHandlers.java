@@ -19,7 +19,15 @@ package discord4j.core.event.dispatch;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.AuditLogEntryCreateEvent;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.InviteCreateEvent;
+import discord4j.core.event.domain.InviteDeleteEvent;
+import discord4j.core.event.domain.PresenceUpdateEvent;
+import discord4j.core.event.domain.UserUpdateEvent;
+import discord4j.core.event.domain.VoiceServerUpdateEvent;
+import discord4j.core.event.domain.VoiceStateUpdateEvent;
+import discord4j.core.event.domain.WebhooksUpdateEvent;
 import discord4j.core.event.domain.automod.AutoModActionExecutedEvent;
 import discord4j.core.event.domain.automod.AutoModRuleCreateEvent;
 import discord4j.core.event.domain.automod.AutoModRuleDeleteEvent;
@@ -28,7 +36,16 @@ import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
-import discord4j.core.event.domain.interaction.*;
+import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractionEvent;
+import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.MessageInteractionEvent;
+import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
+import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.automod.AutoModRule;
@@ -44,7 +61,62 @@ import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.VoiceStateData;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.gateway.ApplicationCommandCreate;
+import discord4j.discordjson.json.gateway.ApplicationCommandDelete;
+import discord4j.discordjson.json.gateway.ApplicationCommandPermissionUpdate;
+import discord4j.discordjson.json.gateway.ApplicationCommandUpdate;
+import discord4j.discordjson.json.gateway.AuditLogEntryCreate;
+import discord4j.discordjson.json.gateway.AutoModActionExecution;
+import discord4j.discordjson.json.gateway.AutoModRuleCreate;
+import discord4j.discordjson.json.gateway.AutoModRuleDelete;
+import discord4j.discordjson.json.gateway.AutoModRuleUpdate;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.GuildBanAdd;
+import discord4j.discordjson.json.gateway.GuildBanRemove;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildIntegrationsUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.IntegrationCreate;
+import discord4j.discordjson.json.gateway.IntegrationDelete;
+import discord4j.discordjson.json.gateway.IntegrationUpdate;
+import discord4j.discordjson.json.gateway.InteractionCreate;
+import discord4j.discordjson.json.gateway.InviteCreate;
+import discord4j.discordjson.json.gateway.InviteDelete;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.Resumed;
+import discord4j.discordjson.json.gateway.TypingStart;
+import discord4j.discordjson.json.gateway.UnavailableGuildCreate;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceServerUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
+import discord4j.discordjson.json.gateway.WebhooksUpdate;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -61,6 +133,7 @@ import java.util.Map;
 public class DispatchHandlers implements DispatchEventMapper {
 
     private static final Map<Class<?>, DispatchHandler<?, ?, ?>> handlerMap = new HashMap<>();
+    private static final Logger log = Loggers.getLogger(DispatchHandlers.class);
 
     static {
         addHandler(ChannelCreate.class, ChannelDispatchHandlers::channelCreate);
@@ -109,7 +182,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ApplicationCommandCreate.class, ApplicationCommandDispatchHandlers::applicationCommandCreate);
         addHandler(ApplicationCommandUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandUpdate);
         addHandler(ApplicationCommandDelete.class, ApplicationCommandDispatchHandlers::applicationCommandDelete);
-        addHandler(ApplicationCommandPermissionUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandPermissionUpdate);
+        addHandler(ApplicationCommandPermissionUpdate.class,
+                ApplicationCommandDispatchHandlers::applicationCommandPermissionUpdate);
         addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
         addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
         addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);
@@ -128,34 +202,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
-    private static final Logger log = Loggers.getLogger(DispatchHandlers.class);
-
-    /**
-     * Process a {@link Dispatch} object wrapped with its context to potentially obtain an {@link Event}.
-     *
-     * @param context the DispatchContext used with this Dispatch object
-     * @param <D> the Dispatch type
-     * @param <S> the old state type, if applicable
-     * @param <E> the resulting Event type
-     * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
-     */
-    @SuppressWarnings("unchecked")
-    public <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context) {
-        DispatchHandler<D, S, E> handler = (DispatchHandler<D, S, E>) handlerMap.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
-        if (handler == null) {
-            log.warn("Handler not found from: {}", context.getDispatch().getClass());
-            return Mono.empty();
-        }
-        return Mono.defer(() -> handler.handle(context))
-                .checkpoint("Dispatch handled for " + context.getDispatch().getClass());
-    }
-
-    private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate, PresenceAndUserData> context) {
+    private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate,
+            PresenceAndUserData> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
@@ -171,7 +219,8 @@ public class DispatchHandlers implements DispatchEventMapper {
                 .map(old -> new User(gateway, old))
                 .orElse(null);
 
-        return Mono.just(new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser, userData, current, oldPresence));
+        return Mono.just(new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser, userData,
+                current, oldPresence));
     }
 
     private static PresenceData createPresence(PresenceUpdate update) {
@@ -190,7 +239,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         Instant startTime = Instant.ofEpochSecond(context.getDispatch().timestamp());
 
         Member member = context.getDispatch().member().toOptional()
-                .filter(__ -> guildId != null)
+                .filter(unused -> guildId != null)
                 .map(memberData -> new Member(context.getGateway(), memberData, guildId))
                 .orElse(null);
 
@@ -204,7 +253,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         User current = new User(gateway, userData);
 
         return Mono.just(new UserUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
-                                .map(old -> new User(gateway, old)).orElse(null)));
+                .map(old -> new User(gateway, old)).orElse(null)));
     }
 
     private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate, Void> context) {
@@ -216,14 +265,15 @@ public class DispatchHandlers implements DispatchEventMapper {
                 endpoint));
     }
 
-    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch, VoiceStateData> context) {
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch,
+            VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         VoiceStateData voiceStateData = context.getDispatch().voiceState();
 
         VoiceState current = new VoiceState(gateway, voiceStateData);
 
         return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
-                                .map(old -> new VoiceState(gateway, old)).orElse(null)));
+                .map(old -> new VoiceState(gateway, old)).orElse(null)));
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate, Void> context) {
@@ -233,11 +283,13 @@ public class DispatchHandlers implements DispatchEventMapper {
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 
-    private static Mono<AuditLogEntryCreateEvent> auditLogEntryCreate(DispatchContext<AuditLogEntryCreate, Void> context) {
+    private static Mono<AuditLogEntryCreateEvent> auditLogEntryCreate(
+            DispatchContext<AuditLogEntryCreate, Void> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         AuditLogEntry auditLogEntry = new AuditLogEntry(context.getGateway(), context.getDispatch());
 
-        return Mono.just(new AuditLogEntryCreateEvent(context.getGateway(), context.getShardInfo(), guildId, auditLogEntry));
+        return Mono.just(new AuditLogEntryCreateEvent(context.getGateway(), context.getShardInfo(), guildId,
+                auditLogEntry));
     }
 
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate, Void> context) {
@@ -338,10 +390,11 @@ public class DispatchHandlers implements DispatchEventMapper {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
 
-        return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
+        return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId,
+                integration));
     }
 
-    private static Mono<AutoModRuleCreateEvent> autoModRuleCreate(DispatchContext<AutoModRuleCreate,Void> context) {
+    private static Mono<AutoModRuleCreateEvent> autoModRuleCreate(DispatchContext<AutoModRuleCreate, Void> context) {
         AutoModRule autoModRule = new AutoModRule(context.getGateway(), context.getDispatch().automodrule());
 
         return Mono.just(new AutoModRuleCreateEvent(context.getGateway(), context.getShardInfo(), autoModRule));
@@ -359,7 +412,34 @@ public class DispatchHandlers implements DispatchEventMapper {
         return Mono.just(new AutoModRuleDeleteEvent(context.getGateway(), context.getShardInfo(), autoModRule));
     }
 
-    private static Mono<AutoModActionExecutedEvent> autoModActionExecute(DispatchContext<AutoModActionExecution, Void> context) {
-        return Mono.just(new AutoModActionExecutedEvent(context.getGateway(), context.getShardInfo(), context.getDispatch()));
+    private static Mono<AutoModActionExecutedEvent> autoModActionExecute(DispatchContext<AutoModActionExecution,
+            Void> context) {
+        return Mono.just(new AutoModActionExecutedEvent(context.getGateway(), context.getShardInfo(),
+                context.getDispatch()));
+    }
+
+    /**
+     * Process a {@link Dispatch} object wrapped with its context to potentially obtain an {@link Event}.
+     *
+     * @param context the DispatchContext used with this Dispatch object
+     * @param <D> the Dispatch type
+     * @param <S> the old state type, if applicable
+     * @param <E> the resulting Event type
+     * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
+     */
+    @SuppressWarnings("unchecked")
+    public <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context) {
+        DispatchHandler<D, S, E> handler = (DispatchHandler<D, S, E>) handlerMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        if (handler == null) {
+            log.warn("Handler not found from: {}", context.getDispatch().getClass());
+            return Mono.empty();
+        }
+        return Mono.defer(() -> handler.handle(context))
+                .checkpoint("Dispatch handled for " + context.getDispatch().getClass());
     }
 }

@@ -27,6 +27,8 @@ public final class ImageUtil {
     /** The {@link String#format(String, Object...) format} for URLs. */
     private static final String URL_FORMAT = BASE_URL + "%s.%s";
 
+    private ImageUtil() {}
+
     /**
      * Gets the URL utilizing a path and the {@link Image.Format} the URL should represent.
      *
@@ -37,6 +39,4 @@ public final class ImageUtil {
     public static String getUrl(final String path, final Image.Format format) {
         return String.format(URL_FORMAT, path, format.getExtension());
     }
-
-    private ImageUtil() {}
 }

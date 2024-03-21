@@ -52,6 +52,29 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     @Nullable
     protected AllowedMentions allowedMentions;
 
+    protected RestClientBuilder(String token,
+                                Function<Config, C> clientFactory,
+                                Function<RouterOptions, O> optionsModifier) {
+        this.token = Objects.requireNonNull(token, "token");
+        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
+        this.optionsModifier = Objects.requireNonNull(optionsModifier, "optionsModifier");
+    }
+
+    protected RestClientBuilder(RestClientBuilder<?, ?> source,
+                                Function<Config, C> clientFactory,
+                                Function<RouterOptions, O> optionsModifier) {
+        this.clientFactory = clientFactory;
+        this.optionsModifier = optionsModifier;
+
+        this.token = source.token;
+        this.reactorResources = source.reactorResources;
+        this.jacksonResources = source.jacksonResources;
+        this.exchangeStrategies = source.exchangeStrategies;
+        this.responseTransformers = source.responseTransformers;
+        this.globalRateLimiter = source.globalRateLimiter;
+        this.requestQueueFactory = source.requestQueueFactory;
+    }
+
     /**
      * Initialize a new builder with the given token.
      *
@@ -74,29 +97,6 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             return new RestClient(restResources);
         };
         return new RestClientBuilder<>("", clientFactory, Function.identity());
-    }
-
-    protected RestClientBuilder(String token,
-                                Function<Config, C> clientFactory,
-                                Function<RouterOptions, O> optionsModifier) {
-        this.token = Objects.requireNonNull(token, "token");
-        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
-        this.optionsModifier = Objects.requireNonNull(optionsModifier, "optionsModifier");
-    }
-
-    protected RestClientBuilder(RestClientBuilder<?, ?> source,
-                                Function<Config, C> clientFactory,
-                                Function<RouterOptions, O> optionsModifier) {
-        this.clientFactory = clientFactory;
-        this.optionsModifier = optionsModifier;
-
-        this.token = source.token;
-        this.reactorResources = source.reactorResources;
-        this.jacksonResources = source.jacksonResources;
-        this.exchangeStrategies = source.exchangeStrategies;
-        this.responseTransformers = source.responseTransformers;
-        this.globalRateLimiter = source.globalRateLimiter;
-        this.requestQueueFactory = source.requestQueueFactory;
     }
 
     /**
@@ -265,20 +265,6 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         return this.optionsModifier.apply(options);
     }
 
-    private ReactorResources initReactorResources() {
-        if (reactorResources != null) {
-            return reactorResources;
-        }
-        return new ReactorResources();
-    }
-
-    private JacksonResources initJacksonResources() {
-        if (jacksonResources != null) {
-            return jacksonResources;
-        }
-        return JacksonResources.create();
-    }
-
     private ExchangeStrategies initExchangeStrategies(JacksonResources jacksonResources) {
         if (exchangeStrategies != null) {
             return exchangeStrategies;
@@ -298,6 +284,20 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             return requestQueueFactory;
         }
         return RequestQueueFactory.buffering();
+    }
+
+    private ReactorResources initReactorResources() {
+        if (reactorResources != null) {
+            return reactorResources;
+        }
+        return new ReactorResources();
+    }
+
+    private JacksonResources initJacksonResources() {
+        if (jacksonResources != null) {
+            return jacksonResources;
+        }
+        return JacksonResources.create();
     }
 
     protected static class Config {

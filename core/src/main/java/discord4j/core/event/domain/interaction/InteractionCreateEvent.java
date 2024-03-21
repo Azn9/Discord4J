@@ -43,7 +43,8 @@ import reactor.util.annotation.Nullable;
  *     <li>{@link UserInteractionEvent} dispatched when a user uses a context menu command on a user</li>
  *     <li>{@link MessageInteractionEvent} dispatched when a user uses a context menu command on a message</li>
  *     <li>{@link ButtonInteractionEvent} dispatched when a user clicks a button component</li>
- *     <li>{@link SelectMenuInteractionEvent} dispatched when a user confirms a selection in a select menu component</li>
+ *     <li>{@link SelectMenuInteractionEvent} dispatched when a user confirms a selection in a select menu
+ *     component</li>
  *     <li>{@link ChatInputAutoCompleteEvent} dispatched when a user starts chat command auto complete</li>
  *     <li>{@link ModalSubmitInteractionEvent} dispatched when a user submits a previously presented modal</li>
  * </ul>

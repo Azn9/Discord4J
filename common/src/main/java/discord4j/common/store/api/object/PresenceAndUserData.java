@@ -41,7 +41,7 @@ public class PresenceAndUserData {
      * Creates a new {@link PresenceAndUserData} wrapping the given presence and user data.
      *
      * @param presenceData the presence data, or null if not provided
-     * @param userData     the user data, or null if not provided
+     * @param userData the user data, or null if not provided
      * @return a new {@link PresenceAndUserData}
      */
     public static PresenceAndUserData of(@Nullable PresenceData presenceData, @Nullable UserData userData) {
@@ -67,24 +67,30 @@ public class PresenceAndUserData {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PresenceAndUserData)) return false;
-        PresenceAndUserData that = (PresenceAndUserData) o;
-        return Objects.equals(presenceData, that.presenceData) &&
-                Objects.equals(userData, that.userData);
-    }
-
-    @Override
     public int hashCode() {
         return Objects.hash(presenceData, userData);
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PresenceAndUserData)) {
+            return false;
+        }
+        PresenceAndUserData that = (PresenceAndUserData) o;
+        return Objects.equals(presenceData, that.presenceData)
+                && Objects.equals(userData, that.userData);
+    }
+
+    @Override
     public String toString() {
-        return "PresenceAndUserData{" +
-                "presenceData=" + presenceData +
-                ", userData=" + userData +
-                '}';
+        return "PresenceAndUserData{"
+                + "presenceData="
+                + presenceData
+                + ", userData="
+                + userData
+                + '}';
     }
 }

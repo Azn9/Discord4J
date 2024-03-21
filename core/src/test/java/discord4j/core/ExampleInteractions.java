@@ -25,13 +25,16 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.InteractionPresentModalSpec;
-import discord4j.rest.interaction.GuildCommandRegistrar;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.interaction.GuildCommandRegistrar;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -44,9 +47,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ExampleInteractions {
 
-    private static final String token = System.getenv("token");
-    private static final long guildId = Long.parseLong(System.getenv("guildId"));
-
     public static final String CHAT_INPUT_COMMAND_NAME = "example";
     public static final String REPLY_MODE_SELECT = "reply-mode";
     public static final String DEFER_REPLY = "deferReply";
@@ -58,6 +58,8 @@ public class ExampleInteractions {
     public static final String ACTION_BUTTON = "action";
     public static final String USER_COMMAND_NAME = "Show user info";
     public static final String MESSAGE_COMMAND_NAME = "Approve";
+    private static final String token = System.getenv("token");
+    private static final long guildId = Long.parseLong(System.getenv("guildId"));
 
     public static void main(String[] args) {
         DiscordClient.create(token)
@@ -96,9 +98,11 @@ public class ExampleInteractions {
                                                     .withFields(
                                                             EmbedCreateFields.Field.of("Name", user.getUsername(),
                                                                     false),
-                                                            EmbedCreateFields.Field.of("Display Name", user.getDisplayName(),
+                                                            EmbedCreateFields.Field.of("Display Name",
+                                                                    user.getDisplayName(),
                                                                     false),
-                                                            EmbedCreateFields.Field.of("Global Name", user.getGlobalName().orElse("none"),
+                                                            EmbedCreateFields.Field.of("Global Name",
+                                                                    user.getGlobalName().orElse("none"),
                                                                     false),
                                                             EmbedCreateFields.Field.of("Avatar URL",
                                                                     user.getAvatarUrl(), false))
@@ -159,10 +163,10 @@ public class ExampleInteractions {
                                             .withComponents(getComponents(true));
                                 case MODAL:
                                     return event.presentModal(InteractionPresentModalSpec.builder()
-                                                    .title("Type deferReply, reply, deferEdit or edit")
-                                                    .customId(MODAL_CUSTOM_ID)
-                                                    .addComponent(getModalComponent())
-                                                    .build());
+                                            .title("Type deferReply, reply, deferEdit or edit")
+                                            .customId(MODAL_CUSTOM_ID)
+                                            .addComponent(getModalComponent())
+                                            .build());
                             }
                         }
                         return Mono.empty();

@@ -8,6 +8,7 @@ import discord4j.core.spec.GuildStickerEditSpec;
 import discord4j.discordjson.json.StickerData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
 import java.util.Objects;
 
 public final class GuildSticker extends Sticker {
@@ -26,15 +27,6 @@ public final class GuildSticker extends Sticker {
     }
 
     /**
-     * Gets the ID of the guild this user is associated to.
-     *
-     * @return The ID of the guild this user is associated to.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the guild this user is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
@@ -42,6 +34,15 @@ public final class GuildSticker extends Sticker {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the ID of the guild this user is associated to.
+     *
+     * @return The ID of the guild this user is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -59,7 +60,8 @@ public final class GuildSticker extends Sticker {
      * Requests to edit this guild sticker. Properties specifying how to edit this sticker can be set via the {@code
      * withXxx} methods of the returned {@link GuildStickerEditMono}.
      *
-     * @return A {@link GuildStickerEditMono} where, upon successful completion, emits the edited {@link GuildSticker}. If
+     * @return A {@link GuildStickerEditMono} where, upon successful completion, emits the edited
+     * {@link GuildSticker}. If
      * an error is received, it is emitted through the {@code GuildStickerEditMono}.
      */
     public GuildStickerEditMono edit() {
@@ -76,10 +78,10 @@ public final class GuildSticker extends Sticker {
     public Mono<GuildSticker> edit(GuildStickerEditSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getStickerService()
-                    .modifyGuildSticker(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
-                        spec.reason()))
-            .map(data -> new GuildSticker(gateway, data, getGuildId().asLong()));
+                        () -> gateway.getRestClient().getStickerService()
+                                .modifyGuildSticker(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
+                                        spec.reason()))
+                .map(data -> new GuildSticker(gateway, data, getGuildId().asLong()));
     }
 
     /**
@@ -101,6 +103,6 @@ public final class GuildSticker extends Sticker {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return gateway.getRestClient().getStickerService()
-            .deleteGuildSticker(getGuildId().asLong(), getId().asLong(), reason);
+                .deleteGuildSticker(getGuildId().asLong(), getId().asLong(), reason);
     }
 }

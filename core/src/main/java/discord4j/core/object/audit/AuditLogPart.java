@@ -23,7 +23,11 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.AuditLogData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -62,7 +66,8 @@ public class AuditLogPart {
                 .collect(Collectors.toList());
     }
 
-    private AuditLogPart(long guildId, List<AutoModRule> autoModRules, Set<Webhook> webhooks, Set<User> users, List<AuditLogEntry> entries) {
+    private AuditLogPart(long guildId, List<AutoModRule> autoModRules, Set<Webhook> webhooks, Set<User> users,
+                         List<AuditLogEntry> entries) {
         this.guildId = guildId;
         this.autoModRules = autoModRules;
         this.webhooks = webhooks;

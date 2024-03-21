@@ -23,11 +23,13 @@ import discord4j.core.object.entity.GuildSticker;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
 import java.util.Optional;
 import java.util.Set;
 
 /**
- * Dispatched when an sticker is added/deleted/or edited in a guild. The {@link #stickers} set includes ALL stickers of the
+ * Dispatched when an sticker is added/deleted/or edited in a guild. The {@link #stickers} set includes ALL stickers
+ * of the
  * guild.
  * <p>
  * This event is dispatched by Discord.
@@ -42,20 +44,12 @@ public class StickersUpdateEvent extends GuildEvent {
     @Nullable
     private final Set<GuildSticker> old;
 
-    public StickersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildSticker> stickers, Set<GuildSticker> old) {
+    public StickersUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId,
+                               Set<GuildSticker> stickers, Set<GuildSticker> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.stickers = stickers;
         this.old = old;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -66,6 +60,15 @@ public class StickersUpdateEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

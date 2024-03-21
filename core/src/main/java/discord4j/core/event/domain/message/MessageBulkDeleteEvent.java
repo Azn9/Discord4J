@@ -16,11 +16,11 @@
  */
 package discord4j.core.event.domain.message;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -45,7 +45,8 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<Long> messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<Long> messageIds,
+                                  long channelId, long guildId,
                                   Set<Message> messages) {
         super(gateway, shardInfo);
         this.messageIds = messageIds;
@@ -75,15 +76,6 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link TextChannel} the messages were deleted in.
-     *
-     * @return The ID of the {@link TextChannel} that the messages were deleted in.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
-    }
-
-    /**
      * Requests to retrieve the {@link TextChannel} representation of the {@code Channel} the messages were deleted
      * in.
      *
@@ -95,12 +87,12 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the messages were deleted in.
+     * Gets the {@link Snowflake} ID of the {@link TextChannel} the messages were deleted in.
      *
-     * @return The ID of the {@link Guild} the messages were deleted in.
+     * @return The ID of the {@link TextChannel} that the messages were deleted in.
      */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -111,6 +103,15 @@ public class MessageBulkDeleteEvent extends MessageEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the messages were deleted in.
+     *
+     * @return The ID of the {@link Guild} the messages were deleted in.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     @Override

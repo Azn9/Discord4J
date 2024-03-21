@@ -45,15 +45,15 @@ public class CommandListener extends ReactiveEventAdapter {
     }
 
     public static CommandListener create() {
-        return createWithPrefix(__ -> Mono.just(""));
-    }
-
-    public static CommandListener createWithPrefix(String prefix) {
-        return createWithPrefix(__ -> Mono.justOrEmpty(prefix));
+        return createWithPrefix(unused -> Mono.just(""));
     }
 
     public static CommandListener createWithPrefix(Function<MessageCreateEvent, Publisher<String>> prefixFunction) {
-        return new CommandListener(Objects.requireNonNull(prefixFunction, "prefixFunction"), __ -> Mono.just(true));
+        return new CommandListener(Objects.requireNonNull(prefixFunction, "prefixFunction"), unused -> Mono.just(true));
+    }
+
+    public static CommandListener createWithPrefix(String prefix) {
+        return createWithPrefix(unused -> Mono.justOrEmpty(prefix));
     }
 
     public CommandListener filter(Function<? super CommandContext, Mono<Boolean>> condition) {
@@ -71,7 +71,7 @@ public class CommandListener extends ReactiveEventAdapter {
     }
 
     public CommandListener handle(Command handler) {
-        handlers.add(new CommandHandler(__ -> true, handler));
+        handlers.add(new CommandHandler(unused -> true, handler));
         return this;
     }
 

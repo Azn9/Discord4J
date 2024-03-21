@@ -32,7 +32,8 @@ public class ScheduledEventEntityMetadata implements DiscordObject {
     private final GuildScheduledEventEntityMetadataData data;
 
     /**
-     * Constructs a {@code ScheduledEventEntityMetadata} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs a {@code ScheduledEventEntityMetadata} with an associated {@link GatewayDiscordClient} and Discord
+     * data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated with this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -67,8 +68,8 @@ public class ScheduledEventEntityMetadata implements DiscordObject {
 
     @Override
     public String toString() {
-        return "ScheduledEventEntityMetadata{"+
-            "data=" + data +
-            '}';
+        return "ScheduledEventEntityMetadata{" +
+                "data=" + data +
+                '}';
     }
 }

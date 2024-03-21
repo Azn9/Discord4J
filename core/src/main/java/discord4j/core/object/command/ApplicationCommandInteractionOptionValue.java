@@ -46,9 +46,10 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     @Nullable
     private final ApplicationCommandInteractionResolvedData resolved;
 
-    public ApplicationCommandInteractionOptionValue(final GatewayDiscordClient gateway, @Nullable final Long guildId,
-                                                    final int type, final String value,
-                                                    @Nullable final ApplicationCommandInteractionResolvedData resolved) {
+    public ApplicationCommandInteractionOptionValue(
+            final GatewayDiscordClient gateway, @Nullable final Long guildId,
+            final int type, final String value,
+            @Nullable final ApplicationCommandInteractionResolvedData resolved) {
         this.gateway = gateway;
         this.guildId = guildId;
         this.value = value;
@@ -62,6 +63,15 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
     public String asString() {
         return getValueAs("string", Function.identity(), ApplicationCommandOption.Type.STRING);
+    }
+
+    private <T> T getValueAs(String parsedTypeName, Function<String, T> parser,
+                             ApplicationCommandOption.Type... allowedTypes) {
+        if (!Arrays.asList(allowedTypes).contains(ApplicationCommandOption.Type.of(type))) {
+            throw new IllegalArgumentException("Option value cannot be converted as " + parsedTypeName);
+        }
+
+        return parser.apply(value);
     }
 
     public boolean asBoolean() {
@@ -90,6 +100,11 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
                 ApplicationCommandOption.Type.USER);
     }
 
+    @Override
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
     public Mono<Role> asRole() {
         return getValueAs("role",
                 value -> getClient().getRoleById(Snowflake.of(Objects.requireNonNull(guildId)), Snowflake.of(value)),
@@ -107,19 +122,5 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
                 value -> new Attachment(getClient(), Objects.requireNonNull(resolved)
                         .attachments().get().get(value)),
                 ApplicationCommandOption.Type.ATTACHMENT);
-    }
-
-    private <T> T getValueAs(String parsedTypeName, Function<String, T> parser,
-                             ApplicationCommandOption.Type... allowedTypes) {
-        if (!Arrays.asList(allowedTypes).contains(ApplicationCommandOption.Type.of(type))) {
-            throw new IllegalArgumentException("Option value cannot be converted as " + parsedTypeName);
-        }
-
-        return parser.apply(value);
-    }
-
-    @Override
-    public GatewayDiscordClient getClient() {
-        return gateway;
     }
 }

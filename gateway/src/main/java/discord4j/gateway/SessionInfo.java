@@ -60,6 +60,11 @@ public class SessionInfo {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(id, sequence);
+    }
+
+    @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
@@ -70,11 +75,6 @@ public class SessionInfo {
         SessionInfo that = (SessionInfo) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(sequence, that.sequence);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, sequence);
     }
 
     @Override

@@ -33,15 +33,6 @@ import java.util.stream.Collectors;
 @Value.Immutable
 interface GuildEmojiCreateSpecGenerator extends AuditSpec<GuildEmojiCreateRequest> {
 
-    String name();
-
-    Image image();
-
-    @Value.Default
-    default List<Snowflake> roles() {
-        return Collections.emptyList();
-    }
-
     @Override
     default GuildEmojiCreateRequest asRequest() {
         return GuildEmojiCreateRequest.builder()
@@ -50,18 +41,24 @@ interface GuildEmojiCreateSpecGenerator extends AuditSpec<GuildEmojiCreateReques
                 .roles(roles().stream().map(Snowflake::asString).collect(Collectors.toList()))
                 .build();
     }
+    String name();
+    Image image();
+    @Value.Default
+    default List<Snowflake> roles() {
+        return Collections.emptyList();
+    }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildEmojiCreateMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super GuildEmoji> actual) {
         guild().createEmoji(GuildEmojiCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

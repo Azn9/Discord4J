@@ -34,6 +34,15 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
+    DiscordClientBuilder(String token, Function<Config, C> allocator, Function<RouterOptions, O> optionsModifier) {
+        super(token, allocator, optionsModifier);
+    }
+
+    DiscordClientBuilder(DiscordClientBuilder<?, ?> source, Function<Config, C> allocator,
+                         Function<RouterOptions, O> optionsModifier) {
+        super(source, allocator, optionsModifier);
+    }
+
     /**
      * Initialize a new builder with the given token.
      *
@@ -52,15 +61,6 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
             return new DiscordClient(coreResources);
         };
         return new DiscordClientBuilder<>(token, clientFactory, Function.identity());
-    }
-
-    DiscordClientBuilder(String token, Function<Config, C> allocator, Function<RouterOptions, O> optionsModifier) {
-        super(token, allocator, optionsModifier);
-    }
-
-    DiscordClientBuilder(DiscordClientBuilder<?, ?> source, Function<Config, C> allocator,
-                         Function<RouterOptions, O> optionsModifier) {
-        super(source, allocator, optionsModifier);
     }
 
     /**

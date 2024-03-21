@@ -127,7 +127,8 @@ public interface GuildChannel extends Channel {
     /**
      * Requests to retrieve the position of the channel relative to other channels in the guild.
      * <p>
-     * This is determined by the index of this channel in the {@link OrderUtil#orderGuildChannels(Flux) sorted} list of channels of the guild.
+     * This is determined by the index of this channel in the {@link OrderUtil#orderGuildChannels(Flux) sorted} list
+     * of channels of the guild.
      * <p>
      * Warning: Because this method must sort the guild channels, it is inefficient to make repeated invocations for the
      * same set of channels (meaning that channels haven't been added or removed). For example, instead of writing:
@@ -159,7 +160,6 @@ public interface GuildChannel extends Channel {
      *
      * @param memberId The ID of the member to add the overwrite for.
      * @param overwrite The overwrite to add.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
@@ -176,7 +176,6 @@ public interface GuildChannel extends Channel {
      * @param memberId The ID of the member to add the overwrite for.
      * @param overwrite The overwrite to add.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
@@ -190,7 +189,6 @@ public interface GuildChannel extends Channel {
      *
      * @param roleId The ID of the role to add the overwrite for.
      * @param overwrite The overwrite to add.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to
@@ -207,7 +205,6 @@ public interface GuildChannel extends Channel {
      * @param roleId The ID of the role to add the overwrite for.
      * @param overwrite The overwrite to add.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      * @deprecated Threads don't have permission overwrites, so when they are released, this will be moved to

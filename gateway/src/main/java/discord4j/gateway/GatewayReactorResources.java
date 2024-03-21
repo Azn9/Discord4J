@@ -95,15 +95,6 @@ public class GatewayReactorResources extends ReactorResources {
     }
 
     /**
-     * Returns a new builder to create {@link GatewayReactorResources}.
-     *
-     * @return a builder to create {@link GatewayReactorResources}
-     */
-    public static GatewayReactorResources.Builder builder() {
-        return new GatewayReactorResources.Builder();
-    }
-
-    /**
      * Returns a new builder to create {@link GatewayReactorResources} from a pre-configured {@link ReactorResources},
      * copying its settings.
      *
@@ -114,6 +105,15 @@ public class GatewayReactorResources extends ReactorResources {
                 .httpClient(reactorResources.getHttpClient())
                 .timerTaskScheduler(reactorResources.getTimerTaskScheduler())
                 .blockingTaskScheduler(reactorResources.getBlockingTaskScheduler());
+    }
+
+    /**
+     * Returns a new builder to create {@link GatewayReactorResources}.
+     *
+     * @return a builder to create {@link GatewayReactorResources}
+     */
+    public static GatewayReactorResources.Builder builder() {
+        return new GatewayReactorResources.Builder();
     }
 
     /**

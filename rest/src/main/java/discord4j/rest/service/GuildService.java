@@ -41,15 +41,15 @@ public class GuildService extends RestService {
 
     public Mono<GuildUpdateData> getGuild(long guildId, Map<String, Object> queryParams) {
         return Routes.GUILD_GET.newRequest(guildId)
-            .query(queryParams)
-            .exchange(getRouter())
-            .bodyToMono(GuildUpdateData.class);
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(GuildUpdateData.class);
     }
 
     public Mono<GuildUpdateData> getGuild(long guildId) {
         return Routes.GUILD_GET.newRequest(guildId)
-            .exchange(getRouter())
-            .bodyToMono(GuildUpdateData.class);
+                .exchange(getRouter())
+                .bodyToMono(GuildUpdateData.class);
     }
 
     public Mono<GuildUpdateData> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {
@@ -105,10 +105,10 @@ public class GuildService extends RestService {
 
     public Flux<MemberData> searchGuildMembers(long guildId, Map<String, Object> queryParams) {
         return Routes.SEARCH_GUILD_MEMBERS_GET.newRequest(guildId)
-            .query(queryParams)
-            .exchange(getRouter())
-            .bodyToMono(MemberData[].class)
-            .flatMapMany(Flux::fromArray);
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(MemberData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<MemberData> addGuildMember(long guildId, long userId, GuildMemberAddRequest request) {
@@ -118,7 +118,8 @@ public class GuildService extends RestService {
                 .bodyToMono(MemberData.class);
     }
 
-    public Mono<MemberData> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
+    public Mono<MemberData> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request,
+                                              @Nullable String reason) {
         return Routes.GUILD_MEMBER_MODIFY.newRequest(guildId, userId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -175,7 +176,8 @@ public class GuildService extends RestService {
                 .bodyToMono(BanData.class);
     }
 
-    public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams, @Nullable String reason) {
+    public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams,
+                                     @Nullable String reason) {
         return Routes.GUILD_BAN_CREATE.newRequest(guildId, userId)
                 .query(queryParams)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -213,7 +215,8 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<RoleData> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request, @Nullable String reason) {
+    public Mono<RoleData> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request,
+                                          @Nullable String reason) {
         return Routes.GUILD_ROLE_MODIFY.newRequest(guildId, roleId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
@@ -276,9 +279,9 @@ public class GuildService extends RestService {
 
     public Flux<IntegrationData> getGuildIntegrations(long guildId) {
         return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
-            .exchange(getRouter())
-            .bodyToMono(IntegrationData[].class)
-            .flatMapMany(Flux::fromArray);
+                .exchange(getRouter())
+                .bodyToMono(IntegrationData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> createGuildIntegration(long guildId, IntegrationCreateRequest request) {
@@ -322,66 +325,70 @@ public class GuildService extends RestService {
 
     public Mono<GuildPreviewData> getGuildPreview(long guildId) {
         return Routes.GUILD_PREVIEW_GET.newRequest(guildId)
-            .exchange(getRouter())
-            .bodyToMono(GuildPreviewData.class);
+                .exchange(getRouter())
+                .bodyToMono(GuildPreviewData.class);
     }
 
     public Mono<Void> modifySelfVoiceState(long guildId, UpdateCurrentUserVoiceStateRequest request) {
         return Routes.SELF_VOICE_STATE_MODIFY.newRequest(guildId)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(Void.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> modifyOthersVoiceState(long guildId, long userId, UpdateUserVoiceStateRequest request) {
         return Routes.OTHERS_VOICE_STATE_MODIFY.newRequest(guildId, userId)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(Void.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
-    public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId, Map<String, Object> queryParams) {
+    public Mono<GuildScheduledEventData> getScheduledEvent(long guildId, long eventId,
+                                                           Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENT_GET.newRequest(guildId, eventId)
-            .query(queryParams)
-            .exchange(getRouter())
-            .bodyToMono(GuildScheduledEventData.class);
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(GuildScheduledEventData.class);
     }
 
     public Flux<GuildScheduledEventData> getScheduledEvents(long guildId, Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENTS_GET.newRequest(guildId)
-            .query(queryParams)
-            .exchange(getRouter())
-            .bodyToMono(GuildScheduledEventData[].class)
-            .flatMapMany(Flux::fromArray);
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(GuildScheduledEventData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<GuildScheduledEventData> createScheduledEvent(long guildId, GuildScheduledEventCreateRequest request) {
         return Routes.GUILD_SCHEDULED_EVENT_CREATE.newRequest(guildId)
-            .body(request)
-            .exchange(getRouter())
-            .bodyToMono(GuildScheduledEventData.class);
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(GuildScheduledEventData.class);
     }
 
-    public Mono<GuildScheduledEventData> modifyScheduledEvent(long guildId, long eventId, GuildScheduledEventModifyRequest request, @Nullable String reason) {
+    public Mono<GuildScheduledEventData> modifyScheduledEvent(long guildId, long eventId,
+                                                              GuildScheduledEventModifyRequest request,
+                                                              @Nullable String reason) {
         return Routes.GUILD_SCHEDULED_EVENT_MODIFY.newRequest(guildId, eventId)
-            .body(request)
-            .optionalHeader("X-Audit-Log-Reason", reason)
-            .exchange(getRouter())
-            .bodyToMono(GuildScheduledEventData.class);
+                .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(GuildScheduledEventData.class);
     }
 
     public Mono<Void> deleteScheduledEvent(long guildId, long eventId, @Nullable String reason) {
         return Routes.GUILD_SCHEDULED_EVENT_DELETE.newRequest(guildId, eventId)
-            .optionalHeader("X-Audit-Log-Reason", reason)
-            .exchange(getRouter())
-            .bodyToMono(Void.class);
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
-    public Flux<GuildScheduledEventUserData> getScheduledEventUsers(long guildId, long eventId, Map<String, Object> queryParams) {
+    public Flux<GuildScheduledEventUserData> getScheduledEventUsers(long guildId, long eventId,
+                                                                    Map<String, Object> queryParams) {
         return Routes.GUILD_SCHEDULED_EVENT_USERS_GET.newRequest(guildId, eventId)
-            .query(queryParams)
-            .exchange(getRouter())
-            .bodyToMono(GuildScheduledEventUserData[].class)
-            .flatMapMany(Flux::fromArray);
+                .query(queryParams)
+                .exchange(getRouter())
+                .bodyToMono(GuildScheduledEventUserData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 }

@@ -24,8 +24,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to channels.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onChannelCreate</li>
      *     <li>onChannelDelete</li>
@@ -44,8 +44,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guild emojis.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildEmojisUpdate</li>
      * </ul>
@@ -62,8 +62,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guilds.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildCreate</li>
      *     <li>onGuildDelete</li>
@@ -80,8 +80,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guild members.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildMemberAdd</li>
      *     <li>onGuildMemberRemove</li>
@@ -104,8 +104,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to messages.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onMessageCreate</li>
      *     <li>onMessageDelete</li>
@@ -129,8 +129,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to presences.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onPresenceUpdate</li>
      * </ul>
@@ -147,8 +147,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guild roles.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildRoleCreate</li>
      *     <li>onGuildRoleDelete</li>
@@ -167,8 +167,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to users.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onUserUpdate</li>
      * </ul>
@@ -183,8 +183,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to voice states.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onVoiceStateUpdateDispatch</li>
      * </ul>
@@ -203,8 +203,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guild stickers.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildStickersUpdate</li>
      * </ul>
@@ -221,8 +221,8 @@ public enum StoreFlag {
 
     /**
      * Flag affecting operations related to guild scheduled events.
-     * <p>
-     * Updates:
+     *
+     * <p>Updates:
      * <ul>
      *     <li>onGuildScheduledEventCreate</li>
      *     <li>onGuildScheduledEventUpdate</li>

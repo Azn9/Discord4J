@@ -85,14 +85,14 @@ public class LegacyGuildPruneSpec implements LegacyAuditSpec<Multimap<String, Ob
     }
 
     @Override
-    public LegacyGuildPruneSpec setReason(String reason) {
-        this.reason = reason;
-        return this;
+    public String getReason() {
+        return reason;
     }
 
     @Override
-    public String getReason() {
-        return reason;
+    public LegacyGuildPruneSpec setReason(String reason) {
+        this.reason = reason;
+        return this;
     }
 
     @Override

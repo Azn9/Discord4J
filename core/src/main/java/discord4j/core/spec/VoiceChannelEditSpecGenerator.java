@@ -30,28 +30,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @Value.Immutable(singleton = true)
 interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
-
-    Possible<String> name();
-
-    Possible<Integer> bitrate();
-
-    Possible<Integer> userLimit();
-
-    Possible<Integer> position();
-
-    Possible<Integer> rateLimitPerUser();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
-
-    Possible<Optional<Snowflake>> parentId();
-
-    Possible<Optional<String>> rtcRegion();
-
-    Possible<Optional<VoiceChannel.Mode>> videoQualityMode();
 
     @Override
     default ChannelModifyRequest asRequest() {
@@ -69,18 +52,27 @@ interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> 
                 .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))
                 .build();
     }
+    Possible<String> name();
+    Possible<Integer> bitrate();
+    Possible<Integer> userLimit();
+    Possible<Integer> position();
+    Possible<Integer> rateLimitPerUser();
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Optional<Snowflake>> parentId();
+    Possible<Optional<String>> rtcRegion();
+    Possible<Optional<VoiceChannel.Mode>> videoQualityMode();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class VoiceChannelEditMonoGenerator extends Mono<VoiceChannel> implements VoiceChannelEditSpecGenerator {
 
-    abstract VoiceChannel channel();
-
     @Override
     public void subscribe(CoreSubscriber<? super VoiceChannel> actual) {
         channel().edit(VoiceChannelEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract VoiceChannel channel();
 
     @Override
     public abstract String toString();

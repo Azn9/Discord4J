@@ -39,41 +39,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapNullable;
 @Value.Immutable
 interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 
-    String name();
-
-    Region region();
-
-    @Nullable
-    Image icon();
-
-    @Value.Default
-    default Guild.VerificationLevel verificationLevel() {
-        return Guild.VerificationLevel.NONE;
-    }
-
-    @Value.Default
-    default Guild.NotificationLevel defaultMessageNotificationLevel() {
-        return Guild.NotificationLevel.ALL_MESSAGES;
-    }
-
-    @Value.Default
-    default Guild.ContentFilterLevel explicitContentFilter() {
-        return Guild.ContentFilterLevel.DISABLED;
-    }
-
-    @Value.Default
-    default List<RoleCreateSpec> roles() {
-        return Collections.emptyList();
-    }
-
-    @Nullable
-    RoleCreateSpec everyoneRole();
-
-    @Value.Default
-    default List<GuildCreateFields.PartialChannel> channels() {
-        return Collections.emptyList();
-    }
-
     @Override
     default GuildCreateRequest asRequest() {
         List<RoleCreateRequest> roles = roles().stream()
@@ -97,18 +62,44 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
                 .channels(channels)
                 .build();
     }
+    String name();
+    Region region();
+    @Nullable
+    Image icon();
+    @Value.Default
+    default Guild.VerificationLevel verificationLevel() {
+        return Guild.VerificationLevel.NONE;
+    }
+    @Value.Default
+    default Guild.NotificationLevel defaultMessageNotificationLevel() {
+        return Guild.NotificationLevel.ALL_MESSAGES;
+    }
+    @Value.Default
+    default Guild.ContentFilterLevel explicitContentFilter() {
+        return Guild.ContentFilterLevel.DISABLED;
+    }
+    @Value.Default
+    default List<RoleCreateSpec> roles() {
+        return Collections.emptyList();
+    }
+    @Nullable
+    RoleCreateSpec everyoneRole();
+    @Value.Default
+    default List<GuildCreateFields.PartialChannel> channels() {
+        return Collections.emptyList();
+    }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildCreateMonoGenerator extends Mono<Guild> implements GuildCreateSpecGenerator {
 
-    abstract GatewayDiscordClient gateway();
-
     @Override
     public void subscribe(CoreSubscriber<? super Guild> actual) {
         gateway().createGuild(GuildCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GatewayDiscordClient gateway();
 
     @Override
     public abstract String toString();

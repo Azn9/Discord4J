@@ -19,7 +19,8 @@ package discord4j.common.store.api;
 
 /**
  * Represents an operation that can be executed on a store.
- * @param <R>
+ *
+ * @param <R> the type of the result of the operation
  */
 public interface StoreAction<R> {
 }

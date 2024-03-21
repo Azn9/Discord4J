@@ -29,10 +29,6 @@ import java.util.Optional;
 @Value.Immutable(singleton = true)
 interface GuildTemplateEditSpecGenerator extends Spec<TemplateModifyRequest> {
 
-    Possible<String> name();
-
-    Possible<Optional<String>> description();
-
     @Override
     default TemplateModifyRequest asRequest() {
         return TemplateModifyRequest.builder()
@@ -40,18 +36,20 @@ interface GuildTemplateEditSpecGenerator extends Spec<TemplateModifyRequest> {
                 .description(description())
                 .build();
     }
+    Possible<String> name();
+    Possible<Optional<String>> description();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildTemplateEditMonoGenerator extends Mono<GuildTemplate> implements GuildTemplateEditSpecGenerator {
 
-    abstract GuildTemplate guildTemplate();
-
     @Override
     public void subscribe(CoreSubscriber<? super GuildTemplate> actual) {
         guildTemplate().edit(GuildTemplateEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract GuildTemplate guildTemplate();
 
     @Override
     public abstract String toString();

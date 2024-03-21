@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain.role;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -42,20 +42,12 @@ public class RoleDeleteEvent extends RoleEvent {
     @Nullable
     private final Role role;
 
-    public RoleDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long roleId, @Nullable Role role) {
+    public RoleDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long roleId,
+                           @Nullable Role role) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.roleId = roleId;
         this.role = role;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was deleted in.
-     *
-     * @return The ID of the {@link Guild} involved.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     /**
@@ -70,10 +62,18 @@ public class RoleDeleteEvent extends RoleEvent {
     }
 
     /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was deleted in.
+     *
+     * @return The ID of the {@link Guild} involved.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
      * Gets the {@link Snowflake} ID of the {@link Role} that was deleted in this event.
      *
      * @return The ID of the deleted {@link Role}.
-     *
      */
     public Snowflake getRoleId() {
         return Snowflake.of(roleId);

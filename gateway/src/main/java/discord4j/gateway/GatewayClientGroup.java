@@ -36,14 +36,6 @@ public interface GatewayClientGroup {
      * @return a {@link GatewayClient} for a shard index, if present
      */
     Optional<GatewayClient> find(int shardIndex);
-
-    /**
-     * Return the current value of the {@code shardCount} parameter.
-     *
-     * @return the current shard count
-     */
-    int getShardCount();
-
     /**
      * Send a single {@link GatewayPayload} to all {@link GatewayClient} instances represented by this group and
      * returns a {@link Mono} that signals completion when it has been sent.
@@ -52,7 +44,6 @@ public interface GatewayClientGroup {
      * @return a {@link Mono} completing when the payload is sent
      */
     Mono<Void> multicast(GatewayPayload<?> payload);
-
     /**
      * Send a single {@link ShardGatewayPayload} to a specific {@link GatewayClient} instance, given by the
      * routing information in {@link ShardGatewayPayload#getShardIndex()} and returns a {@link Mono} that
@@ -62,7 +53,6 @@ public interface GatewayClientGroup {
      * @return a {@link Mono} completing when the payload is sent
      */
     Mono<Void> unicast(ShardGatewayPayload<?> payload);
-
     /**
      * Instructs that on subscription this group should log out from Discord Gateway.
      *
@@ -70,14 +60,20 @@ public interface GatewayClientGroup {
      * through this {@link Mono}.
      */
     Mono<Void> logout();
-
     /**
      * Return the shard index according to the shard count given by this {@link GatewayClientGroup}.
+     *
      * @param guildId the input guild ID to compute the shard index
      * @return the shard index for a given guild ID
      */
     default int computeShardIndex(Snowflake guildId) {
         return (int) ((guildId.asLong() >> 22) % getShardCount());
     }
+    /**
+     * Return the current value of the {@code shardCount} parameter.
+     *
+     * @return the current shard count
+     */
+    int getShardCount();
 
 }

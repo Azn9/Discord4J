@@ -82,15 +82,6 @@ public class ApplicationTeamMember implements DiscordObject {
     }
 
     /**
-     * Gets the id of the user associated with this team member.
-     *
-     * @return The id of the user associated with this team member.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(data.user().id().asLong());
-    }
-
-    /**
      * Requests to retrieve the user this member is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} this member is associated to.
@@ -98,6 +89,15 @@ public class ApplicationTeamMember implements DiscordObject {
      */
     public Mono<User> getUser() {
         return gateway.getUserById(getUserId());
+    }
+
+    /**
+     * Gets the id of the user associated with this team member.
+     *
+     * @return The id of the user associated with this team member.
+     */
+    public Snowflake getUserId() {
+        return Snowflake.of(data.user().id().asLong());
     }
 
     /**
@@ -111,11 +111,18 @@ public class ApplicationTeamMember implements DiscordObject {
         return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getUserId());
     }
 
+    @Override
+    public String toString() {
+        return "ApplicationTeamMember{" +
+                "data=" + data +
+                '}';
+    }
+
     /**
      * Represents the various types of membership state.
      *
      * @see <a href="https://discord.com/developers/docs/topics/teams#data-models-membership-state-enum">
-     *     Membership State Enum</a>
+     * Membership State Enum</a>
      */
     public enum MembershipState {
 
@@ -138,15 +145,6 @@ public class ApplicationTeamMember implements DiscordObject {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the membership state of team member. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
@@ -160,12 +158,14 @@ public class ApplicationTeamMember implements DiscordObject {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "ApplicationTeamMember{" +
-                "data=" + data +
-                '}';
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

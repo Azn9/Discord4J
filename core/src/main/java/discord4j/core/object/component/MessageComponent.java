@@ -21,9 +21,16 @@ import discord4j.discordjson.json.ComponentData;
 /**
  * A Discord message component.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
  */
 public class MessageComponent {
+
+    private final ComponentData data;
+
+    MessageComponent(ComponentData data) {
+        this.data = data;
+    }
 
     /**
      * Constructs a {@code MessageComponent} from raw data.
@@ -45,12 +52,6 @@ public class MessageComponent {
             case TEXT_INPUT: return new TextInput(data);
             default: return new MessageComponent(data);
         }
-    }
-
-    private final ComponentData data;
-
-    MessageComponent(ComponentData data) {
-        this.data = data;
     }
 
     /**
@@ -88,10 +89,6 @@ public class MessageComponent {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static Type of(int value) {
             switch (value) {
                 case 1: return ACTION_ROW;
@@ -104,6 +101,10 @@ public class MessageComponent {
                 case 8: return SELECT_MENU_CHANNEL;
                 default: return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 

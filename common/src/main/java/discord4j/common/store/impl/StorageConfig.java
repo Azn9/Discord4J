@@ -36,6 +36,14 @@ public class StorageConfig {
         this.invalidationFilter = b.invalidationFilter == null ? defaultInvalidationFilter() : b.invalidationFilter;
     }
 
+    private static StorageBackend defaultMessageBackend() {
+        return StorageBackend.caffeine(builder -> builder.maximumSize(1000L));
+    }
+
+    private static EnumSet<InvalidationCause> defaultInvalidationFilter() {
+        return EnumSet.allOf(InvalidationCause.class);
+    }
+
     /**
      * Creates a new builder to customize a {@link StorageConfig}.
      *
@@ -43,14 +51,6 @@ public class StorageConfig {
      */
     public static Builder builder() {
         return new Builder();
-    }
-
-    private static StorageBackend defaultMessageBackend() {
-        return StorageBackend.caffeine(builder -> builder.maximumSize(1000L));
-    }
-
-    private static EnumSet<InvalidationCause> defaultInvalidationFilter() {
-        return EnumSet.allOf(InvalidationCause.class);
     }
 
     /**

@@ -43,10 +43,8 @@ import static discord4j.common.LogUtil.format;
  */
 public class DiscordWebClient {
 
-    private static final Logger log = Loggers.getLogger(DiscordWebClient.class);
-
     public static final String KEY_REQUEST_TIMESTAMP = "discord4j.request.timestamp";
-
+    private static final Logger log = Loggers.getLogger(DiscordWebClient.class);
     private final HttpClient httpClient;
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
@@ -137,20 +135,21 @@ public class DiscordWebClient {
      */
     public Mono<ClientResponse> exchange(ClientRequest request) {
         return Mono.defer(
-                () -> {
-                    HttpHeaders requestHeaders = buildHttpHeaders(request);
-                    String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
-                    HttpClient.RequestSender sender = httpClient.headers(headers -> headers.setAll(requestHeaders))
-                            .request(request.getMethod())
-                            .uri(request.getUrl());
-                    Object body = request.getBody();
-                    return exchangeStrategies.writers().stream()
-                            .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
-                            .findFirst()
-                            .map(DiscordWebClient::cast)
-                            .map(writer -> writer.write(sender, body))
-                            .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
-                })
+                        () -> {
+                            HttpHeaders requestHeaders = buildHttpHeaders(request);
+                            String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
+                            HttpClient.RequestSender sender =
+                                    httpClient.headers(headers -> headers.setAll(requestHeaders))
+                                    .request(request.getMethod())
+                                    .uri(request.getUrl());
+                            Object body = request.getBody();
+                            return exchangeStrategies.writers().stream()
+                                    .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
+                                    .findFirst()
+                                    .map(DiscordWebClient::cast)
+                                    .map(writer -> writer.write(sender, body))
+                                    .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
+                        })
                 .flatMap(receiver -> receiver.responseConnection((response, connection) ->
                         Mono.just(new ClientResponse(response, connection.inbound(),
                                 exchangeStrategies, request, responseFunctions))).next())

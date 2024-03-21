@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 /**
  * An Auto Moderation Trigger MetaData
  *
- * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata">Auto Moderation Trigger MetaData</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-metadata">Auto Moderation Trigger MetaData</a>
  */
 public class AutoModRuleTriggerMetaData {
 
@@ -101,7 +102,8 @@ public class AutoModRuleTriggerMetaData {
         if (data.presets().isAbsent()) {
             return presets;
         }
-        presets.addAll(data.presets().toOptional().map(presetValues -> presetValues.stream().map(Preset::of)).orElse(Stream.empty()).collect(Collectors.toList()));
+        presets.addAll(data.presets().toOptional().map(presetValues -> presetValues.stream().map(Preset::of))
+                .orElse(Stream.empty()).collect(Collectors.toList()));
         return presets;
     }
 
@@ -144,15 +146,6 @@ public class AutoModRuleTriggerMetaData {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -166,6 +159,15 @@ public class AutoModRuleTriggerMetaData {
                 }
             }
             return UNKNOWN;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 

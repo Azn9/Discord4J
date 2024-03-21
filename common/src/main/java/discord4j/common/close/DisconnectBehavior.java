@@ -27,8 +27,14 @@ public class DisconnectBehavior {
     private final Action action;
     private final Throwable cause;
 
+    private DisconnectBehavior(Action action, @Nullable Throwable cause) {
+        this.action = action;
+        this.cause = cause;
+    }
+
     /**
-     * Create a {@link DisconnectBehavior} that instructs a client to retry in a graceful manner, with an optional cause.
+     * Create a {@link DisconnectBehavior} that instructs a client to retry in a graceful manner, with an optional
+     * cause.
      *
      * @param cause optionally, a {@link Throwable} that triggered this close intent
      * @return a {@link DisconnectBehavior} that will gracefully attempt to retry
@@ -67,11 +73,6 @@ public class DisconnectBehavior {
         return new DisconnectBehavior(Action.STOP_ABRUPTLY, cause);
     }
 
-    private DisconnectBehavior(Action action, @Nullable Throwable cause) {
-        this.action = action;
-        this.cause = cause;
-    }
-
     /**
      * Returns the action to perform while closing a resource.
      *
@@ -91,15 +92,15 @@ public class DisconnectBehavior {
         return cause;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s%s", action, cause != null ? " due to " + cause : "");
+    }
+
     /**
      * The action to trigger to close a resource.
      */
     public enum Action {
         RETRY, STOP, RETRY_ABRUPTLY, STOP_ABRUPTLY;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s%s", action, cause != null ? " due to " + cause : "");
     }
 }

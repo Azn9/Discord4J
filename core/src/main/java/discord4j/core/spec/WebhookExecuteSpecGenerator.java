@@ -38,36 +38,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecuteRequest>> {
 
-    Possible<String> content();
-
-    Possible<String> username();
-
-    Possible<String> avatarUrl();
-
-    @Value.Default
-    default boolean tts() {
-        return false;
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.File> files() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
-        return Collections.emptyList();
-    }
-
-    @Value.Default
-    default List<EmbedCreateSpec> embeds() {
-        return Collections.emptyList();
-    }
-
-    Possible<AllowedMentions> allowedMentions();
-
-    Possible<List<LayoutComponent>> components();
-
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
@@ -85,20 +55,41 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
                 .map(MessageCreateFields.File::asRequest)
                 .collect(Collectors.toList()));
     }
+    Possible<String> content();
+    Possible<String> username();
+    Possible<String> avatarUrl();
+    @Value.Default
+    default boolean tts() {
+        return false;
+    }
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+    @Value.Default
+    default List<EmbedCreateSpec> embeds() {
+        return Collections.emptyList();
+    }
+    Possible<AllowedMentions> allowedMentions();
+    Possible<List<LayoutComponent>> components();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements WebhookExecuteSpecGenerator {
 
-    abstract boolean waitForMessage();
-
-    abstract Webhook webhook();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract boolean waitForMessage();
+
+    abstract Webhook webhook();
 
     @Override
     public abstract String toString();

@@ -20,7 +20,13 @@ package discord4j.common.store.api;
 import discord4j.common.annotations.Experimental;
 import org.reactivestreams.Publisher;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +39,8 @@ public class ActionMapper {
 
     private final Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Publisher<?>>> mappings;
 
-    private ActionMapper(Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Publisher<?>>> mappings) {
+    private ActionMapper(Map<Class<? extends StoreAction<?>>,
+            Function<StoreAction<?>, ? extends Publisher<?>>> mappings) {
         this.mappings = mappings;
     }
 
@@ -66,8 +73,12 @@ public class ActionMapper {
      */
     public static ActionMapper aggregate(ActionMapper... mappers) {
         Objects.requireNonNull(mappers);
-        if (mappers.length == 0) return EMPTY;
-        if (mappers.length == 1) return mappers[0];
+        if (mappers.length == 0) {
+            return EMPTY;
+        }
+        if (mappers.length == 1) {
+            return mappers[0];
+        }
         return new ActionMapper(Arrays.stream(mappers)
                 .flatMap(mapper -> mapper.mappings.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))); // throws ISE if duplicates
@@ -115,9 +126,9 @@ public class ActionMapper {
          * Maps a specific action type to a handler function to execute.
          *
          * @param actionType the type of the action
-         * @param handler    the handler to execute when an action of the specified type is received
-         * @param <R>        the return type of the action
-         * @param <S>        the type of the action itself
+         * @param handler the handler to execute when an action of the specified type is received
+         * @param <R> the return type of the action
+         * @param <S> the type of the action itself
          * @return this {@link Builder} enriched with the added mapping
          */
         @SuppressWarnings("unchecked")

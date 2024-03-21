@@ -44,17 +44,28 @@ public final class IntentSet extends AbstractSet<Intent> {
      * Common instance for {@code all()}.
      */
     private static final IntentSet ALL = new IntentSet(ALL_RAW);
-
-    /**
-     * Common instance for {@code none()}.
-     */
-    private static final IntentSet NONE = new IntentSet(NONE_RAW);
-
     /**
      * Common instance for {@code nonPrivileged()}.
      */
     private static final IntentSet NON_PRIVILEGED =
             ALL.andNot(IntentSet.of(Intent.GUILD_PRESENCES, Intent.GUILD_MEMBERS, Intent.MESSAGE_CONTENT));
+    /**
+     * Common instance for {@code none()}.
+     */
+    private static final IntentSet NONE = new IntentSet(NONE_RAW);
+    /**
+     * A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
+     */
+    private final long rawValue;
+
+    /**
+     * Constructs a {@code IntentSet} with a <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
+     */
+    private IntentSet(final long rawValue) {
+        this.rawValue = rawValue;
+    }
 
     /**
      * Returns a {@code IntentSet} containing all intents.
@@ -85,16 +96,6 @@ public final class IntentSet extends AbstractSet<Intent> {
     }
 
     /**
-     * Returns a {@code IntentSet} containing all the intents represented by the <i>raw value</i>.
-     *
-     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
-     * @return A {@code IntentSet} containing all the intents represented by the <i>raw value</i>.
-     */
-    public static IntentSet of(final long rawValue) {
-        return new IntentSet(rawValue);
-    }
-
-    /**
      * Returns a {@code IntentSet} containing all the supplied intents.
      *
      * @param intents The intents to add to the {@code IntentSet}.
@@ -105,20 +106,6 @@ public final class IntentSet extends AbstractSet<Intent> {
                 .mapToLong(Intent::getValue)
                 .reduce(0, (left, right) -> left | right);
         return new IntentSet(rawValue);
-    }
-
-    /**
-     * A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
-     */
-    private final long rawValue;
-
-    /**
-     * Constructs a {@code IntentSet} with a <i>raw value</i>.
-     *
-     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
-     */
-    private IntentSet(final long rawValue) {
-        this.rawValue = rawValue;
     }
 
     /**
@@ -141,6 +128,16 @@ public final class IntentSet extends AbstractSet<Intent> {
      */
     public IntentSet and(IntentSet other) {
         return IntentSet.of(this.rawValue & other.rawValue);
+    }
+
+    /**
+     * Returns a {@code IntentSet} containing all the intents represented by the <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Intent#getValue()}.
+     * @return A {@code IntentSet} containing all the intents represented by the <i>raw value</i>.
+     */
+    public static IntentSet of(final long rawValue) {
+        return new IntentSet(rawValue);
     }
 
     /**
@@ -227,17 +224,6 @@ public final class IntentSet extends AbstractSet<Intent> {
     }
 
     /**
-     * Gets this {@code IntentSet} as an {@link EnumSet}.
-     *
-     * @return This {@code IntentSet} as an {@link EnumSet}.
-     */
-    public EnumSet<Intent> asEnumSet() {
-        final EnumSet<Intent> intents = EnumSet.allOf(Intent.class);
-        intents.removeIf(intent -> !contains(intent));
-        return intents;
-    }
-
-    /**
      * Gets the <i>raw value</i> for this {@code IntentSet}.
      *
      * @return The <i>raw value</i> for this {@code IntentSet}.
@@ -248,19 +234,37 @@ public final class IntentSet extends AbstractSet<Intent> {
     }
 
     @Override
-    public boolean contains(final Object o) {
-        return (o instanceof Intent) && ((((Intent) o).getValue() & rawValue) > 0);
-    }
-
-    @Override
     public Iterator<Intent> iterator() {
         // Wrap so users aren't confused when remove doesn't "work"
         return Collections.unmodifiableSet(asEnumSet()).iterator();
     }
 
+    /**
+     * Gets this {@code IntentSet} as an {@link EnumSet}.
+     *
+     * @return This {@code IntentSet} as an {@link EnumSet}.
+     */
+    public EnumSet<Intent> asEnumSet() {
+        final EnumSet<Intent> intents = EnumSet.allOf(Intent.class);
+        intents.removeIf(intent -> !contains(intent));
+        return intents;
+    }
+
     @Override
     public int size() {
         return Long.bitCount(rawValue);
+    }
+
+    @Override
+    public boolean contains(final Object o) {
+        return (o instanceof Intent) && ((((Intent) o).getValue() & rawValue) > 0);
+    }
+
+    @Override
+    public String toString() {
+        return "IntentSet{" +
+                "rawValue=" + rawValue +
+                "} " + super.toString();
     }
 
     @Override
@@ -279,12 +283,5 @@ public final class IntentSet extends AbstractSet<Intent> {
     @Override
     public int hashCode() {
         return Long.hashCode(rawValue);
-    }
-
-    @Override
-    public String toString() {
-        return "IntentSet{" +
-                "rawValue=" + rawValue +
-                "} " + super.toString();
     }
 }

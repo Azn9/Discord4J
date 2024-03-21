@@ -30,6 +30,10 @@ import java.util.stream.Collectors;
  */
 public class ActionRow extends LayoutComponent {
 
+    ActionRow(ComponentData data) {
+        super(data);
+    }
+
     /**
      * Creates an {@code ActionRow} with the given components.
      *
@@ -51,10 +55,6 @@ public class ActionRow extends LayoutComponent {
                 .type(Type.ACTION_ROW.getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
                 .build());
-    }
-
-    ActionRow(ComponentData data) {
-        super(data);
     }
 
     /**

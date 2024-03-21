@@ -44,7 +44,12 @@ public interface VoiceConnection {
     default Mono<Boolean> isConnected() {
         return stateEvents().next().filter(s -> s.equals(State.CONNECTED)).hasElement();
     }
-
+    /**
+     * Return a sequence of the {@link State} transitions this voice connection receives.
+     *
+     * @return a {@link Flux} of {@link State} elements
+     */
+    Flux<State> stateEvents();
     /**
      * Return a {@link Mono} that completes when this connection reaches a {@link State#CONNECTED} or
      * {@link State#DISCONNECTED} state. Only state transitions made after subscription are taken into account.
@@ -54,14 +59,6 @@ public interface VoiceConnection {
     default Mono<State> onConnectOrDisconnect() {
         return stateEvents().filter(s -> s.equals(State.CONNECTED) || s.equals(State.DISCONNECTED)).next();
     }
-
-    /**
-     * Return a sequence of the {@link State} transitions this voice connection receives.
-     *
-     * @return a {@link Flux} of {@link State} elements
-     */
-    Flux<State> stateEvents();
-
     /**
      * Disconnects this voice connection, tearing down existing resources associated with it.
      *
@@ -86,15 +83,6 @@ public interface VoiceConnection {
      * if available
      */
     Mono<Snowflake> getChannelId();
-
-    /**
-     * Instruct a reconnect procedure on this voice connection.
-     *
-     * @return a {@link Mono} that, upon subscription, attempts to reconnect to the voice gateway, maintaining the same
-     * parameters currently associated to this instance
-     */
-    Mono<Void> reconnect();
-
     /**
      * Instruct a reconnect procedure on this voice connection, using a custom {@link Throwable} as cause.
      * Implementations can use this to differentiate between a RESUME action (that does not tear down UDP resources)
@@ -106,6 +94,13 @@ public interface VoiceConnection {
     default Mono<Void> reconnect(Function<ContextView, Throwable> errorCause) {
         return reconnect();
     }
+    /**
+     * Instruct a reconnect procedure on this voice connection.
+     *
+     * @return a {@link Mono} that, upon subscription, attempts to reconnect to the voice gateway, maintaining the same
+     * parameters currently associated to this instance
+     */
+    Mono<Void> reconnect();
 
     /**
      * States of a voice connection.

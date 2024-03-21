@@ -44,15 +44,6 @@ import java.util.function.Function;
 public interface ResponseFunction {
 
     /**
-     * Transform a {@link Mono} pipeline using the given {@link DiscordWebRequest} as hint for parameterization of the
-     * resulting transformation.
-     *
-     * @param request the {@code DiscordRequest} used for the targeted {@code Mono} sequence
-     * @return a {@link Function} that allows immediately mapping this {@code Mono} into a target {@code Mono} instance
-     */
-    Function<Mono<ClientResponse>, Mono<ClientResponse>> transform(DiscordWebRequest request);
-
-    /**
      * Transform every HTTP 404 status code into an empty response into an empty sequence, effectively suppressing
      * the {@link ClientException} that would be forwarded otherwise. See {@link #emptyIfNotFound(RouteMatcher)}
      * for an override that supports applying the transformation to a subset of requests.
@@ -62,7 +53,6 @@ public interface ResponseFunction {
     static EmptyResponseTransformer emptyIfNotFound() {
         return new EmptyResponseTransformer(RouteMatcher.any(), ClientException.isStatusCode(404));
     }
-
     /**
      * Transforms HTTP 404 status codes caused by requests matching the given {@link RouteMatcher} into an empty
      * sequence, effectively suppressing the {@link ClientException} that would be forwarded otherwise. See
@@ -74,7 +64,6 @@ public interface ResponseFunction {
     static EmptyResponseTransformer emptyIfNotFound(RouteMatcher routeMatcher) {
         return new EmptyResponseTransformer(routeMatcher, ClientException.isStatusCode(404));
     }
-
     /**
      * Transforms the given <strong>error</strong> status codes caused by requests matching the given
      * {@link RouteMatcher}, effectively suppressing the {@link ClientException} that would be forwarded otherwise.
@@ -89,7 +78,6 @@ public interface ResponseFunction {
     static EmptyResponseTransformer emptyOnErrorStatus(RouteMatcher routeMatcher, Integer... codes) {
         return new EmptyResponseTransformer(routeMatcher, ClientException.isStatusCode(codes));
     }
-
     /**
      * Applies a retry strategy to retry <strong>once</strong> with a fixed backoff of 1 second to the given
      * <strong>error</strong> status codes caused by any request, effectively suppressing the {@link ClientException}
@@ -111,7 +99,6 @@ public interface ResponseFunction {
                         .fixedBackoff(Duration.ofSeconds(1))
                         .retryOnce());
     }
-
     /**
      * Applies a retry strategy to retry <strong>once</strong> with a fixed backoff of 1 second to the given
      * <strong>error</strong> status codes caused by requests matching the given {@link RouteMatcher}, effectively
@@ -134,7 +121,6 @@ public interface ResponseFunction {
                         .fixedBackoff(Duration.ofSeconds(1))
                         .retryOnce());
     }
-
     /**
      * Applies a custom retry strategy to the requests matching the given {@link RouteMatcher}, effectively
      * suppressing the {@link ClientException} that would be forwarded otherwise.
@@ -150,4 +136,12 @@ public interface ResponseFunction {
     static RetryingTransformer retryWhen(RouteMatcher routeMatcher, reactor.retry.Retry<?> retry) {
         return new RetryingTransformer(routeMatcher, retry);
     }
+    /**
+     * Transform a {@link Mono} pipeline using the given {@link DiscordWebRequest} as hint for parameterization of the
+     * resulting transformation.
+     *
+     * @param request the {@code DiscordRequest} used for the targeted {@code Mono} sequence
+     * @return a {@link Function} that allows immediately mapping this {@code Mono} into a target {@code Mono} instance
+     */
+    Function<Mono<ClientResponse>, Mono<ClientResponse>> transform(DiscordWebRequest request);
 }

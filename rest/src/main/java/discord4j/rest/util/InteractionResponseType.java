@@ -70,16 +70,8 @@ public enum InteractionResponseType {
     }
 
     /**
-     * Gets the underlying value as represented by Discord.
-     *
-     * @return The underlying value as represented by Discord.
-     */
-    public int getValue() {
-        return value;
-    }
-
-    /**
-     * Gets the type of an interaction response. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+     * Gets the type of an interaction response. It is guaranteed that invoking {@link #getValue()} from the returned
+     * enum will
      * equal ({@code ==}) the supplied {@code value}.
      *
      * @param value The underlying value as represented by Discord.
@@ -96,5 +88,14 @@ public enum InteractionResponseType {
             case 9: return MODAL;
             default: return UNKNOWN;
         }
+    }
+
+    /**
+     * Gets the underlying value as represented by Discord.
+     *
+     * @return The underlying value as represented by Discord.
+     */
+    public int getValue() {
+        return value;
     }
 }

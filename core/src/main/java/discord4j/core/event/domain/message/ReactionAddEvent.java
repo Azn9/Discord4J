@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -23,7 +24,6 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -51,7 +51,8 @@ public class ReactionAddEvent extends MessageEvent {
     private final Member member;
     private final long messageAuthorId;
 
-    public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
+    public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId,
+                            long messageId, @Nullable Long guildId,
                             ReactionEmoji emoji, @Nullable Member member, long messageAuthorId) {
         super(gateway, shardInfo);
         this.userId = userId;
@@ -61,15 +62,6 @@ public class ReactionAddEvent extends MessageEvent {
         this.emoji = emoji;
         this.member = member;
         this.messageAuthorId = messageAuthorId;
-    }
-
-    /**
-     * Gets the {@link Snowflake} ID of the {@link User} who added a reaction in this event.
-     *
-     * @return The Id of the {@link User} who added a reaction.
-     */
-    public Snowflake getUserId() {
-        return Snowflake.of(userId);
     }
 
     /**
@@ -83,12 +75,12 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the {@link Message} and reaction are in.
+     * Gets the {@link Snowflake} ID of the {@link User} who added a reaction in this event.
      *
-     * @return The ID of the {@link MessageChannel} involved.
+     * @return The Id of the {@link User} who added a reaction.
      */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
+    public Snowflake getUserId() {
+        return Snowflake.of(userId);
     }
 
     /**
@@ -102,12 +94,12 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was added to in this event.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the {@link Message} and reaction are in.
      *
-     * @return The ID of the {@link Message} the reaction was added to.
+     * @return The ID of the {@link MessageChannel} involved.
      */
-    public Snowflake getMessageId() {
-        return Snowflake.of(messageId);
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -121,13 +113,12 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link Message} and Reaction, if present.
-     * This may not be available if the reaction is to a {@code Message} in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was added to in this event.
      *
-     * @return The ID of the {@link Guild} involved in the event, if present.
+     * @return The ID of the {@link Message} the reaction was added to.
      */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
     }
 
     /**
@@ -139,6 +130,16 @@ public class ReactionAddEvent extends MessageEvent {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link Message} and Reaction, if present.
+     * This may not be available if the reaction is to a {@code Message} in a private channel.
+     *
+     * @return The ID of the {@link Guild} involved in the event, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**

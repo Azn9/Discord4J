@@ -27,14 +27,6 @@ import reactor.core.publisher.Mono;
 @Value.Immutable
 interface GuildStickerCreateSpecGenerator extends AuditSpec<GuildStickerCreateRequest> {
 
-    String name();
-
-    String description();
-
-    String tags();
-
-    String file();
-
     @Override
     default GuildStickerCreateRequest asRequest() {
         return GuildStickerCreateRequest.builder()
@@ -44,18 +36,22 @@ interface GuildStickerCreateSpecGenerator extends AuditSpec<GuildStickerCreateRe
                 .file(file())
                 .build();
     }
+    String name();
+    String description();
+    String tags();
+    String file();
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class GuildStickerCreateMonoGenerator extends Mono<GuildSticker> implements GuildStickerCreateSpecGenerator {
 
-    abstract Guild guild();
-
     @Override
     public void subscribe(CoreSubscriber<? super GuildSticker> actual) {
         guild().createSticker(GuildStickerCreateSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Guild guild();
 
     @Override
     public abstract String toString();

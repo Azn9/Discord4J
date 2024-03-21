@@ -54,25 +54,6 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
         });
     }
 
-    /**
-     * Returns a {@link Mono} indicating that the rate limit has ended.
-     *
-     * @return a {@link Mono} that completes when the currently set limit has completed
-     */
-    private Mono<Void> onComplete() {
-        return Mono.defer(this::notifier);
-    }
-
-    private Mono<Void> notifier() {
-        return getRemaining().flatMap(remaining -> {
-            if (!remaining.isNegative() && !remaining.isZero()) {
-                return Mono.delay(remaining).then();
-            } else {
-                return Mono.empty();
-            }
-        });
-    }
-
     @Override
     public Mono<Duration> getRemaining() {
         return Mono.fromCallable(() -> Duration.ofNanos(limitedUntil - System.nanoTime()));
@@ -95,18 +76,37 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
 
     private Mono<Resource> acquire() {
         return Mono.defer(
-                () -> {
-                    outer.acquireUninterruptibly();
-                    return getRemaining().map(remaining -> {
-                        if (!remaining.isNegative() && !remaining.isZero()) {
-                            inner.acquireUninterruptibly();
-                            return new Resource(outer, inner);
-                        }
-                        return new Resource(outer, null);
-                    });
-                })
+                        () -> {
+                            outer.acquireUninterruptibly();
+                            return getRemaining().map(remaining -> {
+                                if (!remaining.isNegative() && !remaining.isZero()) {
+                                    inner.acquireUninterruptibly();
+                                    return new Resource(outer, inner);
+                                }
+                                return new Resource(outer, null);
+                            });
+                        })
                 .subscribeOn(Schedulers.elastic())
                 .delayUntil(resource -> onComplete());
+    }
+
+    /**
+     * Returns a {@link Mono} indicating that the rate limit has ended.
+     *
+     * @return a {@link Mono} that completes when the currently set limit has completed
+     */
+    private Mono<Void> onComplete() {
+        return Mono.defer(this::notifier);
+    }
+
+    private Mono<Void> notifier() {
+        return getRemaining().flatMap(remaining -> {
+            if (!remaining.isNegative() && !remaining.isZero()) {
+                return Mono.delay(remaining).then();
+            } else {
+                return Mono.empty();
+            }
+        });
     }
 
     private Mono<Void> release(Resource resource) {

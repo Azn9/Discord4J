@@ -120,15 +120,19 @@ public class RestEmoji {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final RestEmoji restEmoji = (RestEmoji) o;
-        return guildId == restEmoji.guildId && id == restEmoji.id;
+    public int hashCode() {
+        return Objects.hash(guildId, id);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(guildId, id);
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RestEmoji restEmoji = (RestEmoji) o;
+        return guildId == restEmoji.guildId && id == restEmoji.id;
     }
 }

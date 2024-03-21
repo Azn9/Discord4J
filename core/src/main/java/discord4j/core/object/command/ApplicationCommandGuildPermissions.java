@@ -56,7 +56,7 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
      * {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
     public ApplicationCommandGuildPermissions(final GatewayDiscordClient gateway,
                                               final GuildApplicationCommandPermissionsData data) {
@@ -71,16 +71,6 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
      */
     public Snowflake getId() {
         return Snowflake.of(data.id());
-    }
-
-
-    /**
-     * Returns the id of the guild.
-     *
-     * @return the id of the guild
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId());
     }
 
     /**
@@ -104,6 +94,15 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Returns the id of the guild.
+     *
+     * @return the id of the guild
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(data.guildId());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
@@ -111,8 +110,9 @@ public class ApplicationCommandGuildPermissions implements DiscordObject {
 
     @Override
     public String toString() {
-        return "ApplicationCommandGuildPermissions{" +
-                "data=" + data +
-                '}';
+        return "ApplicationCommandGuildPermissions{"
+                + "data="
+                + data
+                + '}';
     }
 }

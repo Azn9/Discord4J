@@ -28,7 +28,8 @@ class RequestCorrelation<T> {
     private final ContextView context;
     private final Sinks.Empty<Void> cancel;
 
-    RequestCorrelation(DiscordWebRequest request, Sinks.One<T> response, ContextView context, Sinks.Empty<Void> cancel) {
+    RequestCorrelation(DiscordWebRequest request, Sinks.One<T> response, ContextView context,
+                       Sinks.Empty<Void> cancel) {
         this.request = request;
         this.response = response;
         this.context = context;

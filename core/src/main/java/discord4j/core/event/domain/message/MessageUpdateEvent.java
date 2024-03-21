@@ -16,12 +16,12 @@
  */
 package discord4j.core.event.domain.message;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -56,7 +56,8 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
+    public MessageUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId,
+                              @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
         super(gateway, shardInfo);
@@ -71,15 +72,6 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Message} that has been updated in this event.
-     *
-     * @return THe ID of the {@link Message}.
-     */
-    public Snowflake getMessageId() {
-        return Snowflake.of(messageId);
-    }
-
-    /**
      * Requests to retrieve the {@link Message} that has been updated in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} that was updated.
@@ -87,6 +79,15 @@ public class MessageUpdateEvent extends MessageEvent {
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Message} that has been updated in this event.
+     *
+     * @return THe ID of the {@link Message}.
+     */
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
     }
 
     /**
@@ -109,15 +110,6 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * The {@link Snowflake} ID of the {@link Guild} containing the updated {@link Message} in this event, if present.
-     *
-     * @return The ID of the {@link Guild} containing the updated {@link Message}, if present.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(guildId).map(Snowflake::of);
-    }
-
-    /**
      * Request to retrieve the {@link Guild} containing the updated {@link Message} in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the updated
@@ -125,6 +117,15 @@ public class MessageUpdateEvent extends MessageEvent {
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+    }
+
+    /**
+     * The {@link Snowflake} ID of the {@link Guild} containing the updated {@link Message} in this event, if present.
+     *
+     * @return The ID of the {@link Guild} containing the updated {@link Message}, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**

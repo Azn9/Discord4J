@@ -7,13 +7,15 @@
 [![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.2.5/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.2.5)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/Discord4J/Discord4J/gradle.yml?branch=3.2.x&logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
-Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
+Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for
+Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
 ## 🏃 Quick Example
 
 In this example for v3.2, whenever a user sends a `!ping` message the bot will immediately respond with `Pong!`.
 
-Make sure your bot has the **Message Content** intent enabled in your [developer portal](https://discord.com/developers/applications).
+Make sure your bot has the **Message Content** intent enabled in
+your [developer portal](https://discord.com/developers/applications).
 
 ```java
 public class ExampleBot {
@@ -36,7 +38,8 @@ public class ExampleBot {
 }
 ```
 
-For a full project example, check out our example projects repository [here](https://github.com/Discord4J/example-projects).
+For a full project example, check out our example projects
+repository [here](https://github.com/Discord4J/example-projects).
 
 ## 🔗 Quick Links
 
@@ -49,24 +52,36 @@ For a full project example, check out our example projects repository [here](htt
 
 ## 💎 Benefits
 
-* 🚀 **Reactive** - Discord4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol to ensure Discord bots run smoothly and efficiently regardless of size.
+* 🚀 **Reactive** - Discord4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol to ensure Discord
+  bots run smoothly and efficiently regardless of size.
 
-* 📜 **Official** - Automatic rate limiting, automatic reconnection strategies, and consistent naming conventions are among the many features Discord4J offers to ensure your Discord bots run up to Discord's specifications and to provide the least amount of surprises when interacting with our library.
+* 📜 **Official** - Automatic rate limiting, automatic reconnection strategies, and consistent naming conventions are
+  among the many features Discord4J offers to ensure your Discord bots run up to Discord's specifications and to provide
+  the least amount of surprises when interacting with our library.
 
-* 🛠️ **Modular** - Discord4J breaks itself into modules to allow advanced users to interact with our API at lower levels to build minimal and fast runtimes or even add their own abstractions.
+* 🛠️ **Modular** - Discord4J breaks itself into modules to allow advanced users to interact with our API at lower levels
+  to build minimal and fast runtimes or even add their own abstractions.
 
-* ⚔️ **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
+* ⚔️ **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing
+  large-scale bots
+  from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis),
+  and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
 
-* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/d4j)!
+* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or
+  if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web
+  development help, and even Reactor-specific questions. Be sure to visit us on
+  our [Discord server](https://discord.gg/d4j)!
 
 ## 📦 Installation
 
-* [Creating a new Gradle project with IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-gradle.html) *(recommended)*
+* [Creating a new Gradle project with IntelliJ](https://www.jetbrains.com/help/idea/getting-started-with-gradle.html) *(
+  recommended)*
 * [Creating a new Maven project with IntelliJ](https://www.jetbrains.com/help/idea/maven-support.html)
 * [Creating a new Gradle project with Eclipse](https://www.vogella.com/tutorials/EclipseGradle/article.html#creating-gradle-projects)
 * [Creating a new Maven project with Eclipse](https://www.vogella.com/tutorials/EclipseMaven/article.html#exercise-create-a-new-maven-enabled-project-via-eclipse)
 
 ### Gradle
+
 ```groovy
 repositories {
   mavenCentral()
@@ -78,6 +93,7 @@ dependencies {
 ```
 
 ### Gradle Kotlin DSL
+
 ```kotlin
 repositories {
   mavenCentral()
@@ -89,6 +105,7 @@ dependencies {
 ```
 
 ### Maven
+
 ```xml
 <dependencies>
   <dependency>
@@ -100,6 +117,7 @@ dependencies {
 ```
 
 ### SBT
+
 ```scala
 libraryDependencies ++= Seq(
   "com.discord4j" % "discord4j-core" % "3.2.5"
@@ -108,19 +126,23 @@ libraryDependencies ++= Seq(
 
 ## 🔀 Discord4J Versions
 
-Discord4J 3.2.x includes simpler and more powerful APIs to build requests, a new entity cache and performance improvements from dependency upgrades. Check our [Migration Guide](https://docs.discord4j.com/migrating-from-v3-1-to-v3-2) for more details.
+Discord4J 3.2.x includes simpler and more powerful APIs to build requests, a new entity cache and performance
+improvements from dependency upgrades. Check
+our [Migration Guide](https://docs.discord4j.com/migrating-from-v3-1-to-v3-2) for more details.
 
-| Discord4J                                                   | Support          | Gateway/API | Intents                           | Interactions    |
-|-------------------------------------------------------------|------------------|-------------|-----------------------------------|-----------------|
-| [v3.3.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v9          | Mandatory, non-privileged default | Fully supported |
-| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/3.2.x) | Current          | v8          | Mandatory, non-privileged default | Fully supported |
-| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Maintenance only | v6          | Optional, no intent default       | Maintenance only|
+| Discord4J                                                    | Support          | Gateway/API | Intents                           | Interactions     |
+|--------------------------------------------------------------|------------------|-------------|-----------------------------------|------------------|
+| [v3.3.x](https://github.com/Discord4J/Discord4J/tree/master) | In development   | v9          | Mandatory, non-privileged default | Fully supported  |
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/3.2.x)  | Current          | v8          | Mandatory, non-privileged default | Fully supported  |
+| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x)  | Maintenance only | v6          | Optional, no intent default       | Maintenance only |
 
 See [our docs](https://docs.discord4j.com/versions) for more details about compatibility.
 
 ## 🎉 Sponsors
 
-We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like to give a special shoutout to these wonderful individuals:
+We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and
+hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like
+to give a special shoutout to these wonderful individuals:
 
 * [decyg](https://github.com/decyg)
 * [nikammerlaan](https://github.com/nikammerlaan)
@@ -131,16 +153,21 @@ We would like to give a special thanks to all of our sponsors for providing us t
 
 Here are some real-world examples of large bots using Discord4J:
 
-* [Groovy](https://groovy.bot/) - Was the second-largest bot on Discord, serving music to over 4 million servers before its shutdown in August 2021.
+* [Groovy](https://groovy.bot/) - Was the second-largest bot on Discord, serving music to over 4 million servers before
+  its shutdown in August 2021.
 * [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in over 1 million servers.
-* [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving over 21k servers.
-* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving nearly 12K servers before its shutdown in August 2021.
+* [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as
+  possible; serving over 21k servers.
+* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video
+  game stats, and more; serving nearly 12K servers before its shutdown in August 2021.
 
-Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
+Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the
+list!
 
 ## ⚛️ Reactive
 
-Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor provides a simple yet extremely powerful API that enables users to reduce resources and increase performance.
+Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor
+provides a simple yet extremely powerful API that enables users to reduce resources and increase performance.
 
 ```java
 public class ExampleBot {
@@ -159,7 +186,9 @@ public class ExampleBot {
 }
 ```
 
-Discord4J also provides several methods to aid in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
+Discord4J also provides several methods to aid in better reactive chain compositions, such
+as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with
+an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
 public class ExampleBot {
@@ -186,7 +215,10 @@ public class ExampleBot {
 
 ## 🧵 Kotlin
 
-By utilizing Reactor, Discord4J has native integration with [Kotlin coroutines](https://kotlinlang.org/docs/reference/coroutines-overview.html) when paired with the [kotlinx-coroutines-reactor](https://github.com/Kotlin/kotlinx.coroutines/tree/master/reactive/kotlinx-coroutines-reactor) library.
+By utilizing Reactor, Discord4J has native integration
+with [Kotlin coroutines](https://kotlinlang.org/docs/reference/coroutines-overview.html) when paired with
+the [kotlinx-coroutines-reactor](https://github.com/Kotlin/kotlinx.coroutines/tree/master/reactive/kotlinx-coroutines-reactor)
+library.
 
 ```kotlin
 val token = args[0]
@@ -238,7 +270,8 @@ channel.createMessage(builder.build()).block();
 
 ### 🏷️ Find Members by Role Name
 
-Users typically prefer working with names instead of IDs. This example will demonstrate how to search for all members that have a role with a specific name.
+Users typically prefer working with names instead of IDs. This example will demonstrate how to search for all members
+that have a role with a specific name.
 
 ```java
 Guild guild = ...
@@ -257,6 +290,7 @@ return roleMembers;
 ```
 
 Alternatively, using Reactor:
+
 ```java
 Guild guild = ...
 return guild.getMembers()
@@ -267,7 +301,10 @@ return guild.getMembers()
 
 ### 🎵 Voice and Music
 
-Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same
+channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source
+with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding
+audio from YouTube, SoundCloud, and other providers.
 
 To get started, you will first need to instantiate and configure an, conventionally global, `AudioPlayerManager`.
 
@@ -314,7 +351,9 @@ public class LavaPlayerAudioProvider extends AudioProvider {
 }
 ```
 
-Typically, audio players will have queues or internal playlists for users to be able to automatically cycle through songs as they are finished or requested to be skipped over. We can manage this queue externally and pass it to other areas of our code to allow tracks to be viewed, queued, or skipped over by creating an `AudioTrackScheduler`.
+Typically, audio players will have queues or internal playlists for users to be able to automatically cycle through
+songs as they are finished or requested to be skipped over. We can manage this queue externally and pass it to other
+areas of our code to allow tracks to be viewed, queued, or skipped over by creating an `AudioTrackScheduler`.
 
 ```java
 public class AudioTrackScheduler extends AudioEventAdapter {
@@ -361,7 +400,11 @@ public class AudioTrackScheduler extends AudioEventAdapter {
 }
 ```
 
-Currently, Discord only allows 1 voice connection per server. Working within this limitation, it is logical to think of the 3 components we have worked with thus far (`AudioPlayer`, `LavaPlayerAudioProvider`, and `AudioTrackScheduler`) to be correlated to a specific `Guild`, naturally unique by some `Snowflake`. Logically, it makes sense to combine these objects into one, so that they can be put into a `Map` for easier retrieval when connecting to a voice channel or when working with commands.
+Currently, Discord only allows 1 voice connection per server. Working within this limitation, it is logical to think of
+the 3 components we have worked with thus far (`AudioPlayer`, `LavaPlayerAudioProvider`, and `AudioTrackScheduler`) to
+be correlated to a specific `Guild`, naturally unique by some `Snowflake`. Logically, it makes sense to combine these
+objects into one, so that they can be put into a `Map` for easier retrieval when connecting to a voice channel or when
+working with commands.
 
 ```java
 public class GuildAudioManager {
@@ -388,7 +431,8 @@ public class GuildAudioManager {
 }
 ```
 
-Finally, we need to connect to the voice channel. After connecting you are given a `VoiceConnection` object where you can utilize it later to disconnect from the voice channel by calling `VoiceConnection#disconnect`.
+Finally, we need to connect to the voice channel. After connecting you are given a `VoiceConnection` object where you
+can utilize it later to disconnect from the voice channel by calling `VoiceConnection#disconnect`.
 
 ```java
 VoiceChannel channel = ...
@@ -401,7 +445,9 @@ PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Audio
 
 ### ❌ Disconnecting from a Voice Channel Automatically
 
-Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. This problem can be solved rather elegantly using a reactive approach over an imperative one as the example below demonstrates.
+Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to
+disconnect the bot manually. This problem can be solved rather elegantly using a reactive approach over an imperative
+one as the example below demonstrates.
 
 ```java
 VoiceChannel channel = ...

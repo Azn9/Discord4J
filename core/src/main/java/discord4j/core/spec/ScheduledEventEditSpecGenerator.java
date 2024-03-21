@@ -18,27 +18,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable
 public interface ScheduledEventEditSpecGenerator extends AuditSpec<GuildScheduledEventModifyRequest> {
 
-    /* Possible for events with entity type external */
-    Possible<Optional<Snowflake>> channelId();
-
-    Possible<ScheduledEventEntityMetadataSpec> entityMetadata();
-
-    Possible<String> name();
-
-    Possible<ScheduledEvent.PrivacyLevel> privacyLevel();
-
-    Possible<Instant> scheduledStartTime();
-
-    Possible<Instant> scheduledEndTime();
-
-    Possible<String> description();
-
-    Possible<ScheduledEvent.EntityType> entityType();
-
-    Possible<ScheduledEvent.Status> status();
-
-    Possible<Image> image();
-
     @Override
     default GuildScheduledEventModifyRequest asRequest() {
         return GuildScheduledEventModifyRequest.builder()
@@ -54,17 +33,28 @@ public interface ScheduledEventEditSpecGenerator extends AuditSpec<GuildSchedule
                 .image(mapPossible(image(), Image::getDataUri))
                 .build();
     }
+    /* Possible for events with entity type external */
+    Possible<Optional<Snowflake>> channelId();
+    Possible<ScheduledEventEntityMetadataSpec> entityMetadata();
+    Possible<String> name();
+    Possible<ScheduledEvent.PrivacyLevel> privacyLevel();
+    Possible<Instant> scheduledStartTime();
+    Possible<Instant> scheduledEndTime();
+    Possible<String> description();
+    Possible<ScheduledEvent.EntityType> entityType();
+    Possible<ScheduledEvent.Status> status();
+    Possible<Image> image();
 }
 
 @Value.Immutable(builder = false)
 abstract class ScheduledEventEditMonoGenerator extends Mono<ScheduledEvent> implements ScheduledEventEditSpecGenerator {
 
-    abstract ScheduledEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super ScheduledEvent> actual) {
         event().edit(ScheduledEventEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract ScheduledEvent event();
 
     @Override
     public abstract String toString();

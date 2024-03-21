@@ -73,18 +73,15 @@ public class ScheduledEvent implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
-     * Gets the data of the scheduled event.
+     * Requests to retrieve the creator if this event, if present.
      *
-     * @return The data of the scheduled event.
+     * @return A {@link Mono} where, if the creator is present, emits the {@link Member creator} of the event,
+     * otherwise emits an {@link Mono#empty() empty mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
-    public GuildScheduledEventData getData() {
-        return data;
+    public Mono<Member> getCreator() {
+        return Mono.justOrEmpty(getCreatorId()).flatMap(id -> gateway.getMemberById(getGuildId(), id));
     }
 
     /**
@@ -106,26 +103,6 @@ public class ScheduledEvent implements Entity {
     }
 
     /**
-     * Requests to retrieve the creator if this event, if present.
-     *
-     * @return A {@link Mono} where, if the creator is present, emits the {@link Member creator} of the event,
-     * otherwise emits an {@link Mono#empty() empty mono}.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Member> getCreator() {
-        return Mono.justOrEmpty(getCreatorId()).flatMap(id -> gateway.getMemberById(getGuildId(), id));
-    }
-
-    /**
-     * Gets the ID of the channel where the event will be hosted, if present.
-     *
-     * @return The ID of the channel where the event will be hosted, if present.
-     */
-    public Optional<Snowflake> getChannelId() {
-        return data.channelId().map(Snowflake::of);
-    }
-
-    /**
      * Requests to retrieve the channel this event will be hosted in, if present.
      * <p>
      * Note: This channel could be a stage or voice channel, see {@link #getEntityType()} to determine the type safely.
@@ -138,6 +115,15 @@ public class ScheduledEvent implements Entity {
         return Mono.justOrEmpty(getChannelId())
                 .flatMap(gateway::getChannelById)
                 .ofType(GuildChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel where the event will be hosted, if present.
+     *
+     * @return The ID of the channel where the event will be hosted, if present.
+     */
+    public Optional<Snowflake> getChannelId() {
+        return data.channelId().map(Snowflake::of);
     }
 
     /**
@@ -207,6 +193,11 @@ public class ScheduledEvent implements Entity {
                 .map(hash -> ImageUtil.getUrl(String.format(EVENT_COVER_IMAGE_PATH, getId().asString(), hash), format));
     }
 
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
     /**
      * Gets the entity type of the event.
      *
@@ -229,14 +220,12 @@ public class ScheduledEvent implements Entity {
     }
 
     /**
-     * Gets the entity metadata of the event, if present.
-     * <p>
-     * Note: This metadata will always be present when the entity type is {@link EntityType#EXTERNAL external}.
+     * Gets the data of the scheduled event.
      *
-     * @return The entity metadata of the event, if present.
+     * @return The data of the scheduled event.
      */
-    public Optional<ScheduledEventEntityMetadata> getEntityMetadata() {
-        return data.entityMetadata().map(data -> new ScheduledEventEntityMetadata(gateway, data));
+    public GuildScheduledEventData getData() {
+        return data;
     }
 
     /**
@@ -248,6 +237,17 @@ public class ScheduledEvent implements Entity {
      */
     public Optional<String> getLocation() {
         return getEntityMetadata().flatMap(ScheduledEventEntityMetadata::getLocation);
+    }
+
+    /**
+     * Gets the entity metadata of the event, if present.
+     * <p>
+     * Note: This metadata will always be present when the entity type is {@link EntityType#EXTERNAL external}.
+     *
+     * @return The entity metadata of the event, if present.
+     */
+    public Optional<ScheduledEventEntityMetadata> getEntityMetadata() {
+        return data.entityMetadata().map(data -> new ScheduledEventEntityMetadata(gateway, data));
     }
 
     /**
@@ -327,6 +327,15 @@ public class ScheduledEvent implements Entity {
     }
 
     /**
+     * Requests to delete this event.
+     *
+     * @return A {@link Mono} which completes when the event is deleted.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this event with the provided reason.
      *
      * @param reason the reason explaining why this event is being deleted
@@ -335,15 +344,6 @@ public class ScheduledEvent implements Entity {
     public Mono<Void> delete(@Nullable String reason) {
         return gateway.getRestClient().getScheduledEventById(getGuildId(), getId())
                 .delete(reason);
-    }
-
-    /**
-     * Requests to delete this event.
-     *
-     * @return A {@link Mono} which completes when the event is deleted.
-     */
-    public Mono<Void> delete() {
-        return delete(null);
     }
 
     /**
@@ -359,10 +359,6 @@ public class ScheduledEvent implements Entity {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static PrivacyLevel of(int value) {
             switch (value) {
                 case 2:
@@ -370,6 +366,10 @@ public class ScheduledEvent implements Entity {
                 default:
                     return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 
@@ -388,10 +388,6 @@ public class ScheduledEvent implements Entity {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static EntityType of(int value) {
             switch (value) {
                 case 1:
@@ -403,6 +399,10 @@ public class ScheduledEvent implements Entity {
                 default:
                     return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 
@@ -422,10 +422,6 @@ public class ScheduledEvent implements Entity {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
         public static Status of(int value) {
             switch (value) {
                 case 1:
@@ -439,6 +435,10 @@ public class ScheduledEvent implements Entity {
                 default:
                     return UNKNOWN;
             }
+        }
+
+        public int getValue() {
+            return value;
         }
     }
 

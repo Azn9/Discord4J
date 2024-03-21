@@ -32,14 +32,6 @@ import java.util.function.Supplier;
 public interface RequestQueueFactory {
 
     /**
-     * Creates a new {@link RequestQueue} instance.
-     *
-     * @param <T> the desired generic type of {@link RequestQueue}
-     * @return the freshly instantiated {@link RequestQueue}
-     */
-    <T> RequestQueue<T> create();
-
-    /**
      * Returns a factory of {@link RequestQueue} backed by a {@link FluxProcessor}.
      *
      * @param processorSupplier a Supplier that provides a processor. The Supplier <b>must</b> provide a new instance
@@ -54,7 +46,18 @@ public interface RequestQueueFactory {
                                                  FluxSink.OverflowStrategy overflowStrategy) {
         return new ProcessorRequestQueueFactory(processorSupplier, overflowStrategy);
     }
-
+    /**
+     * Returns a factory of {@link RequestQueue} with default parameters capable of buffering requests up to a
+     * reasonable capacity, then applying a delay on overflowing requests.
+     *
+     * @return a {@link RequestQueueFactory} backed by a multicasting {@link Sinks.Many} with capacity given by
+     * {@link Queues#SMALL_BUFFER_SIZE} and a parking {@link EmissionStrategy}.
+     */
+    static RequestQueueFactory buffering() {
+        return RequestQueueFactory.createFromSink(
+                spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false),
+                EmissionStrategy.park(Duration.ofMillis(10)));
+    }
     /**
      * Returns a factory of {@link RequestQueue} backed by a {@link Sinks.Many} instance.
      *
@@ -68,17 +71,11 @@ public interface RequestQueueFactory {
                                               EmissionStrategy emissionStrategy) {
         return new SinksRequestQueueFactory(requestSinkFactory, emissionStrategy);
     }
-
     /**
-     * Returns a factory of {@link RequestQueue} with default parameters capable of buffering requests up to a
-     * reasonable capacity, then applying a delay on overflowing requests.
+     * Creates a new {@link RequestQueue} instance.
      *
-     * @return a {@link RequestQueueFactory} backed by a multicasting {@link Sinks.Many} with capacity given by
-     * {@link Queues#SMALL_BUFFER_SIZE} and a parking {@link EmissionStrategy}.
+     * @param <T> the desired generic type of {@link RequestQueue}
+     * @return the freshly instantiated {@link RequestQueue}
      */
-    static RequestQueueFactory buffering() {
-        return RequestQueueFactory.createFromSink(
-                spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false),
-                EmissionStrategy.park(Duration.ofMillis(10)));
-    }
+    <T> RequestQueue<T> create();
 }

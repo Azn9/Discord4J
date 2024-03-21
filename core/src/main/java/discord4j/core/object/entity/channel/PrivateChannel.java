@@ -46,11 +46,11 @@ public final class PrivateChannel extends BaseMessageChannel {
      */
     public Set<Snowflake> getRecipientIds() {
         return getData().recipients().toOptional()
-            .map(recipients -> recipients.stream()
-                .map(UserData::id)
-                .map(Snowflake::of)
-                .collect(Collectors.toSet()))
-            .orElse(Collections.emptySet());
+                .map(recipients -> recipients.stream()
+                        .map(UserData::id)
+                        .map(Snowflake::of)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
     /**

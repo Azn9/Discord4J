@@ -16,9 +16,9 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -38,7 +38,8 @@ public class VoiceServerUpdateEvent extends Event {
     @Nullable
     private final String endpoint;
 
-    public VoiceServerUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String token, long guildId, @Nullable String endpoint) {
+    public VoiceServerUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String token, long guildId,
+                                  @Nullable String endpoint) {
         super(gateway, shardInfo);
         this.token = token;
         this.guildId = guildId;
@@ -55,15 +56,6 @@ public class VoiceServerUpdateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the guild whose voice server has been updated in this event.
-     *
-     * @return The ID of the guild involved.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} whose voice server has been updated in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} whose voice server has been
@@ -72,6 +64,15 @@ public class VoiceServerUpdateEvent extends Event {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the guild whose voice server has been updated in this event.
+     *
+     * @return The ID of the guild involved.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**

@@ -26,6 +26,17 @@ import java.util.Optional;
 
 public class PermissionOverwrite {
 
+    private final long allowed;
+    private final long denied;
+    private final long targetId;
+    private final Type type;
+    PermissionOverwrite(long allowed, long denied, long targetId, Type type) {
+        this.allowed = allowed;
+        this.denied = denied;
+        this.targetId = targetId;
+        this.type = type;
+    }
+
     /**
      * Constructs a {@code PermissionOverwrite} targeting a {@link discord4j.core.object.entity.Member}.
      *
@@ -50,18 +61,6 @@ public class PermissionOverwrite {
         return new PermissionOverwrite(allowed.getRawValue(), denied.getRawValue(), roleId.asLong(), Type.ROLE);
     }
 
-    private final long allowed;
-    private final long denied;
-    private final long targetId;
-    private final Type type;
-
-    PermissionOverwrite(long allowed, long denied, long targetId, Type type) {
-        this.allowed = allowed;
-        this.denied = denied;
-        this.targetId = targetId;
-        this.type = type;
-    }
-
     /**
      * Map this {@link PermissionOverwrite} object to a {@link OverwriteData} JSON.
      *
@@ -78,6 +77,7 @@ public class PermissionOverwrite {
 
     /**
      * Gets the permissions explicitly allowed by this overwrite.
+     *
      * @return The permissions explicitly allowed by this overwrite.
      */
     public PermissionSet getAllowed() {
@@ -86,6 +86,7 @@ public class PermissionOverwrite {
 
     /**
      * Gets the permissions explicitly denied by this overwrite.
+     *
      * @return The permissions explicitly denied by this overwrite.
      */
     public PermissionSet getDenied() {
@@ -93,9 +94,18 @@ public class PermissionOverwrite {
     }
 
     /**
-     * Gets the ID of the entity this overwrite targets. This is either a role ID or a member ID.
-     * @return The ID of the entity this overwrite targets.
+     * Gets the ID of the role this overwrite targets.
      *
+     * @return The ID of the role this overwrite targets.
+     */
+    public Optional<Snowflake> getRoleId() {
+        return type == Type.ROLE ? Optional.of(getTargetId()) : Optional.empty();
+    }
+
+    /**
+     * Gets the ID of the entity this overwrite targets. This is either a role ID or a member ID.
+     *
+     * @return The ID of the entity this overwrite targets.
      * @see #getRoleId()
      * @see #getMemberId()
      */
@@ -104,15 +114,8 @@ public class PermissionOverwrite {
     }
 
     /**
-     * Gets the ID of the role this overwrite targets.
-     * @return The ID of the role this overwrite targets.
-     */
-    public Optional<Snowflake> getRoleId() {
-        return type == Type.ROLE ? Optional.of(getTargetId()) : Optional.empty();
-    }
-
-    /**
      * Gets the ID of the member this overwrite targets.
+     *
      * @return The ID of the member this overwrite targets.
      */
     public Optional<Snowflake> getMemberId() {
@@ -121,10 +124,21 @@ public class PermissionOverwrite {
 
     /**
      * Gets the type of the overwrite.
+     *
      * @return The type of the overwrite.
      */
     public Type getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return "PermissionOverwrite{" +
+                "allowed=" + allowed +
+                ", denied=" + denied +
+                ", targetId=" + targetId +
+                ", type=" + type +
+                '}';
     }
 
     /** The type of entity a {@link PermissionOverwrite} is for. */
@@ -152,15 +166,6 @@ public class PermissionOverwrite {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of permission overwrite. It is guaranteed that invoking {@link #getValue()} from the returned
          * enum will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
@@ -174,15 +179,14 @@ public class PermissionOverwrite {
                 default: return UNKNOWN;
             }
         }
-    }
 
-    @Override
-    public String toString() {
-        return "PermissionOverwrite{" +
-                "allowed=" + allowed +
-                ", denied=" + denied +
-                ", targetId=" + targetId +
-                ", type=" + type +
-                '}';
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
     }
 }

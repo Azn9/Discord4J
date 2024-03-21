@@ -75,6 +75,76 @@ public class ReconnectOptions {
         return new Builder();
     }
 
+    /**
+     * Return the minimum backoff duration.
+     *
+     * @return minimum backoff duration
+     */
+    public Duration getFirstBackoff() {
+        return firstBackoff;
+    }
+
+    /**
+     * Return the maximum backoff duration.
+     *
+     * @return maximum backoff duration
+     */
+    public Duration getMaxBackoffInterval() {
+        return maxBackoffInterval;
+    }
+
+    /**
+     * Returns the number of retries.
+     *
+     * @return number of retries
+     */
+    public long getMaxRetries() {
+        return maxRetries;
+    }
+
+    /**
+     * Retrieve the backoff function used for retrying. It uses a RetryContext object to calculate the correct backoff
+     * delay.
+     *
+     * @return a Backoff function
+     * @deprecated only select implementations will use this value. Moving forward, consider assuming an exponential
+     * backoff function bounded by {@link #getFirstBackoff()} and {@link #getMaxBackoffInterval()}
+     */
+    @Deprecated
+    public Backoff getBackoff() {
+        return backoff;
+    }
+
+    /**
+     * Retrieve the jitter to be applied on each backoff delay.
+     *
+     * @return a Jitter function
+     * @deprecated only select implementations will use this value. Moving forward, consider also using
+     * {@link #getJitterFactor()}
+     */
+    @Deprecated
+    public Jitter getJitter() {
+        return jitter;
+    }
+
+    /**
+     * Returns a scheduler provided every reconnect attempt, as backoff delay.
+     *
+     * @return scheduler used when reconnecting
+     */
+    public Scheduler getBackoffScheduler() {
+        return backoffScheduler;
+    }
+
+    /**
+     * Retrieve the jitter factor to be applied on each backoff delay.
+     *
+     * @return a jitter factor value between {@code 0d} and {@code 1d}
+     */
+    public double getJitterFactor() {
+        return jitterFactor;
+    }
+
     public static class Builder {
 
         private Duration firstBackoff = Duration.ofSeconds(2);
@@ -200,75 +270,5 @@ public class ReconnectOptions {
         public ReconnectOptions build() {
             return new ReconnectOptions(this);
         }
-    }
-
-    /**
-     * Return the minimum backoff duration.
-     *
-     * @return minimum backoff duration
-     */
-    public Duration getFirstBackoff() {
-        return firstBackoff;
-    }
-
-    /**
-     * Return the maximum backoff duration.
-     *
-     * @return maximum backoff duration
-     */
-    public Duration getMaxBackoffInterval() {
-        return maxBackoffInterval;
-    }
-
-    /**
-     * Returns the number of retries.
-     *
-     * @return number of retries
-     */
-    public long getMaxRetries() {
-        return maxRetries;
-    }
-
-    /**
-     * Retrieve the backoff function used for retrying. It uses a RetryContext object to calculate the correct backoff
-     * delay.
-     *
-     * @return a Backoff function
-     * @deprecated only select implementations will use this value. Moving forward, consider assuming an exponential
-     * backoff function bounded by {@link #getFirstBackoff()} and {@link #getMaxBackoffInterval()}
-     */
-    @Deprecated
-    public Backoff getBackoff() {
-        return backoff;
-    }
-
-    /**
-     * Retrieve the jitter to be applied on each backoff delay.
-     *
-     * @return a Jitter function
-     * @deprecated only select implementations will use this value. Moving forward, consider also using
-     * {@link #getJitterFactor()}
-     */
-    @Deprecated
-    public Jitter getJitter() {
-        return jitter;
-    }
-
-    /**
-     * Returns a scheduler provided every reconnect attempt, as backoff delay.
-     *
-     * @return scheduler used when reconnecting
-     */
-    public Scheduler getBackoffScheduler() {
-        return backoffScheduler;
-    }
-
-    /**
-     * Retrieve the jitter factor to be applied on each backoff delay.
-     *
-     * @return a jitter factor value between {@code 0d} and {@code 1d}
-     */
-    public double getJitterFactor() {
-        return jitterFactor;
     }
 }

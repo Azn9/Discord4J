@@ -77,6 +77,7 @@ public enum Intent {
      *     <li>GUILD_BAN_ADD</li>
      *     <li>GUILD_BAN_REMOVE</li>
      * </ul>
+     *
      * @deprecated deprecated in favor of {@link #GUILD_MODERATION}
      */
     @Deprecated
@@ -209,7 +210,8 @@ public enum Intent {
      * MESSAGE_CONTENT does not represent individual events, but rather affects what data is present for
      * events that could contain message content fields.
      *
-     * @see <a href="https://discord.com/developers/docs/topics/gateway#message-content-intent">Message Content Intent</a>
+     * @see
+     * <a href="https://discord.com/developers/docs/topics/gateway#message-content-intent">Message Content Intent</a>
      */
     MESSAGE_CONTENT(15),
 

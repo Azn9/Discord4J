@@ -25,14 +25,78 @@ import discord4j.common.store.api.object.ExactResultNotAvailableException;
 import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildCreateData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildScheduledEventData;
+import discord4j.discordjson.json.ImmutableChannelData;
+import discord4j.discordjson.json.ImmutableEmojiData;
+import discord4j.discordjson.json.ImmutableGuildData;
+import discord4j.discordjson.json.ImmutableGuildScheduledEventData;
+import discord4j.discordjson.json.ImmutableMemberData;
+import discord4j.discordjson.json.ImmutableMessageData;
+import discord4j.discordjson.json.ImmutablePartialMessageData;
+import discord4j.discordjson.json.ImmutablePartialUserData;
+import discord4j.discordjson.json.ImmutablePresenceData;
+import discord4j.discordjson.json.ImmutableReactionData;
+import discord4j.discordjson.json.ImmutableRoleData;
+import discord4j.discordjson.json.ImmutableStickerData;
+import discord4j.discordjson.json.ImmutableUserData;
+import discord4j.discordjson.json.ImmutableVoiceStateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PartialUserData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.ReactionData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,7 +104,12 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static discord4j.common.store.impl.ImplUtils.*;
+import static discord4j.common.store.impl.ImplUtils.add;
+import static discord4j.common.store.impl.ImplUtils.createPresence;
+import static discord4j.common.store.impl.ImplUtils.ifNonNullDo;
+import static discord4j.common.store.impl.ImplUtils.ifNonNullMap;
+import static discord4j.common.store.impl.ImplUtils.or;
+import static discord4j.common.store.impl.ImplUtils.remove;
 
 /**
  * A {@link StoreLayout} that stores entities in the heap of the local JVM. This implementation is entirely thread-safe:
@@ -60,7 +129,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             new ConcurrentHashMap<>();
 
     private final ConcurrentMap<Long, ImmutableStickerData> stickers =
-        new ConcurrentHashMap<>();
+            new ConcurrentHashMap<>();
 
     private final ConcurrentMap<Long, WrappedGuildData> guilds = new ConcurrentHashMap<>();
 
@@ -96,12 +165,12 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         this.config = config;
     }
 
-    public static LocalStoreLayout create(StorageConfig config) {
-        return new LocalStoreLayout(config);
-    }
-
     public static LocalStoreLayout create() {
         return create(StorageConfig.builder().build());
+    }
+
+    public static LocalStoreLayout create(StorageConfig config) {
+        return new LocalStoreLayout(config);
     }
 
     // ------------ DataAccessor countX methods ------------
@@ -125,7 +194,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Long> countStickersInGuild(long guildId) {
         return Mono.justOrEmpty(contentByGuild.get(guildId))
-            .map(content -> (long) content.stickerIds.size());
+                .map(content -> (long) content.stickerIds.size());
     }
 
     @Override
@@ -245,8 +314,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Flux<StickerData> getStickersInGuild(long guildId) {
         return Mono.justOrEmpty(contentByGuild.get(guildId))
-            .flatMapIterable(content -> content.stickerIds)
-            .flatMap(id -> Mono.justOrEmpty(stickers.get(id)));
+                .flatMapIterable(content -> content.stickerIds)
+                .flatMap(id -> Mono.justOrEmpty(stickers.get(id)));
     }
 
     @Override
@@ -285,20 +354,20 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Flux<GuildScheduledEventData> getScheduledEventsInGuild(long guildId) {
         return Mono.justOrEmpty(contentByGuild.get(guildId))
-            .flatMapIterable(content -> content.eventIds)
-            .mapNotNull(scheduledEvents::get);
+                .flatMapIterable(content -> content.eventIds)
+                .mapNotNull(scheduledEvents::get);
     }
 
     @Override
     public Mono<GuildScheduledEventData> getScheduledEventById(long guildId, long eventId) {
         return Mono.justOrEmpty(scheduledEvents.get(eventId))
-            .filter(event -> event.guildId().asLong() == guildId);
+                .filter(event -> event.guildId().asLong() == guildId);
     }
 
     @Override
     public Flux<Id> getScheduledEventUsersInEvent(long guildId, long eventId) {
         return Flux.fromIterable(scheduledEventsUsers.getOrDefault(new Long2(guildId, eventId), new ArrayList<>()))
-            .map(Id::of);
+                .map(Id::of);
     }
 
     @Override
@@ -490,9 +559,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromCallable(() -> {
             GuildContent content = computeGuildContent(guildId);
             Set<StickerData> old = content.stickerIds.stream()
-                .map(stickers::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                    .map(stickers::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
             stickers.keySet().removeAll(content.stickerIds);
             ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().clear());
             content.stickerIds.clear();
@@ -601,19 +670,23 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         guildContent.eventIds.add(eventId);
 
         // Store the event
-        return Mono.fromRunnable(() -> scheduledEvents.put(eventId, ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
+        return Mono.fromRunnable(() -> scheduledEvents.put(eventId,
+                ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch) {
+    public Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex,
+                                                                     GuildScheduledEventUpdate dispatch) {
         final long eventId = dispatch.scheduledEvent().id().asLong();
 
         // Update the event
-        return Mono.fromCallable(() -> scheduledEvents.replace(eventId, ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
+        return Mono.fromCallable(() -> scheduledEvents.replace(eventId,
+                ImmutableGuildScheduledEventData.copyOf(dispatch.scheduledEvent())));
     }
 
     @Override
-    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex, GuildScheduledEventDelete dispatch) {
+    public Mono<GuildScheduledEventData> onGuildScheduledEventDelete(int shardIndex,
+                                                                     GuildScheduledEventDelete dispatch) {
         final long eventId = dispatch.scheduledEvent().id().asLong();
 
         // Remove event from guild->events index
@@ -631,14 +704,16 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Void> onGuildScheduledEventUserAdd(int shardIndex, GuildScheduledEventUserAdd dispatch) {
         final Long2 key = new Long2(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
-        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>()).add(dispatch.userId().asLong()));
+        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>())
+                .add(dispatch.userId().asLong()));
     }
 
     @Override
     public Mono<Void> onGuildScheduledEventUserRemove(int shardIndex, GuildScheduledEventUserRemove dispatch) {
         final Long2 key = new Long2(dispatch.guildId().asLong(), dispatch.scheduledEventId().asLong());
 
-        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>()).remove(dispatch.userId().asLong()));
+        return Mono.fromRunnable(() -> scheduledEventsUsers.computeIfAbsent(key, ignored -> new ArrayList<>())
+                .remove(dispatch.userId().asLong()));
     }
 
     @Override
@@ -819,33 +894,50 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromRunnable(() -> ifNonNullDo(contentByGuild.get(guildId), GuildContent::completeMemberList));
     }
 
-    @Override
-    public DataAccessor getDataAccessor() {
-        return this;
+    private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
+        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
+        return message.withReactions(Possible.of(reactions.stream()
+                .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
+                        .from(r)
+                        .count(r.count() - 1)
+                        .me(!me && r.me())
+                        .build() : r)
+                .filter(r -> r.count() > 0)
+                .collect(Collectors.toList())));
     }
 
-    @Override
-    public GatewayDataUpdater getGatewayDataUpdater() {
-        return this;
+    private ImmutableMessageData addReaction(ImmutableMessageData message, MessageReactionAdd dispatch) {
+        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
+        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
+        if (reactions.stream().anyMatch(EmojiKey.predicateEquals(dispatch.emoji()))) {
+            return message.withReactions(Possible.of(reactions.stream()
+                    .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
+                            .from(r)
+                            .count(r.count() + 1)
+                            .me(r.me() || me)
+                            .build() : r)
+                    .collect(Collectors.toList())));
+        }
+        return message.withReactions(Possible.of(
+                add(reactions, ImmutableReactionData.of(1, me, dispatch.emoji()))));
     }
 
     // ------------ Private methods ------------
 
-    private GuildContent computeGuildContent(long guildId) {
-        return contentByGuild.computeIfAbsent(guildId, GuildContent::new);
-    }
-
-    private ChannelContent computeChannelContent(long channelId) {
-        return contentByChannel.computeIfAbsent(channelId, ChannelContent::new);
-    }
-
     @Nullable
-    private ChannelData saveChannel(long guildId, ChannelData channel) {
-        long channelId = channel.id().asLong();
-        GuildContent guildContent = computeGuildContent(guildId);
-        guildContent.channelIds.add(channelId);
-        ifNonNullDo(guilds.get(guildId), guild -> guild.getChannels().add(Id.of(channelId)));
-        return channels.put(channelId, ImmutableChannelData.copyOf(channel).withGuildId(guildId));
+    private MessageData deleteMessage(long channelId, long messageId) {
+        Long2 id = new Long2(channelId, messageId);
+        ChannelContent channelContent = computeChannelContent(channelId);
+        channelContent.messageIds.remove(id);
+        return ifNonNullMap(messages.remove(id), WithUser::get);
+    }
+
+    private void saveSticker(long guildId, StickerData sticker) {
+        long stickerId = sticker.id().asLong();
+        computeGuildContent(guildId).stickerIds.add(stickerId);
+        ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().add(Id.of(stickerId)));
+        stickers.put(stickerId, ImmutableStickerData.copyOf(sticker));
     }
 
     @Nullable
@@ -855,13 +947,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         guildContent.roleIds.add(roleId);
         ifNonNullDo(guilds.get(guildId), guild -> guild.getRoles().add(Id.of(roleId)));
         return roles.put(roleId, ImmutableRoleData.copyOf(role));
-    }
-
-    private void saveSticker(long guildId, StickerData sticker) {
-        long stickerId = sticker.id().asLong();
-        computeGuildContent(guildId).stickerIds.add(stickerId);
-        ifNonNullDo(guilds.get(guildId), guild -> guild.getStickers().add(Id.of(stickerId)));
-        stickers.put(stickerId, ImmutableStickerData.copyOf(sticker));
     }
 
     private void saveEmoji(long guildId, EmojiData emoji) {
@@ -874,6 +959,37 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             emojis.put(emojiId, new WithUser<>(ImmutableEmojiData.copyOf(emoji).withUser(Possible.absent()), userRef,
                     (e, u) -> e.withUser(Possible.of(u))));
         });
+    }
+
+    @Nullable
+    private <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
+                                                                  BiFunction<T, ImmutableUserData, ImmutableUserData>
+                                                                          userUpdater) {
+        for (; ; ) {
+            AtomicReference<ImmutableUserData> existing = users.get(userId);
+            AtomicReference<ImmutableUserData> ref;
+            if (existing == null) {
+                ImmutableUserData newUser = userUpdater.apply(newData, null);
+                if (newUser == null) {
+                    return null;
+                } else {
+                    ref = new AtomicReference<>(newUser);
+                    if (users.putIfAbsent(userId, ref) != null) {
+                        continue;
+                    }
+                }
+            } else {
+                ref = existing;
+                ImmutableUserData oldUser = ref.get();
+                ImmutableUserData newUser = userUpdater.apply(newData, oldUser);
+                if (newUser != null) {
+                    if (!ref.compareAndSet(oldUser, newUser)) {
+                        continue;
+                    }
+                }
+            }
+            return ref;
+        }
     }
 
     private void saveMember(long guildId, MemberData member) {
@@ -912,7 +1028,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Nullable
     private static ImmutableUserData userFromPresence(PresenceData newPresence, @Nullable ImmutableUserData oldUser) {
-        if (oldUser == null) return null;
+        if (oldUser == null) {
+            return null;
+        }
         ImmutablePartialUserData partialUserData = ImmutablePartialUserData.copyOf(newPresence.user());
         return UserData.builder()
                 .from(oldUser)
@@ -947,78 +1065,39 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return old;
     }
 
-    @Nullable
-    private MessageData deleteMessage(long channelId, long messageId) {
-        Long2 id = new Long2(channelId, messageId);
-        ChannelContent channelContent = computeChannelContent(channelId);
-        channelContent.messageIds.remove(id);
-        return ifNonNullMap(messages.remove(id), WithUser::get);
-    }
-
-    private ImmutableMessageData addReaction(ImmutableMessageData message, MessageReactionAdd dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
-        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
-        if (reactions.stream().anyMatch(EmojiKey.predicateEquals(dispatch.emoji()))) {
-            return message.withReactions(Possible.of(reactions.stream()
-                    .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
-                            .from(r)
-                            .count(r.count() + 1)
-                            .me(r.me() || me)
-                            .build() : r)
-                    .collect(Collectors.toList())));
-        }
-        return message.withReactions(Possible.of(
-                add(reactions, ImmutableReactionData.of(1, me, dispatch.emoji()))));
-    }
-
-    private ImmutableMessageData removeReaction(ImmutableMessageData message, MessageReactionRemove dispatch) {
-        boolean me = dispatch.userId().asLong() == selfUser.get().id().asLong();
-        List<ReactionData> reactions = message.reactions().toOptional().orElse(Collections.emptyList());
-        return message.withReactions(Possible.of(reactions.stream()
-                .map(r -> EmojiKey.predicateEquals(dispatch.emoji()).test(r) ? ImmutableReactionData.builder()
-                        .from(r)
-                        .count(r.count() - 1)
-                        .me(!me && r.me())
-                        .build() : r)
-                .filter(r -> r.count() > 0)
-                .collect(Collectors.toList())));
+    private ChannelContent computeChannelContent(long channelId) {
+        return contentByChannel.computeIfAbsent(channelId, ChannelContent::new);
     }
 
     @Nullable
-    private <T> AtomicReference<ImmutableUserData> computeUserRef(long userId, T newData,
-                                                                  BiFunction<T, ImmutableUserData, ImmutableUserData>
-                                                                         userUpdater) {
-        for (; ; ) {
-            AtomicReference<ImmutableUserData> existing = users.get(userId);
-            AtomicReference<ImmutableUserData> ref;
-            if (existing == null) {
-                ImmutableUserData newUser = userUpdater.apply(newData, null);
-                if (newUser == null) {
-                    return null;
-                } else {
-                    ref = new AtomicReference<>(newUser);
-                    if (users.putIfAbsent(userId, ref) != null) {
-                        continue;
-                    }
-                }
-            } else {
-                ref = existing;
-                ImmutableUserData oldUser = ref.get();
-                ImmutableUserData newUser = userUpdater.apply(newData, oldUser);
-                if (newUser != null) {
-                    if (!ref.compareAndSet(oldUser, newUser)) {
-                        continue;
-                    }
-                }
-            }
-            return ref;
-        }
+    private ChannelData saveChannel(long guildId, ChannelData channel) {
+        long channelId = channel.id().asLong();
+        GuildContent guildContent = computeGuildContent(guildId);
+        guildContent.channelIds.add(channelId);
+        ifNonNullDo(guilds.get(guildId), guild -> guild.getChannels().add(Id.of(channelId)));
+        return channels.put(channelId, ImmutableChannelData.copyOf(channel).withGuildId(guildId));
+    }
+
+    private GuildContent computeGuildContent(long guildId) {
+        return contentByGuild.computeIfAbsent(guildId, GuildContent::new);
+    }
+
+    @Override
+    public DataAccessor getDataAccessor() {
+        return this;
+    }
+
+    @Override
+    public GatewayDataUpdater getGatewayDataUpdater() {
+        return this;
     }
 
     // ------------ Internal classes ------------
 
     private static class Long2 {
-        private final long a, b;
+
+        private final long a;
+        private final long b;
 
         private Long2(long a, long b) {
             this.a = a;
@@ -1026,17 +1105,21 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Long2)) return false;
-            Long2 long2 = (Long2) o;
-            return a == long2.a &&
-                    b == long2.b;
+        public int hashCode() {
+            return Objects.hash(a, b);
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(a, b);
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof Long2)) {
+                return false;
+            }
+            Long2 long2 = (Long2) o;
+            return a == long2.a
+                    && b == long2.b;
         }
     }
 
@@ -1055,16 +1138,20 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            EmojiKey emojiKey = (EmojiKey) o;
-            return id != -1 ? id == emojiKey.id : Objects.equals(name, emojiKey.name);
+        public int hashCode() {
+            return id != -1 ? Long.hashCode(id) : Objects.hash(name);
         }
 
         @Override
-        public int hashCode() {
-            return id != -1 ? Long.hashCode(id) : Objects.hash(name);
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            EmojiKey emojiKey = (EmojiKey) o;
+            return id != -1 ? id == emojiKey.id : Objects.equals(name, emojiKey.name);
         }
     }
 

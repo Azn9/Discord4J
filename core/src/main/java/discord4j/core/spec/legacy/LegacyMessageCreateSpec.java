@@ -43,7 +43,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * LegacySpec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
+ * LegacySpec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this
+ * spec must
  * have connected to gateway at least once.
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
@@ -130,6 +131,17 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
     }
 
     /**
+     * Adds a spoiler file as attachment to the created {@link Message}.
+     *
+     * @param fileName The filename used in the file being sent.
+     * @param file The file contents.
+     * @return This spec.
+     */
+    public LegacyMessageCreateSpec addFileSpoiler(String fileName, InputStream file) {
+        return addFile(Attachment.SPOILER_PREFIX + fileName, file);
+    }
+
+    /**
      * Adds a file as attachment to the created {@link Message}.
      *
      * @param fileName The filename used in the file being sent.
@@ -142,17 +154,6 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
         }
         files.add(Tuples.of(fileName, file));
         return this;
-    }
-
-    /**
-     * Adds a spoiler file as attachment to the created {@link Message}.
-     *
-     * @param fileName The filename used in the file being sent.
-     * @param file The file contents.
-     * @return This spec.
-     */
-    public LegacyMessageCreateSpec addFileSpoiler(String fileName, InputStream file) {
-        return addFile(Attachment.SPOILER_PREFIX + fileName, file);
     }
 
     /**

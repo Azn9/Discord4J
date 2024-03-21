@@ -35,8 +35,8 @@ import java.util.*;
 public final class PermissionSet extends AbstractSet<Permission> {
 
     private static final long ALL_RAW = Arrays.stream(Permission.values())
-        .mapToLong(Permission::getValue)
-        .reduce(0, (a, b) -> a | b);
+            .mapToLong(Permission::getValue)
+            .reduce(0, (a, b) -> a | b);
     private static final long NONE_RAW = 0;
 
     /** Common instance for {@code all()}. */
@@ -44,6 +44,17 @@ public final class PermissionSet extends AbstractSet<Permission> {
 
     /** Common instance for {@code none()}. */
     private static final PermissionSet NONE = new PermissionSet(NONE_RAW);
+    /** A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}. */
+    private final long rawValue;
+
+    /**
+     * Constructs a {@code PermissionSet} with a <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
+     */
+    private PermissionSet(final long rawValue) {
+        this.rawValue = rawValue;
+    }
 
     /**
      * Returns a {@code PermissionSet} containing all permissions.
@@ -61,16 +72,6 @@ public final class PermissionSet extends AbstractSet<Permission> {
      */
     public static PermissionSet none() {
         return NONE;
-    }
-
-    /**
-     * Returns a {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
-     *
-     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
-     * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
-     */
-    public static PermissionSet of(final long rawValue) {
-        return new PermissionSet(rawValue);
     }
 
     /**
@@ -97,22 +98,11 @@ public final class PermissionSet extends AbstractSet<Permission> {
         return new PermissionSet(rawValue);
     }
 
-    /** A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}. */
-    private final long rawValue;
-
-    /**
-     * Constructs a {@code PermissionSet} with a <i>raw value</i>.
-     *
-     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
-     */
-    private PermissionSet(final long rawValue) {
-        this.rawValue = rawValue;
-    }
-
     /**
      * Performs a logical <b>AND</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>intersection</b> of this set and the other set. A permission is contained if and only if it was
+     * The resultant set is the <b>intersection</b> of this set and the other set. A permission is contained if and
+     * only if it was
      * contained in both this set and the other set. This is analogous to {@link Set#retainAll(java.util.Collection)}.
      * <pre>
      * {@code
@@ -128,6 +118,16 @@ public final class PermissionSet extends AbstractSet<Permission> {
      */
     public PermissionSet and(PermissionSet other) {
         return PermissionSet.of(this.rawValue & other.rawValue);
+    }
+
+    /**
+     * Returns a {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
+     * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     */
+    public static PermissionSet of(final long rawValue) {
+        return new PermissionSet(rawValue);
     }
 
     /**
@@ -210,7 +210,6 @@ public final class PermissionSet extends AbstractSet<Permission> {
      *
      * @param other The other permission set.
      * @return The relative complement of this set with the other set.
-     *
      * @deprecated Use {@link PermissionSet#andNot(PermissionSet)} instead.
      */
     @Deprecated
@@ -238,17 +237,6 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     /**
-     * Gets this {@code PermissionSet} as an {@link EnumSet}.
-     *
-     * @return This {@code PermissionSet} as an {@link EnumSet}.
-     */
-    public EnumSet<Permission> asEnumSet() {
-        final EnumSet<Permission> permissions = EnumSet.allOf(Permission.class);
-        permissions.removeIf(permission -> !contains(permission));
-        return permissions;
-    }
-
-    /**
      * Gets the <i>raw value</i> for this {@code PermissionSet}.
      *
      * @return The <i>raw value</i> for this {@code PermissionSet}.
@@ -259,19 +247,37 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     @Override
-    public boolean contains(final Object o) {
-        return (o instanceof Permission) && ((((Permission) o).getValue() & rawValue) > 0);
-    }
-
-    @Override
     public Iterator<Permission> iterator() {
         // Wrap so users aren't confused when remove doesn't "work"
         return Collections.unmodifiableSet(asEnumSet()).iterator();
     }
 
+    /**
+     * Gets this {@code PermissionSet} as an {@link EnumSet}.
+     *
+     * @return This {@code PermissionSet} as an {@link EnumSet}.
+     */
+    public EnumSet<Permission> asEnumSet() {
+        final EnumSet<Permission> permissions = EnumSet.allOf(Permission.class);
+        permissions.removeIf(permission -> !contains(permission));
+        return permissions;
+    }
+
     @Override
     public int size() {
         return Long.bitCount(rawValue);
+    }
+
+    @Override
+    public boolean contains(final Object o) {
+        return (o instanceof Permission) && ((((Permission) o).getValue() & rawValue) > 0);
+    }
+
+    @Override
+    public String toString() {
+        return "PermissionSet{" +
+                "rawValue=" + rawValue +
+                "} " + super.toString();
     }
 
     @Override
@@ -290,12 +296,5 @@ public final class PermissionSet extends AbstractSet<Permission> {
     @Override
     public int hashCode() {
         return Long.hashCode(rawValue);
-    }
-
-    @Override
-    public String toString() {
-        return "PermissionSet{" +
-                "rawValue=" + rawValue +
-                "} " + super.toString();
     }
 }

@@ -26,8 +26,7 @@ import discord4j.gateway.ShardInfo;
  * Dispatched when an integration is created.
  * This event is dispatched by Discord.
  *
- * @see
- * <a href="https://discord.com/developers/docs/topics/gateway#integration-create">Integration Create</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#integration-create">Integration Create</a>
  */
 public class IntegrationCreateEvent extends Event {
 

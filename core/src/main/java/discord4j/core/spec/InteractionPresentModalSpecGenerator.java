@@ -33,12 +33,6 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 @Value.Immutable(singleton = true)
 interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicationCommandCallbackData> {
 
-    Possible<String> title();
-
-    Possible<String> customId();
-
-    Possible<List<LayoutComponent>> components();
-
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
@@ -49,6 +43,9 @@ interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicati
                         .collect(Collectors.toList())))
                 .build();
     }
+    Possible<String> title();
+    Possible<String> customId();
+    Possible<List<LayoutComponent>> components();
 }
 
 @SuppressWarnings("immutables:subtype")
@@ -56,12 +53,12 @@ interface InteractionPresentModalSpecGenerator extends Spec<InteractionApplicati
 abstract class InteractionPresentModalMonoGenerator extends Mono<Void>
         implements InteractionPresentModalSpecGenerator {
 
-    abstract DeferrableInteractionEvent event();
-
     @Override
     public void subscribe(CoreSubscriber<? super Void> actual) {
         event().presentModal(InteractionPresentModalSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract DeferrableInteractionEvent event();
 
     @Override
     public abstract String toString();

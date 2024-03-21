@@ -16,10 +16,10 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -51,15 +51,6 @@ public class MemberJoinEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Member} has joined in this event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} the {@link Member} has joined in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the {@link Member} has joined.
@@ -67,6 +58,15 @@ public class MemberJoinEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Member} has joined in this event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     @Override

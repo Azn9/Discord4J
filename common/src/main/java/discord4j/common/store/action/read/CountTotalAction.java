@@ -21,6 +21,16 @@ import discord4j.common.store.api.StoreAction;
 
 public class CountTotalAction implements StoreAction<Long> {
 
+    private final CountableEntity entity;
+
+    CountTotalAction(CountableEntity entity) {
+        this.entity = entity;
+    }
+
+    public CountableEntity getEntity() {
+        return entity;
+    }
+
     public enum CountableEntity {
         CHANNELS,
         STICKERS,
@@ -32,15 +42,5 @@ public class CountTotalAction implements StoreAction<Long> {
         ROLES,
         USERS,
         VOICE_STATES
-    }
-
-    private final CountableEntity entity;
-
-    CountTotalAction(CountableEntity entity) {
-        this.entity = entity;
-    }
-
-    public CountableEntity getEntity() {
-        return entity;
     }
 }

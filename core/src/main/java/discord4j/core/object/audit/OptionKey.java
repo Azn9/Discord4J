@@ -24,8 +24,8 @@ import java.util.function.Function;
  * A key to be used in {@link AuditLogEntry#getOption(OptionKey)}.
  *
  * @param <T> The type of the optional data.
- *
- * @see <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info">Optional Audit Entry Info</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info">Optional Audit Entry Info</a>
  */
 public class OptionKey<T> {
 
@@ -45,17 +45,15 @@ public class OptionKey<T> {
     public static final OptionKey<String> TYPE = optionKey("type", Function.identity());
     /** Name of the role if type is "role". */
     public static final OptionKey<String> ROLE_NAME = optionKey("role_name", Function.identity());
-
-    private static <T> OptionKey<T> optionKey(String field, Function<String, T> parser) {
-        return new OptionKey<>(field, parser);
-    }
-
     private final String field;
     private final Function<String, T> parser;
-
     private OptionKey(String field, Function<String, T> parser) {
         this.field = field;
         this.parser = parser;
+    }
+
+    private static <T> OptionKey<T> optionKey(String field, Function<String, T> parser) {
+        return new OptionKey<>(field, parser);
     }
 
     public String getField() {

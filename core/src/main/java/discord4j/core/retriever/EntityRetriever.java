@@ -16,20 +16,13 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.ScheduledEventUser;
 import discord4j.core.object.automod.AutoModRule;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.GuildSticker;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.ScheduledEvent;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.OrderUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +36,7 @@ public interface EntityRetriever {
      *
      * @param channelId The ID of the channel.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Channel} as represented by the
-     *         supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Channel> getChannelById(Snowflake channelId);
 
@@ -52,7 +45,7 @@ public interface EntityRetriever {
      *
      * @param guildId The ID of the guild.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
-     *         ID. If an error is received, it is emitted through the {@code Mono}.
+     * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Guild> getGuildById(Snowflake guildId);
 
@@ -62,7 +55,7 @@ public interface EntityRetriever {
      * @param guildId The ID of the guild.
      * @param stickerId The ID of the sticker.
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildSticker} as represented by the
-     *         supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<GuildSticker> getGuildStickerById(Snowflake guildId, Snowflake stickerId);
 
@@ -72,7 +65,7 @@ public interface EntityRetriever {
      * @param guildId The ID of the guild.
      * @param emojiId The ID of the emoji.
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     *         supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId);
 
@@ -81,9 +74,9 @@ public interface EntityRetriever {
      * to lazily request member entities from the Gateway, or the REST API.
      *
      * @param guildId The ID of the guild.
-     * @param userId  The ID of the user.
+     * @param userId The ID of the user.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
-     *         IDs. If an error is received, it is emitted through the {@code Mono}.
+     * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Member> getMemberById(Snowflake guildId, Snowflake userId);
 
@@ -93,7 +86,7 @@ public interface EntityRetriever {
      * @param channelId The ID of the channel.
      * @param messageId The ID of the message.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
-     *         supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Message> getMessageById(Snowflake channelId, Snowflake messageId);
 
@@ -101,9 +94,9 @@ public interface EntityRetriever {
      * Requests to retrieve the role represented by the supplied IDs.
      *
      * @param guildId The ID of the guild.
-     * @param roleId  The ID of the role.
+     * @param roleId The ID of the role.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
-     *         IDs. If an error is received, it is emitted through the {@code Mono}.
+     * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId);
 
@@ -112,7 +105,7 @@ public interface EntityRetriever {
      *
      * @param userId The ID of the user.
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} as represented by the supplied
-     *         ID. If an error is received, it is emitted through the {@code Mono}.
+     * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<User> getUserById(Snowflake userId);
 
@@ -120,7 +113,7 @@ public interface EntityRetriever {
      * Requests to retrieve the guilds the current client is in.
      *
      * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
-     *         is received, it is emitted through the {@code Flux}.
+     * is received, it is emitted through the {@code Flux}.
      */
     Flux<Guild> getGuilds();
 
@@ -128,24 +121,25 @@ public interface EntityRetriever {
      * Requests to retrieve the bot user.
      *
      * @return A {@link Mono} where, upon successful completion, emits the bot {@link User user}. If an error is
-     *         received, it is emitted through the {@code Mono}.
+     * received, it is emitted through the {@code Mono}.
      */
     Mono<User> getSelf();
 
     /**
      * Requests to retrieve the bot user represented as a {@link Member member} of the guild with the supplied ID.
+     *
      * @param guildId The ID of the guild.
      * @return A {@link Mono} where, upon successful completion, emits the bot {@link Member member}. If an error is
-     *         received, it is emitted through the {@code Mono}.
+     * received, it is emitted through the {@code Mono}.
      */
     Mono<Member> getSelfMember(Snowflake guildId);
 
     /**
      * Requests to retrieve the guild's members.
      *
-     * @param guildId   the ID of the guild.
+     * @param guildId the ID of the guild.
      * @return A {@link Flux} that continually emits the {@link Member members} of the guild. If an error is received,
-     *         it is emitted through the {@code Flux}.
+     * it is emitted through the {@code Flux}.
      */
     Flux<Member> getGuildMembers(Snowflake guildId);
 
@@ -157,7 +151,7 @@ public interface EntityRetriever {
      *
      * @param guildId the ID of the guild.
      * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received,
-     *         it is emitted through the {@code Flux}.
+     * it is emitted through the {@code Flux}.
      */
     Flux<GuildChannel> getGuildChannels(Snowflake guildId);
 
@@ -191,7 +185,8 @@ public interface EntityRetriever {
     /**
      * Requests to retrieve the guild's automod rules.
      *
-     * @return A {@link Flux} that continually emits the guild's {@link AutoModRule AutoModRule}. If an error is received,
+     * @return A {@link Flux} that continually emits the guild's {@link AutoModRule AutoModRule}. If an error is
+     * received,
      * it is emitted through the {@code Flux}.
      */
     Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId);

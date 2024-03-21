@@ -44,7 +44,12 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -89,21 +94,6 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Set<ExtendedPermissionOverwrite> getPermissionOverwrites() {
-        return guildChannel.getPermissionOverwrites();
-    }
-
-    @Override
-    public Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId) {
-        return guildChannel.getOverwriteForMember(memberId);
-    }
-
-    @Override
-    public Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId) {
-        return guildChannel.getOverwriteForRole(roleId);
-    }
-
-    @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
         return guildChannel.getEffectivePermissions(memberId);
     }
@@ -116,6 +106,21 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     @Override
     public String getName() {
         return guildChannel.getName();
+    }
+
+    @Override
+    public Set<ExtendedPermissionOverwrite> getPermissionOverwrites() {
+        return guildChannel.getPermissionOverwrites();
+    }
+
+    @Override
+    public Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId) {
+        return guildChannel.getOverwriteForMember(memberId);
+    }
+
+    @Override
+    public Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId) {
+        return guildChannel.getOverwriteForRole(roleId);
     }
 
     @Override
@@ -160,12 +165,12 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
         return messageChannel.createMessage(spec);
     }
 
     @Override
-    public Mono<Message> createMessage(MessageCreateSpec spec) {
+    public Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
         return messageChannel.createMessage(spec);
     }
 
@@ -205,33 +210,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Optional<Snowflake> getCategoryId() {
-        return categorizableChannel.getCategoryId();
-    }
-
-    @Override
-    public Mono<Category> getCategory() {
-        return categorizableChannel.getCategory();
-    }
-
-    @Override
-    public Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy) {
-        return categorizableChannel.getCategory(retrievalStrategy);
-    }
-
-    @Override
     public Mono<ExtendedInvite> createInvite(final Consumer<? super LegacyInviteCreateSpec> spec) {
         return categorizableChannel.createInvite(spec);
-    }
-
-    @Override
-    public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
-        return categorizableChannel.createInvite(spec);
-    }
-
-    @Override
-    public Flux<ExtendedInvite> getInvites() {
-        return categorizableChannel.getInvites();
     }
 
     /**
@@ -257,49 +237,50 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
         return Flux.from(messages)
-            .distinct(Message::getId)
-            .buffer(100)
-            .flatMap(allMessages -> {
-                final List<Message> eligibleMessages = new ArrayList<>(0);
-                final Collection<Message> ineligibleMessages = new ArrayList<>(0);
+                .distinct(Message::getId)
+                .buffer(100)
+                .flatMap(allMessages -> {
+                    final List<Message> eligibleMessages = new ArrayList<>(0);
+                    final Collection<Message> ineligibleMessages = new ArrayList<>(0);
 
-                for (final Message message : allMessages) {
-                    if (message.getId().getTimestamp().isBefore(timeLimit)) {
-                        ineligibleMessages.add(message);
+                    for (final Message message : allMessages) {
+                        if (message.getId().getTimestamp().isBefore(timeLimit)) {
+                            ineligibleMessages.add(message);
 
-                    } else {
-                        eligibleMessages.add(message);
+                        } else {
+                            eligibleMessages.add(message);
+                        }
                     }
-                }
 
-                if (eligibleMessages.size() == 1) {
-                    ineligibleMessages.add(eligibleMessages.get(0));
-                    eligibleMessages.clear();
-                }
+                    if (eligibleMessages.size() == 1) {
+                        ineligibleMessages.add(eligibleMessages.get(0));
+                        eligibleMessages.clear();
+                    }
 
-                final Collection<String> eligibleIds = eligibleMessages.stream()
-                    .map(Message::getId)
-                    .map(Snowflake::asString)
-                    .collect(Collectors.toList());
+                    final Collection<String> eligibleIds = eligibleMessages.stream()
+                            .map(Message::getId)
+                            .map(Snowflake::asString)
+                            .collect(Collectors.toList());
 
-                return Mono.just(eligibleIds)
-                    .filter(chunk -> !chunk.isEmpty())
-                    .flatMap(chunk -> getClient().getRestClient()
-                        .getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
-                    .thenMany(Flux.fromIterable(ineligibleMessages));
-            });
+                    return Mono.just(eligibleIds)
+                            .filter(chunk -> !chunk.isEmpty())
+                            .flatMap(chunk -> getClient().getRestClient()
+                                    .getChannelService()
+                                    .bulkDeleteMessages(getId().asLong(),
+                                            BulkDeleteRequest.builder().messages(chunk).build()))
+                            .thenMany(Flux.fromIterable(ineligibleMessages));
+                });
     }
 
     @Override
     public Mono<Webhook> createWebhook(final Consumer<? super LegacyWebhookCreateSpec> spec) {
         return Mono.defer(
-                () -> {
-                    LegacyWebhookCreateSpec mutatedSpec = new LegacyWebhookCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getWebhookService()
-                            .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                        () -> {
+                            LegacyWebhookCreateSpec mutatedSpec = new LegacyWebhookCreateSpec();
+                            spec.accept(mutatedSpec);
+                            return getClient().getRestClient().getWebhookService()
+                                    .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        })
                 .map(data -> new Webhook(getClient(), data));
     }
 
@@ -307,8 +288,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     public Mono<Webhook> createWebhook(WebhookCreateSpec spec) {
         Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> getClient().getRestClient().getWebhookService()
-                        .createWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
+                        () -> getClient().getRestClient().getWebhookService()
+                                .createWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Webhook(getClient(), data));
     }
 
@@ -337,6 +318,31 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .flatMapMany(Guild::getMembers)
                 .filterWhen(member -> getEffectivePermissions(member.getId())
                         .map(permissions -> permissions.contains(Permission.VIEW_CHANNEL)));
+    }
+
+    @Override
+    public Optional<Snowflake> getCategoryId() {
+        return categorizableChannel.getCategoryId();
+    }
+
+    @Override
+    public Mono<Category> getCategory() {
+        return categorizableChannel.getCategory();
+    }
+
+    @Override
+    public Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy) {
+        return categorizableChannel.getCategory(retrievalStrategy);
+    }
+
+    @Override
+    public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
+        return categorizableChannel.createInvite(spec);
+    }
+
+    @Override
+    public Flux<ExtendedInvite> getInvites() {
+        return categorizableChannel.getInvites();
     }
 
     @Override

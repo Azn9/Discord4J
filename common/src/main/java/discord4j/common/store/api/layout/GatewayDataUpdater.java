@@ -19,8 +19,50 @@ package discord4j.common.store.api.layout;
 
 import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
-import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildScheduledEventData;
+import discord4j.discordjson.json.GuildScheduledEventUserData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.gateway.ChannelCreate;
+import discord4j.discordjson.json.gateway.ChannelDelete;
+import discord4j.discordjson.json.gateway.ChannelUpdate;
+import discord4j.discordjson.json.gateway.GuildCreate;
+import discord4j.discordjson.json.gateway.GuildDelete;
+import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
+import discord4j.discordjson.json.gateway.GuildMemberAdd;
+import discord4j.discordjson.json.gateway.GuildMemberRemove;
+import discord4j.discordjson.json.gateway.GuildMemberUpdate;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.GuildRoleCreate;
+import discord4j.discordjson.json.gateway.GuildRoleDelete;
+import discord4j.discordjson.json.gateway.GuildRoleUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventCreate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventDelete;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUpdate;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserAdd;
+import discord4j.discordjson.json.gateway.GuildScheduledEventUserRemove;
+import discord4j.discordjson.json.gateway.GuildStickersUpdate;
+import discord4j.discordjson.json.gateway.GuildUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.MessageDelete;
+import discord4j.discordjson.json.gateway.MessageDeleteBulk;
+import discord4j.discordjson.json.gateway.MessageReactionAdd;
+import discord4j.discordjson.json.gateway.MessageReactionRemove;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveAll;
+import discord4j.discordjson.json.gateway.MessageReactionRemoveEmoji;
+import discord4j.discordjson.json.gateway.MessageUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.UserUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdateDispatch;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -36,7 +78,7 @@ public interface GatewayDataUpdater {
      * returned by {@link GuildData#channels()} if applicable.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch);
@@ -47,7 +89,7 @@ public interface GatewayDataUpdater {
      * store, and remove the ID from the list returned by {@link GuildData#channels()} if applicable.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link ChannelData} before the deletion
      */
@@ -58,7 +100,7 @@ public interface GatewayDataUpdater {
      * will typically perform an update operation on a related {@link ChannelData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link ChannelData} before the update
      */
@@ -70,7 +112,7 @@ public interface GatewayDataUpdater {
      * entities received in the payload, such as channels, roles, emojis, members, voice states and presences.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildCreate(int shardIndex, GuildCreate dispatch);
@@ -82,7 +124,7 @@ public interface GatewayDataUpdater {
      * members, the voice states and the messages.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link GuildData} before the deletion
      */
@@ -94,7 +136,7 @@ public interface GatewayDataUpdater {
      * present in the store, and update the list returned by {@link GuildData#stickers()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * set of {@link StickerData} before the update
      */
@@ -106,7 +148,7 @@ public interface GatewayDataUpdater {
      * present in the store, and update the list returned by {@link GuildData#emojis()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * set of {@link EmojiData} before the update
      */
@@ -119,7 +161,7 @@ public interface GatewayDataUpdater {
      * {@link GuildData#memberCount()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildMemberAdd(int shardIndex, GuildMemberAdd dispatch);
@@ -131,7 +173,7 @@ public interface GatewayDataUpdater {
      * {@link GuildData#memberCount()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link MemberData} before the deletion
      */
@@ -143,7 +185,7 @@ public interface GatewayDataUpdater {
      * but adapted for whole chunks of members.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildMembersChunk(int shardIndex, GuildMembersChunk dispatch);
@@ -154,7 +196,7 @@ public interface GatewayDataUpdater {
      * the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link MemberData} before the update
      */
@@ -166,7 +208,7 @@ public interface GatewayDataUpdater {
      * returned by {@link GuildData#roles()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildRoleCreate(int shardIndex, GuildRoleCreate dispatch);
@@ -177,7 +219,7 @@ public interface GatewayDataUpdater {
      * and remove the role ID from the list returned by {@link GuildData#roles()} and {@link MemberData#roles()}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link RoleData} before the deletion
      */
@@ -188,7 +230,7 @@ public interface GatewayDataUpdater {
      * will typically perform an update operation on a related {@link RoleData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link RoleData} before the update
      */
@@ -199,7 +241,7 @@ public interface GatewayDataUpdater {
      * will typically perform an insert operation on a new {@link GuildScheduledEventData} in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildScheduledEventCreate(int shardIndex, GuildScheduledEventCreate dispatch);
@@ -210,8 +252,9 @@ public interface GatewayDataUpdater {
      * store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a {@link Mono} completing when the operation is done, optionally returning {@link GuildScheduledEventData}
+     * @param dispatch the dispatch data coming from Discord gateway
+     * @return a {@link Mono} completing when the operation is done, optionally returning
+     * {@link GuildScheduledEventData}
      * in a state before the update
      */
     Mono<GuildScheduledEventData> onGuildScheduledEventUpdate(int shardIndex, GuildScheduledEventUpdate dispatch);
@@ -222,7 +265,7 @@ public interface GatewayDataUpdater {
      * if present.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the
      * {@link GuildScheduledEventData} in a state before the deletion.
      */
@@ -234,7 +277,7 @@ public interface GatewayDataUpdater {
      * between a {@link GuildScheduledEventData} and the provided {@link GuildScheduledEventUserData}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildScheduledEventUserAdd(int shardIndex, GuildScheduledEventUserAdd dispatch);
@@ -245,7 +288,7 @@ public interface GatewayDataUpdater {
      * between a {@link GuildScheduledEventData} and the provided {@link GuildScheduledEventUserData}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onGuildScheduledEventUserRemove(int shardIndex, GuildScheduledEventUserRemove dispatch);
@@ -255,7 +298,7 @@ public interface GatewayDataUpdater {
      * typically perform an update operation on a related {@link GuildData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link GuildData} before the update
      */
@@ -266,7 +309,7 @@ public interface GatewayDataUpdater {
      * be considered stale and the implementation may perform some cleanup work.
      *
      * @param shardIndex the index of the shard to invalidate
-     * @param cause      the cause of the invalidation
+     * @param cause the cause of the invalidation
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onShardInvalidation(int shardIndex, InvalidationCause cause);
@@ -277,7 +320,7 @@ public interface GatewayDataUpdater {
      * {@code last_message_id} field of the channel where the message was sent in.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onMessageCreate(int shardIndex, MessageCreate dispatch);
@@ -287,7 +330,7 @@ public interface GatewayDataUpdater {
      * will typically perform a delete operation on a related {@link MessageData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link MessageData} before the deletion
      */
@@ -299,7 +342,7 @@ public interface GatewayDataUpdater {
      * in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * set of {@link MessageData} before the deletion
      */
@@ -311,7 +354,7 @@ public interface GatewayDataUpdater {
      * the store in order to add the reaction.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch);
@@ -322,7 +365,7 @@ public interface GatewayDataUpdater {
      * the store in order to remove the reaction.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onMessageReactionRemove(int shardIndex, MessageReactionRemove dispatch);
@@ -333,7 +376,7 @@ public interface GatewayDataUpdater {
      * present in the store in order to remove all reactions.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onMessageReactionRemoveAll(int shardIndex, MessageReactionRemoveAll dispatch);
@@ -344,7 +387,7 @@ public interface GatewayDataUpdater {
      * present in the store in order to remove all reactions for a specific emoji.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
     Mono<Void> onMessageReactionRemoveEmoji(int shardIndex, MessageReactionRemoveEmoji dispatch);
@@ -354,7 +397,7 @@ public interface GatewayDataUpdater {
      * will typically perform an update operation on a related {@link MessageData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link MessageData} before the update
      */
@@ -366,7 +409,7 @@ public interface GatewayDataUpdater {
      * related {@link UserData} to reflect the new presence.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of both the
      * {@link PresenceData} and the {@link UserData} before the update
      */
@@ -387,7 +430,7 @@ public interface GatewayDataUpdater {
      * typically perform an update operation on a related {@link UserData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link UserData} before the update
      */
@@ -399,7 +442,7 @@ public interface GatewayDataUpdater {
      * {@link VoiceStateData}.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
      * {@link VoiceStateData} before the update
      */

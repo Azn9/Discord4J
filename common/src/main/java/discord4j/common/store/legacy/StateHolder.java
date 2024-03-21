@@ -18,7 +18,17 @@
 package discord4j.common.store.legacy;
 
 import discord4j.discordjson.Id;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildScheduledEventData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.StickerData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.LongObjStore;
@@ -30,13 +40,12 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Holder for various pieces of state for use in caching.
- * <p>
- * In addition to saving the current bot user ID, the following stores are kept in this class:
+ *
+ * <p>In addition to saving the current bot user ID, the following stores are kept in this class:
  * <ul>
  * <li>Channel store: {@code long} keys and {@link ChannelData} values.</li>
  * <li>Guild store: {@code long} keys and {@link GuildData} values.</li>

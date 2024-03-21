@@ -36,10 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebClientTest {
 
+    private final AtomicInteger callCount = new AtomicInteger();
     private DisposableServer server;
     private int port;
-
-    private final AtomicInteger callCount = new AtomicInteger();
 
     @BeforeAll
     public void setup() {

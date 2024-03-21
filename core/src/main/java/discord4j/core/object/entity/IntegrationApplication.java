@@ -58,11 +58,6 @@ public class IntegrationApplication implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
      * Gets the data of the account.
      *
@@ -90,6 +85,11 @@ public class IntegrationApplication implements Entity {
     public Optional<String> getIconUrl(final Image.Format format) {
         return data.icon()
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
     }
 
     /**

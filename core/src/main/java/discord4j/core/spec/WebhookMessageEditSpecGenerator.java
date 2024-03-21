@@ -41,55 +41,49 @@ import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 @Value.Immutable(singleton = true)
 public interface WebhookMessageEditSpecGenerator extends Spec<MultipartRequest<WebhookMessageEditRequest>> {
 
+    @Override
+    default MultipartRequest<WebhookMessageEditRequest> asRequest() {
+        WebhookMessageEditRequest request = WebhookMessageEditRequest.builder()
+                .content(content())
+                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
+                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+                .components(mapPossible(components(), components -> components.stream()
+                        .map(LayoutComponent::getData)
+                        .collect(Collectors.toList())))
+                .build();
+        return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
+                .map(MessageCreateFields.File::asRequest)
+                .collect(Collectors.toList()));
+    }
     Possible<Optional<String>> content();
-
     @Value.Default
     default List<MessageCreateFields.File> files() {
         return Collections.emptyList();
     }
-
     @Value.Default
     default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
         return Collections.emptyList();
     }
-
     @Value.Default
     default List<EmbedCreateSpec> embeds() {
         return Collections.emptyList();
     }
-
     Possible<Optional<AllowedMentions>> allowedMentions();
-
     Possible<List<LayoutComponent>> components();
-
-    @Override
-    default MultipartRequest<WebhookMessageEditRequest> asRequest() {
-        WebhookMessageEditRequest request = WebhookMessageEditRequest.builder()
-            .content(content())
-            .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-            .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
-            .components(mapPossible(components(), components -> components.stream()
-                .map(LayoutComponent::getData)
-                .collect(Collectors.toList())))
-            .build();
-        return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
-            .map(MessageCreateFields.File::asRequest)
-            .collect(Collectors.toList()));
-    }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
 abstract class WebhookMessageEditMonoGenerator extends Mono<Message> implements WebhookMessageEditSpecGenerator {
 
-    abstract Snowflake messageId();
-
-    abstract Webhook webhook();
-
     @Override
     public void subscribe(CoreSubscriber<? super Message> actual) {
         webhook().editMessage(messageId(), WebhookMessageEditSpec.copyOf(this)).subscribe(actual);
     }
+
+    abstract Snowflake messageId();
+
+    abstract Webhook webhook();
 
     @Override
     public abstract String toString();

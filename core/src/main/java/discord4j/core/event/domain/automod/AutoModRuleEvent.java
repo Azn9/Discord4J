@@ -21,15 +21,6 @@ public class AutoModRuleEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return The ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return this.autoModRule.getGuildId();
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} whose the entry was created.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -37,5 +28,14 @@ public class AutoModRuleEvent extends Event {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return this.autoModRule.getGuildId();
     }
 }

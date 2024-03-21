@@ -16,9 +16,9 @@
  */
 package discord4j.core.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -30,15 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PermissionUtilTest {
 
-    private static PermissionOverwrite overwrite(PermissionSet allowed, PermissionSet denied) {
-        // create an overwrite with garbage ID and type. These are not important *for these tests*.
-        return PermissionOverwrite.forMember(Snowflake.of(-1L), allowed, denied);
-    }
-
     @Test
     public void testComputeBase() {
         PermissionSet everyonePerms = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionSet> rolePerms = Arrays.asList(PermissionSet.of(BAN_MEMBERS, PRIORITY_SPEAKER), PermissionSet.of(MANAGE_ROLES));
+        List<PermissionSet> rolePerms = Arrays.asList(PermissionSet.of(BAN_MEMBERS, PRIORITY_SPEAKER),
+                PermissionSet.of(MANAGE_ROLES));
 
         PermissionSet actual = PermissionUtil.computeBasePermissions(everyonePerms, rolePerms);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, BAN_MEMBERS, PRIORITY_SPEAKER, MANAGE_ROLES);
@@ -60,12 +56,18 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
+        List<PermissionOverwrite> roleOverwrites =
+                Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
 
         assertEquals(expected, actual);
+    }
+
+    private static PermissionOverwrite overwrite(PermissionSet allowed, PermissionSet denied) {
+        // create an overwrite with garbage ID and type. These are not important *for these tests*.
+        return PermissionOverwrite.forMember(Snowflake.of(-1L), allowed, denied);
     }
 
     @Test
@@ -83,7 +85,8 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
+        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(),
+                PermissionSet.of(SEND_MESSAGES)));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.none();
@@ -95,7 +98,8 @@ public class PermissionUtilTest {
     public void testOverwriteAllowsAndDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.of(SEND_MESSAGES));
+        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER),
+                PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(PRIORITY_SPEAKER);
@@ -146,7 +150,8 @@ public class PermissionUtilTest {
 
         PermissionSet base = PermissionUtil.computeBasePermissions(everyonePerms, Collections.singletonList(rolePerms));
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, everyoneOverwrite, Collections.emptyList(), null);
+        PermissionSet actual = PermissionUtil.computePermissions(base, everyoneOverwrite, Collections.emptyList(),
+                null);
         PermissionSet expected = PermissionSet.of(VIEW_CHANNEL);
 
         assertEquals(expected, actual);

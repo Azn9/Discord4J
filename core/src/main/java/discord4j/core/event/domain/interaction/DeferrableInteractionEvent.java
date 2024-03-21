@@ -22,7 +22,17 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.*;
+import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpec;
+import discord4j.core.spec.InteractionCallbackSpecDeferReplyMono;
+import discord4j.core.spec.InteractionFollowupCreateMono;
+import discord4j.core.spec.InteractionFollowupCreateSpec;
+import discord4j.core.spec.InteractionFollowupEditMono;
+import discord4j.core.spec.InteractionPresentModalMono;
+import discord4j.core.spec.InteractionPresentModalSpec;
+import discord4j.core.spec.InteractionReplyEditMono;
+import discord4j.core.spec.InteractionReplyEditSpec;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
@@ -69,6 +79,7 @@ import java.util.function.Consumer;
  */
 @Experimental
 public class DeferrableInteractionEvent extends InteractionCreateEvent {
+
     private final EventInteractionResponse response;
 
     public DeferrableInteractionEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
@@ -88,7 +99,8 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     @Deprecated
     public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, (InteractionApplicationCommandCallbackData) null);
+        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+                (InteractionApplicationCommandCallbackData) null);
     }
 
     /**
@@ -150,7 +162,7 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * Requests to respond to the interaction with a message.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link LegacyInteractionApplicationCommandCallbackSpec} to
-     *             be operated on.
+     * be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      * @deprecated use {@link #reply(InteractionApplicationCommandCallbackSpec)}, {@link #reply(String)} or {@link
@@ -175,28 +187,6 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Requests to respond to the interaction with a message. Properties specifying how to build the reply message to
-     * the interaction can be set via the {@code withXxx} methods of the returned {@link
-     * InteractionApplicationCommandCallbackReplyMono}.
-     * <p>
-     * For component interactions, like buttons or select menus, this method will create a <strong>new</strong> message.
-     * If you want to modify the message the component is on, see {@link ComponentInteractionEvent#edit()} or
-     * {@link ComponentInteractionEvent#deferEdit()}.
-     * <p>
-     * After calling {@code reply}, you are not allowed to call other acknowledging or reply method and have to
-     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
-     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
-     * {@link #deleteFollowup(Snowflake)}.
-     *
-     * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits nothing;
-     * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
-     * InteractionApplicationCommandCallbackMono}.
-     */
-    public InteractionApplicationCommandCallbackReplyMono reply() {
-        return InteractionApplicationCommandCallbackReplyMono.of(this);
-    }
-
-    /**
      * Requests to respond to the interaction with a message initialized with the specified content. Properties
      * specifying how to build the reply message to the interaction can be set via the {@code withXxx} methods of the
      * returned {@link InteractionApplicationCommandCallbackReplyMono}.
@@ -211,12 +201,36 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      * {@link #deleteFollowup(Snowflake)}.
      *
      * @param content a string to populate the message with
-     * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits nothing;
+     * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits
+     * nothing;
      * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
      * InteractionApplicationCommandCallbackMono}.
      */
     public InteractionApplicationCommandCallbackReplyMono reply(final String content) {
         return reply().withContent(content);
+    }
+
+    /**
+     * Requests to respond to the interaction with a message. Properties specifying how to build the reply message to
+     * the interaction can be set via the {@code withXxx} methods of the returned {@link
+     * InteractionApplicationCommandCallbackReplyMono}.
+     * <p>
+     * For component interactions, like buttons or select menus, this method will create a <strong>new</strong> message.
+     * If you want to modify the message the component is on, see {@link ComponentInteractionEvent#edit()} or
+     * {@link ComponentInteractionEvent#deferEdit()}.
+     * <p>
+     * After calling {@code reply}, you are not allowed to call other acknowledging or reply method and have to
+     * either work with the initial reply using {@link #getReply()}, {@link #editReply()}, {@link #deleteReply()}, or
+     * using followup messages with {@link #createFollowup()}, {@link #editFollowup(Snowflake)} or
+     * {@link #deleteFollowup(Snowflake)}.
+     *
+     * @return A {@link InteractionApplicationCommandCallbackReplyMono} where, upon successful completion, emits
+     * nothing;
+     * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
+     * InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionApplicationCommandCallbackReplyMono reply() {
+        return InteractionApplicationCommandCallbackReplyMono.of(this);
     }
 
     /**
@@ -246,22 +260,9 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
 
-                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, actualSpec.asRequest());
+                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                            actualSpec.asRequest());
                 });
-    }
-
-    /**
-     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
-     * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}. Properties
-     * specifying how to build the modal can be set via the {@code withXxx} methods of the returned
-     * {@link InteractionPresentModalMono}.
-     *
-     * @return A {@link InteractionPresentModalMono} where, upon successful completion, emits nothing; indicating the
-     * interaction response has been sent. If an error is received, it is emitted through the
-     * {@code InteractionPresentModalMono}.
-     */
-    public InteractionPresentModalMono presentModal() {
-        return InteractionPresentModalMono.of(this);
     }
 
     /**
@@ -276,6 +277,20 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public Mono<Void> presentModal(String title, String customId, Collection<LayoutComponent> components) {
         return presentModal().withTitle(title).withCustomId(customId).withComponents(components);
+    }
+
+    /**
+     * Requests to respond to the interaction by presenting a modal for the user to fill out and submit.
+     * Once the user submits the modal, it will be received as a new {@link ModalSubmitInteractionEvent}. Properties
+     * specifying how to build the modal can be set via the {@code withXxx} methods of the returned
+     * {@link InteractionPresentModalMono}.
+     *
+     * @return A {@link InteractionPresentModalMono} where, upon successful completion, emits nothing; indicating the
+     * interaction response has been sent. If an error is received, it is emitted through the
+     * {@code InteractionPresentModalMono}.
+     */
+    public InteractionPresentModalMono presentModal() {
+        return InteractionPresentModalMono.of(this);
     }
 
     /**
@@ -391,6 +406,21 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
+     * Returns a REST-only handler for common operations related to an interaction response associated with this event.
+     *
+     * @return a handler aggregating a collection of REST API methods to work with an interaction response
+     * @see #editReply()
+     * @see #getReply()
+     * @see #deleteReply()
+     * @see #createFollowup()
+     * @see #editFollowup(Snowflake)
+     * @see #deleteFollowup(Snowflake)
+     */
+    public InteractionResponse getInteractionResponse() {
+        return response;
+    }
+
+    /**
      * Returns the initial reply to this interaction.
      *
      * @return a {@link Mono} where, upon successful completion, emits the initial reply message. If an error is
@@ -411,17 +441,6 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
     }
 
     /**
-     * Creates a follow-up message to this interaction. Properties specifying how to build the follow-up message can be
-     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupCreateMono}.
-     *
-     * @return a {@link InteractionFollowupCreateMono} where, upon successful completion, emits the resulting follow-up
-     * message. If an error is received, it is emitted through the {@code InteractionApplicationCommandCallbackMono}.
-     */
-    public InteractionFollowupCreateMono createFollowup() {
-        return InteractionFollowupCreateMono.of(this);
-    }
-
-    /**
      * Creates a follow-up message to this interaction with the given message content.
      *
      * @param content a string to populate the followup message with
@@ -430,6 +449,17 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public InteractionFollowupCreateMono createFollowup(String content) {
         return createFollowup().withContent(content);
+    }
+
+    /**
+     * Creates a follow-up message to this interaction. Properties specifying how to build the follow-up message can be
+     * set via the {@code withXxx} methods of the returned {@link InteractionFollowupCreateMono}.
+     *
+     * @return a {@link InteractionFollowupCreateMono} where, upon successful completion, emits the resulting follow-up
+     * message. If an error is received, it is emitted through the {@code InteractionApplicationCommandCallbackMono}.
+     */
+    public InteractionFollowupCreateMono createFollowup() {
+        return InteractionFollowupCreateMono.of(this);
     }
 
     /**
@@ -494,20 +524,5 @@ public class DeferrableInteractionEvent extends InteractionCreateEvent {
      */
     public Mono<Void> deleteFollowup(final Snowflake messageId) {
         return getInteractionResponse().deleteFollowupMessage(messageId.asLong());
-    }
-
-    /**
-     * Returns a REST-only handler for common operations related to an interaction response associated with this event.
-     *
-     * @return a handler aggregating a collection of REST API methods to work with an interaction response
-     * @see #editReply()
-     * @see #getReply()
-     * @see #deleteReply()
-     * @see #createFollowup()
-     * @see #editFollowup(Snowflake)
-     * @see #deleteFollowup(Snowflake)
-     */
-    public InteractionResponse getInteractionResponse() {
-        return response;
     }
 }

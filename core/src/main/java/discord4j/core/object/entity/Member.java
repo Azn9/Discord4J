@@ -47,6 +47,15 @@ public final class Member extends PartialMember {
     }
 
     /**
+     * Gets whether the user has not yet passed the guild's Membership Screening requirements.
+     *
+     * @return Whether the user has not yet passed the guild's Membership Screening requirements.
+     */
+    public boolean isPending() {
+        return getMemberData().pending().toOptional().orElse(false);
+    }
+
+    /**
      * Gets the data of the member.
      *
      * @return The data of the member.
@@ -59,15 +68,6 @@ public final class Member extends PartialMember {
     @Override
     public Mono<Member> asFullMember() {
         return Mono.just(this);
-    }
-
-    /**
-     * Gets whether the user has not yet passed the guild's Membership Screening requirements.
-     *
-     * @return Whether the user has not yet passed the guild's Membership Screening requirements.
-     */
-    public boolean isPending() {
-        return getMemberData().pending().toOptional().orElse(false);
     }
 
     @Override

@@ -50,15 +50,6 @@ public class ScheduledEventDeleteEvent extends GuildEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
-     *
-     * @return the ID of the {@link Guild}.
-     */
-    public Snowflake getGuildId() {
-        return scheduledEvent.getGuildId();
-    }
-
-    /**
      * Requests to retrieve the {@link Guild} where a scheduled event was deleted.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
@@ -66,6 +57,15 @@ public class ScheduledEventDeleteEvent extends GuildEvent {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     *
+     * @return the ID of the {@link Guild}.
+     */
+    public Snowflake getGuildId() {
+        return scheduledEvent.getGuildId();
     }
 
     @Override

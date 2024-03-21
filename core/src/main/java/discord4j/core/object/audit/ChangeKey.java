@@ -29,7 +29,14 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import static discord4j.core.object.audit.AuditLogChangeParser.*;
+import static discord4j.core.object.audit.AuditLogChangeParser.AUDIT_LOG_ROLES_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.BOOLEAN_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.INSTANT_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.INTEGER_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.OVERWRITES_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.PERMISSION_SET_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.SNOWFLAKE_PARSER;
+import static discord4j.core.object.audit.AuditLogChangeParser.STRING_PARSER;
 
 /**
  * Represents the various audit log change key.
@@ -65,15 +72,20 @@ public final class ChangeKey<T> {
     /** Id of the rules channel changed */
     public static final ChangeKey<Snowflake> RULES_CHANNEL = changeKey("rules_channel_id", SNOWFLAKE_PARSER);
     /** Od of the public updates channel changed */
-    public static final ChangeKey<Snowflake> PUBLIC_UPDATES_CHANNEL = changeKey("public_updates_channel_id", SNOWFLAKE_PARSER);
+    public static final ChangeKey<Snowflake> PUBLIC_UPDATES_CHANNEL = changeKey("public_updates_channel_id",
+            SNOWFLAKE_PARSER);
     /** Two-factor auth requirement changed */
-    public static final ChangeKey<Guild.MfaLevel> MFA_LEVEL = changeKey("mfa_level", INTEGER_PARSER.andThen(Guild.MfaLevel::of));
+    public static final ChangeKey<Guild.MfaLevel> MFA_LEVEL = changeKey("mfa_level",
+            INTEGER_PARSER.andThen(Guild.MfaLevel::of));
     /** Required verification level changed */
-    public static final ChangeKey<Guild.VerificationLevel> VERIFICATION_LEVEL = changeKey("verification_level", INTEGER_PARSER.andThen(Guild.VerificationLevel::of));
+    public static final ChangeKey<Guild.VerificationLevel> VERIFICATION_LEVEL = changeKey("verification_level",
+            INTEGER_PARSER.andThen(Guild.VerificationLevel::of));
     /** Change in whose messages are scanned and deleted for explicit content in the server */
-    public static final ChangeKey<Guild.ContentFilterLevel> CONTENT_FILTER_LEVEL = changeKey("explicit_content_filter", INTEGER_PARSER.andThen(Guild.ContentFilterLevel::of));
+    public static final ChangeKey<Guild.ContentFilterLevel> CONTENT_FILTER_LEVEL = changeKey(
+            "explicit_content_filter", INTEGER_PARSER.andThen(Guild.ContentFilterLevel::of));
     /** Default message notification level changed */
-    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey("default_message_notifications", INTEGER_PARSER.andThen(Guild.NotificationLevel::of));
+    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey(
+            "default_message_notifications", INTEGER_PARSER.andThen(Guild.NotificationLevel::of));
     /** Invite vanity url changed */
     public static final ChangeKey<String> VANITY_URL = changeKey("vanity_url_code", STRING_PARSER);
     /** New role added */
@@ -95,7 +107,8 @@ public final class ChangeKey<T> {
     /** Voice channel bitrate changed */
     public static final ChangeKey<Integer> BITRATE = changeKey("bitrate", INTEGER_PARSER);
     /** Permissions on a channel changed */
-    public static final ChangeKey<Set<ExtendedPermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites", OVERWRITES_PARSER);
+    public static final ChangeKey<Set<ExtendedPermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites",
+            OVERWRITES_PARSER);
     /** Channel nsfw restriction changed */
     public static final ChangeKey<Boolean> NSFW = changeKey("nsfw", BOOLEAN_PARSER);
     /** Application id of the added or removed webhook or bot */
@@ -150,13 +163,15 @@ public final class ChangeKey<T> {
     /** New user limit in a voice channel */
     public static final ChangeKey<Integer> USER_LIMIT = changeKey("user_limit", INTEGER_PARSER);
     /** New user date for expire a timeout */
-    public static final ChangeKey<Instant> COMMUNICATION_DISABLED_UNTIL = changeKey("communication_disabled_until", INSTANT_PARSER);
+    public static final ChangeKey<Instant> COMMUNICATION_DISABLED_UNTIL = changeKey("communication_disabled_until",
+            INSTANT_PARSER);
     /** The role unicode emoji changed */
     public static final ChangeKey<String> ROLE_ICON = changeKey("unicode_emoji", STRING_PARSER);
     /** The related emoji of sticker changed */
     public static final ChangeKey<String> STICKER_TAGS = changeKey("tags", STRING_PARSER);
     /** The format type of sticker changed */
-    public static final ChangeKey<Sticker.Format> STICKER_FORMAT_TYPE = changeKey("format_type", INTEGER_PARSER.andThen(Sticker.Format::of));
+    public static final ChangeKey<Sticker.Format> STICKER_FORMAT_TYPE = changeKey("format_type",
+            INTEGER_PARSER.andThen(Sticker.Format::of));
     /** Guild sticker is in changed */
     public static final ChangeKey<Snowflake> STICKER_GUILD_ID = changeKey("guild_id", SNOWFLAKE_PARSER);
     /** Availability of sticker changed */
@@ -164,7 +179,8 @@ public final class ChangeKey<T> {
     /** Thread is now archived/unarchived */
     public static final ChangeKey<Boolean> THREAD_ARCHIVED = changeKey("archived", BOOLEAN_PARSER);
     /** Auto archive duration changed */
-    public static final ChangeKey<Integer> THREAD_AUTO_ARCHIVE_DURATION = changeKey("auto_archive_duration", INTEGER_PARSER);
+    public static final ChangeKey<Integer> THREAD_AUTO_ARCHIVE_DURATION = changeKey("auto_archive_duration",
+            INTEGER_PARSER);
     /** Thread is now locked/unlocked */
     public static final ChangeKey<Boolean> THREAD_LOCKED = changeKey("locked", BOOLEAN_PARSER);
     /** entity type of guild scheduled event changed */
@@ -173,19 +189,16 @@ public final class ChangeKey<T> {
     public static final ChangeKey<String> LOCATION = changeKey("location", STRING_PARSER);
     /** status of guild scheduled event changed */
     public static final ChangeKey<Integer> STATUS = changeKey("status", INTEGER_PARSER);
-
-
-    private static <T> ChangeKey<T> changeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
-        return new ChangeKey<>(name, parser);
-    }
-
     private final String name;
-
     private final BiFunction<AuditLogEntry, JsonNode, T> parser;
 
     private ChangeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
         this.name = name;
         this.parser = parser;
+    }
+
+    private static <T> ChangeKey<T> changeKey(String name, BiFunction<AuditLogEntry, JsonNode, T> parser) {
+        return new ChangeKey<>(name, parser);
     }
 
     public T parseValue(AuditLogEntry entry, JsonNode value) {

@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 /**
  * An Auto Moderation Rule
  *
- * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object">Auto Moderation Rule</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object">Auto Moderation Rule</a>
  */
 public class AutoModRule implements Entity {
 
@@ -40,18 +41,19 @@ public class AutoModRule implements Entity {
         return data;
     }
 
+    /**
+     * Requests to retrieve the {@link User} who has created this rule.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} that has started typing.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getCreatorUser() {
+        return getClient().getUserById(getCreatorId());
+    }
+
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
-    }
-
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId());
     }
 
     /**
@@ -61,16 +63,6 @@ public class AutoModRule implements Entity {
      */
     public Snowflake getCreatorId() {
         return Snowflake.of(data.creatorId());
-    }
-
-    /**
-     * Requests to retrieve the {@link User} who has created this rule.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User} that has started typing.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getCreatorUser() {
-        return getClient().getUserById(getCreatorId());
     }
 
     /**
@@ -116,8 +108,8 @@ public class AutoModRule implements Entity {
      */
     public List<AutoModRuleAction> getActions() {
         return data.actions().stream()
-            .map(data -> new AutoModRuleAction(gateway, data))
-            .collect(Collectors.toList());
+                .map(data -> new AutoModRuleAction(gateway, data))
+                .collect(Collectors.toList());
     }
 
     public EventType getEventType() {
@@ -166,6 +158,15 @@ public class AutoModRule implements Entity {
                 .map(data -> new AutoModRule(gateway, data));
     }
 
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(data.guildId());
+    }
+
     /**
      * Requests to delete this rule.
      *
@@ -190,7 +191,9 @@ public class AutoModRule implements Entity {
 
     /**
      * Represents a Trigger Type of AutoMod Rule.
-     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types">Auto Moderation - Trigger Types</a>
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-trigger-types">Auto Moderation - Trigger Types</a>
      */
     public enum TriggerType {
         /**
@@ -235,15 +238,6 @@ public class AutoModRule implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -257,6 +251,15 @@ public class AutoModRule implements Entity {
                 }
             }
             return UNKNOWN;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 
@@ -289,15 +292,6 @@ public class AutoModRule implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -309,6 +303,15 @@ public class AutoModRule implements Entity {
                 case 1: return MESSAGE_SEND;
                 default: return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
 
     }

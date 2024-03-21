@@ -55,7 +55,8 @@ public class ExampleOAuth2ClientCredentials {
                 ClientCredentialsGrantRequest.builder()
                         .clientId(CLIENT_ID)
                         .clientSecret(CLIENT_SECRET)
-                        .scope(Scope.asString(Scope.IDENTIFY, Scope.APPLICATIONS_COMMANDS_PERMISSIONS_UPDATE, Scope.CONNECTIONS))
+                        .scope(Scope.asString(Scope.IDENTIFY, Scope.APPLICATIONS_COMMANDS_PERMISSIONS_UPDATE,
+                                Scope.CONNECTIONS))
                         .build());
 
         // fetch the current permissions for COMMAND_ID in GUILD_ID

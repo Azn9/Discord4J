@@ -69,7 +69,7 @@ public class GlobalCommandRegistrar {
 
     private Flux<ApplicationCommandData> bulkOverwriteCommands(List<ApplicationCommandRequest> requests) {
         return applicationId.flatMapMany(id -> restClient.getApplicationService()
-            .bulkOverwriteGlobalApplicationCommand(id, requests)
-            .doOnNext(it -> log.debug("Registered command {} globally", it.name())));
+                .bulkOverwriteGlobalApplicationCommand(id, requests)
+                .doOnNext(it -> log.debug("Registered command {} globally", it.name())));
     }
 }

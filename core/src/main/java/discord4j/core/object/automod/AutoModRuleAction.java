@@ -12,7 +12,8 @@ import java.util.Optional;
 /**
  * An Auto Moderation Rule Action
  *
- * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object">Auto Moderation Rule Action</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object">Auto Moderation Rule Action</a>
  */
 public class AutoModRuleAction implements DiscordObject {
 
@@ -59,11 +60,80 @@ public class AutoModRuleAction implements DiscordObject {
     }
 
     /**
+     * Represents an Action Type of AutoMod Action.
+     */
+    public enum Type {
+        /**
+         * Unknown type.
+         */
+        UNKNOWN(-1),
+
+        /**
+         * Blocks the content of a message according to the rule
+         */
+        BLOCK_MESSAGE(1),
+
+        /**
+         * Logs user content to a specified channel
+         */
+        SEND_ALERT_MESSAGE(2),
+
+        /**
+         * Timeout user for a specified duration
+         * <br>
+         * <b>Note:</b> This action can only be setup for {@link AutoModRule.TriggerType#KEYWORD} rules and
+         * the user need to be the permission {@link discord4j.rest.util.Permission#MODERATE_MEMBERS} for use the action
+         */
+        TIMEOUT(3);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs a {@code AutoModAction.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of message.
+         */
+        public static AutoModRuleAction.Type of(final int value) {
+            for (AutoModRuleAction.Type type : values()) {
+                if (type.getValue() == value) {
+                    return type;
+                }
+            }
+            return UNKNOWN;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+    }
+
+    /**
      * An Auto Moderation Rule Action MetaData
      *
-     * @see <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object-action-metadata">Auto Moderation Rule Action MetaData</a>
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-action-object-action-metadata">Auto Moderation Rule Action MetaData</a>
      */
     public static class AutoModRuleActionMetaData implements DiscordObject {
+
         /**
          * The gateway associated to this object.
          */
@@ -115,73 +185,6 @@ public class AutoModRuleAction implements DiscordObject {
         @Override
         public GatewayDiscordClient getClient() {
             return this.gateway;
-        }
-    }
-
-    /**
-     * Represents an Action Type of AutoMod Action.
-     */
-    public enum Type {
-        /**
-         * Unknown type.
-         */
-        UNKNOWN(-1),
-
-        /**
-         * Blocks the content of a message according to the rule
-         */
-        BLOCK_MESSAGE(1),
-
-        /**
-         * Logs user content to a specified channel
-         */
-        SEND_ALERT_MESSAGE(2),
-
-        /**
-         * Timeout user for a specified duration
-         * <br>
-         * <b>Note:</b> This action can only be setup for {@link AutoModRule.TriggerType#KEYWORD} rules and
-         * the user need to be the permission {@link discord4j.rest.util.Permission#MODERATE_MEMBERS} for use the action
-         */
-        TIMEOUT(3);
-
-        /**
-         * The underlying value as represented by Discord.
-         */
-        private final int value;
-
-        /**
-         * Constructs a {@code AutoModAction.Type}.
-         *
-         * @param value The underlying value as represented by Discord.
-         */
-        Type(final int value) {
-            this.value = value;
-        }
-
-        /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
-         * equal ({@code ==}) to the supplied {@code value}.
-         *
-         * @param value The underlying value as represented by Discord.
-         * @return The type of message.
-         */
-        public static AutoModRuleAction.Type of(final int value) {
-            for (AutoModRuleAction.Type type : values()) {
-                if (type.getValue() == value) {
-                    return type;
-                }
-            }
-            return UNKNOWN;
         }
     }
 

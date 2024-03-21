@@ -47,7 +47,8 @@ public class VoiceGatewayOptions {
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
 
-    public VoiceGatewayOptions(Snowflake guildId, Snowflake selfId, String session, VoiceServerOptions voiceServerOptions,
+    public VoiceGatewayOptions(Snowflake guildId, Snowflake selfId, String session,
+                               VoiceServerOptions voiceServerOptions,
                                JacksonResources jacksonResources, VoiceReactorResources reactorResources,
                                ReconnectOptions reconnectOptions, AudioProvider audioProvider,
                                AudioReceiver audioReceiver,

@@ -37,6 +37,22 @@ import static discord4j.core.spec.InternalSpecUtils.toPossible;
 @Value.Immutable(singleton = true)
 interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 
+    @Override
+    default EmbedData asRequest() {
+        return EmbedData.builder()
+                .title(title())
+                .description(description())
+                .url(url())
+                .timestamp(mapPossible(timestamp(), DateTimeFormatter.ISO_INSTANT::format))
+                .color(mapPossible(color(), Color::getRGB))
+                .footer(mapPossible(toPossible(footer()), EmbedCreateFields.Footer::asRequest))
+                .image(mapPossible(image(), url -> EmbedImageData.builder().url(url).build()))
+                .thumbnail(mapPossible(thumbnail(), url -> EmbedThumbnailData.builder().url(url).build()))
+                .author(mapPossible(toPossible(author()), EmbedCreateFields.Author::asRequest))
+                .fields(fields().stream().map(EmbedCreateFields.Field::asRequest).collect(Collectors.toList()))
+                .build();
+    }
+
     Possible<String> title();
 
     Possible<String> description();
@@ -60,21 +76,5 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
     @Value.Default
     default List<EmbedCreateFields.Field> fields() {
         return Collections.emptyList();
-    }
-
-    @Override
-    default EmbedData asRequest() {
-        return EmbedData.builder()
-                .title(title())
-                .description(description())
-                .url(url())
-                .timestamp(mapPossible(timestamp(), DateTimeFormatter.ISO_INSTANT::format))
-                .color(mapPossible(color(), Color::getRGB))
-                .footer(mapPossible(toPossible(footer()), EmbedCreateFields.Footer::asRequest))
-                .image(mapPossible(image(), url -> EmbedImageData.builder().url(url).build()))
-                .thumbnail(mapPossible(thumbnail(), url -> EmbedThumbnailData.builder().url(url).build()))
-                .author(mapPossible(toPossible(author()), EmbedCreateFields.Author::asRequest))
-                .fields(fields().stream().map(EmbedCreateFields.Field::asRequest).collect(Collectors.toList()))
-                .build();
     }
 }

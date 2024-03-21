@@ -130,6 +130,18 @@ public final class Color {
 
     /** The color bismark <span style="color: #546E7A">\u25A0</span>. This is a Discord color preset. */
     public static final Color BISMARK = of(0x546E7A);
+    /** The color value, in RGB. */
+    private final int rgb;
+
+    /**
+     * Initializes a new instance of {@link Color} using the specified RGB value. The blue value is in bits 0-7, green
+     * in bits 8-15, and red in bits 16-23.
+     *
+     * @param rgb The RGB value.
+     */
+    private Color(final int rgb) {
+        this.rgb = rgb;
+    }
 
     /**
      * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
@@ -172,17 +184,12 @@ public final class Color {
         return new Color(rgb & 0xFFFFFF);
     }
 
-    /** The color value, in RGB. */
-    private final int rgb;
+    public int hashCode() {
+        return getRGB();
+    }
 
-    /**
-     * Initializes a new instance of {@link Color} using the specified RGB value. The blue value is in bits 0-7, green
-     * in bits 8-15, and red in bits 16-23.
-     *
-     * @param rgb The RGB value.
-     */
-    private Color(final int rgb) {
-        this.rgb = rgb;
+    public boolean equals(@Nullable final Object obj) {
+        return obj instanceof Color && ((Color) obj).getRGB() == getRGB();
     }
 
     /**
@@ -192,6 +199,15 @@ public final class Color {
      */
     public int getRGB() {
         return rgb;
+    }
+
+    @Override
+    public String toString() {
+        return "Color{" +
+                "red=" + getRed() +
+                ", green=" + getGreen() +
+                ", blue=" + getBlue() +
+                '}';
     }
 
     /**
@@ -219,22 +235,5 @@ public final class Color {
      */
     public int getBlue() {
         return rgb & 0xFF;
-    }
-
-    @Override
-    public String toString() {
-        return "Color{" +
-                "red=" + getRed() +
-                ", green=" + getGreen() +
-                ", blue=" + getBlue() +
-                '}';
-    }
-
-    public boolean equals(@Nullable final Object obj) {
-        return obj instanceof Color && ((Color) obj).getRGB() == getRGB();
-    }
-
-    public int hashCode() {
-        return getRGB();
     }
 }

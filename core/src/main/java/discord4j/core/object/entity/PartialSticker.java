@@ -35,11 +35,6 @@ public class PartialSticker implements Entity {
         return gateway;
     }
 
-    @Override
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
     /**
      * Gets the name of the sticker.
      *
@@ -50,22 +45,28 @@ public class PartialSticker implements Entity {
     }
 
     /**
-     * Gets the type of sticker format.
-     *
-     * @return The type of sticker format.
-     */
-    public Sticker.Format getFormatType() {
-        return Sticker.Format.of(data.formatType());
-    }
-
-    /**
      * Gets the URL for this sticker.
      *
      * @return The URL for this sticker.
      */
     public String getImageUrl() {
         final String path = String.format(STICKER_IMAGE_PATH, getId().asString());
-        return getFormatType().equals(Sticker.Format.LOTTIE) ? ImageUtil.getUrl(path, LOTTIE) : ImageUtil.getUrl(path, PNG);
+        return getFormatType().equals(Sticker.Format.LOTTIE) ? ImageUtil.getUrl(path, LOTTIE) : ImageUtil.getUrl(path
+                , PNG);
+    }
+
+    @Override
+    public Snowflake getId() {
+        return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the type of sticker format.
+     *
+     * @return The type of sticker format.
+     */
+    public Sticker.Format getFormatType() {
+        return Sticker.Format.of(data.formatType());
     }
 
     /**

@@ -102,7 +102,7 @@ public class RestScheduledEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildScheduledEventData> edit(final GuildScheduledEventModifyRequest request, @Nullable String reason) {
-        return restClient.getGuildService().modifyScheduledEvent(guildId,id, request, reason);
+        return restClient.getGuildService().modifyScheduledEvent(guildId, id, request, reason);
     }
 
     /**
@@ -139,7 +139,8 @@ public class RestScheduledEvent {
             Optional.ofNullable(withMember).ifPresent(value -> params.put("with_member", value));
             return restClient.getGuildService().getScheduledEventUsers(guildId, id, params);
         };
-        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.user().id()), userId.asLong(), 100);
+        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.user().id()), userId.asLong(),
+                100);
     }
 
     /**
@@ -165,7 +166,8 @@ public class RestScheduledEvent {
             Optional.ofNullable(withMember).ifPresent(value -> params.put("with_member", value));
             return restClient.getGuildService().getScheduledEventUsers(guildId, id, params);
         };
-        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), userId.asLong(), 100);
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), userId.asLong(),
+                100);
     }
 
     /**

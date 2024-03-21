@@ -20,7 +20,6 @@ import discord4j.common.LogUtil;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.*;
-import discord4j.core.event.domain.guild.ScheduledEventCreateEvent;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
@@ -124,15 +123,15 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
 
         Set<GuildSticker> stickers = context.getDispatch().stickers()
-            .stream()
-            .map(sticker -> new GuildSticker(gateway, sticker, guildId))
-            .collect(Collectors.toSet());
+                .stream()
+                .map(sticker -> new GuildSticker(gateway, sticker, guildId))
+                .collect(Collectors.toSet());
 
         Set<GuildSticker> oldStickers = context.getOldState()
-            .map(oldState -> oldState.stream()
-                .map(data -> new GuildSticker(gateway, data, guildId))
-                .collect(Collectors.toSet()))
-            .orElse(Collections.emptySet());
+                .map(oldState -> oldState.stream()
+                        .map(data -> new GuildSticker(gateway, data, guildId))
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
         return Mono.just(new StickersUpdateEvent(gateway, context.getShardInfo(), guildId, stickers, oldStickers));
     }
@@ -166,7 +165,7 @@ class GuildDispatchHandlers {
         MemberData member = context.getDispatch().member();
 
         return Mono.just(new MemberJoinEvent(gateway, context.getShardInfo(),
-                        new Member(gateway, member, guildId), guildId));
+                new Member(gateway, member, guildId), guildId));
     }
 
     static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove, MemberData> context) {
@@ -196,8 +195,8 @@ class GuildDispatchHandlers {
 
         return Mono.just(new MemberChunkEvent(gateway, context.getShardInfo(), guildId,
                 members.stream()
-                    .map(member -> new Member(gateway, member, guildId))
-                    .collect(Collectors.toSet()),
+                        .map(member -> new Member(gateway, member, guildId))
+                        .collect(Collectors.toSet()),
                 chunkIndex, chunkCount, notFound, nonce));
     }
 
@@ -216,7 +215,8 @@ class GuildDispatchHandlers {
         String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
-        String communicationDisabledUntil = Possible.flatOpt(context.getDispatch().communicationDisabledUntil()).orElse(null);
+        String communicationDisabledUntil =
+                Possible.flatOpt(context.getDispatch().communicationDisabledUntil()).orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
@@ -232,7 +232,7 @@ class GuildDispatchHandlers {
         RoleData role = context.getDispatch().role();
 
         return Mono.just(new RoleCreateEvent(gateway, context.getShardInfo(), guildId,
-                        new Role(gateway, role, guildId)));
+                new Role(gateway, role, guildId)));
     }
 
     static Mono<RoleDeleteEvent> guildRoleDelete(DispatchContext<GuildRoleDelete, RoleData> context) {
@@ -254,8 +254,8 @@ class GuildDispatchHandlers {
         Role current = new Role(gateway, role, guildId);
 
         Role oldRole = context.getOldState()
-            .map(data -> new Role(gateway, data, guildId))
-            .orElse(null);
+                .map(data -> new Role(gateway, data, guildId))
+                .orElse(null);
 
         return Mono.just(new RoleUpdateEvent(gateway, context.getShardInfo(), current, oldRole));
     }
@@ -267,17 +267,20 @@ class GuildDispatchHandlers {
         return Mono.just(new ScheduledEventCreateEvent(gateway, context.getShardInfo(), scheduledEvent));
     }
 
-    static Mono<ScheduledEventUpdateEvent> scheduledEventUpdate(DispatchContext<GuildScheduledEventUpdate, GuildScheduledEventData> context) {
+    static Mono<ScheduledEventUpdateEvent> scheduledEventUpdate(DispatchContext<GuildScheduledEventUpdate,
+            GuildScheduledEventData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         GuildScheduledEventData payload = context.getDispatch().scheduledEvent();
         ScheduledEvent scheduledEvent = new ScheduledEvent(gateway, payload);
         ScheduledEvent oldScheduledEvent = context.getOldState()
                 .map(data -> new ScheduledEvent(gateway, data))
                 .orElse(null);
-        return Mono.just(new ScheduledEventUpdateEvent(gateway, context.getShardInfo(), scheduledEvent, oldScheduledEvent));
+        return Mono.just(new ScheduledEventUpdateEvent(gateway, context.getShardInfo(), scheduledEvent,
+                oldScheduledEvent));
     }
 
-    static Mono<ScheduledEventDeleteEvent> scheduledEventDelete(DispatchContext<GuildScheduledEventDelete, GuildScheduledEventData> context) {
+    static Mono<ScheduledEventDeleteEvent> scheduledEventDelete(DispatchContext<GuildScheduledEventDelete,
+            GuildScheduledEventData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         GuildScheduledEventData payload = context.getDispatch().scheduledEvent();
         ScheduledEvent scheduledEvent = new ScheduledEvent(gateway, payload);
@@ -293,7 +296,8 @@ class GuildDispatchHandlers {
                 Snowflake.asLong(dispatch.userId())));
     }
 
-    static Mono<ScheduledEventUserRemoveEvent> scheduledEventUserRemove(DispatchContext<GuildScheduledEventUserRemove, Void> context) {
+    static Mono<ScheduledEventUserRemoveEvent> scheduledEventUserRemove(DispatchContext<GuildScheduledEventUserRemove
+            , Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         GuildScheduledEventUserRemove dispatch = context.getDispatch();
         return Mono.just(new ScheduledEventUserRemoveEvent(gateway, context.getShardInfo(),
@@ -318,13 +322,13 @@ class GuildDispatchHandlers {
                         .build()))
                 .from(context.getDispatch().guild())
                 .roles(context.getDispatch().guild().roles().stream()
-                    .map(RoleData::id)
-                    .collect(Collectors.toList()))
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
                 .emojis(context.getDispatch().guild().emojis().stream()
-                    .map(EmojiData::id)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList()))
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
                 .build());
 
         return Mono.just(new GuildUpdateEvent(gateway, context.getShardInfo(), newGuild, oldGuild));
