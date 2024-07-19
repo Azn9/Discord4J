@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.reaction;
 
+import discord4j.core.object.entity.ApplicationEmoji;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
@@ -39,6 +40,16 @@ public abstract class ReactionEmoji {
      * @return A reaction emoji using information from the given guild emoji.
      */
     public static Custom custom(GuildEmoji emoji) {
+        return new Custom(emoji.getId().asLong(), emoji.getName(), emoji.isAnimated());
+    }
+
+    /**
+     * Constructs a {@code ReactionEmoji} using information from a {@link ApplicationEmoji known application emoji}.
+     *
+     * @param emoji The application emoji from which to take information.
+     * @return A reaction emoji using information from the given guild emoji.
+     */
+    public static Custom custom(ApplicationEmoji emoji) {
         return new Custom(emoji.getId().asLong(), emoji.getName(), emoji.isAnimated());
     }
 
