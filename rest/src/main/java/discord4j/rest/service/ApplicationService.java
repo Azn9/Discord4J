@@ -36,6 +36,21 @@ public class ApplicationService extends RestService {
                 .bodyToMono(ApplicationInfoData.class);
     }
 
+    public Flux<ApplicationCommandData> getGlobalApplicationCommands(long applicationId, boolean withLocalizations) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId)
+                .query("with_localizations", withLocalizations)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ApplicationInfoData> modifyCurrentApplicationInfo(ApplicationInfoRequest request) {
+        return Routes.APPLICATION_INFO_MODIFY.newRequest()
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationInfoData.class);
+    }
+
     public Flux<ApplicationCommandData> getGlobalApplicationCommands(long applicationId) {
         return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId)
             .exchange(getRouter())
@@ -154,4 +169,20 @@ public class ApplicationService extends RestService {
             .bodyToMono(GuildApplicationCommandPermissionsData[].class)
             .flatMapMany(Flux::fromArray);
     }
+
+    public Flux<ApplicationRoleConnectionMetadataData> getApplicationRoleConnectionMetadata(long applicationId) {
+        return Routes.APPLICATION_ROLE_CONNECTION_METADATA_GET.newRequest(applicationId)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationRoleConnectionMetadataData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<ApplicationRoleConnectionMetadataData> modifyApplicationRoleConnectionMetadata(long applicationId, List<ApplicationRoleConnectionMetadataData> request) {
+        return Routes.APPLICATION_ROLE_CONNECTION_METADATA_MODIFY.newRequest(applicationId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationRoleConnectionMetadataData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
 }

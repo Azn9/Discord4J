@@ -16,8 +16,6 @@
  */
 package discord4j.rest.route;
 
-import discord4j.common.annotations.Experimental;
-
 /**
  * A collection of {@link discord4j.rest.route.Route} object definitions.
  *
@@ -31,7 +29,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v8";
+    public static final String BASE_URL = "https://discord.com/api/v10";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -280,22 +278,6 @@ public abstract class Routes {
     public static final Route MESSAGE_DELETE_BULK = Route.post("/channels/{channel.id}/messages/bulk-delete");
 
     /**
-     * Enable/disable suppression of embeds on a Message. This endpoint requires the 'MANAGE_MESSAGES' permission to
-     * be present for the current user.
-     * <p>
-     * Returns a 204 empty response on success. Fires a Message Update Gateway event.
-     *
-     * @deprecated - As of April 28, 2021, Discord removed this route in API v9. This {@code Route} will be removed in
-     * a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/channel#suppress-message-embeds">
-     * https://discord.com/developers/docs/resources/channel#suppress-message-embeds</a>
-     */
-    @Deprecated
-    public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
-
-    /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
      * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
      * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for
@@ -408,6 +390,48 @@ public abstract class Routes {
      */
     public static final Route GROUP_DM_RECIPIENT_DELETE = Route.delete("/channels/{channel.id}/recipients/{user.id}");
 
+    public static final Route START_THREAD_WITH_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/threads");
+
+    public static final Route START_THREAD_WITHOUT_MESSAGE = Route.post("/channels/{channel.id}/threads");
+
+    public static final Route START_THREAD_IN_FORUM_CHANNEL_MESSAGE = Route.post("/channels/{channel.id}/threads");
+
+    public static final Route JOIN_THREAD = Route.put("/channels/{channel.id}/thread-members/@me");
+
+    public static final Route ADD_THREAD_MEMBER = Route.put("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route LEAVE_THREAD = Route.delete("/channels/{channel.id}/thread-members/@me");
+
+    public static final Route REMOVE_THREAD_MEMBER = Route.delete("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route GET_THREAD_MEMBER = Route.get("/channels/{channel.id}/thread-members/{user.id}");
+
+    public static final Route LIST_THREAD_MEMBERS = Route.get("/channels/{channel.id}/thread-members");
+
+    public static final Route LIST_PUBLIC_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/public");
+
+    public static final Route LIST_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/threads/archived/private");
+
+    public static final Route LIST_JOINED_PRIVATE_ARCHIVED_THREADS = Route.get("/channels/{channel.id}/users/@me/threads/archived/private");
+
+    ///////////////////////////////////////////
+    ////////////////// Polls //////////////////
+    ///////////////////////////////////////////
+
+    /**
+     * Returns a list of users that voted for the given `answer_id` in the poll for the given message represented by
+     * its `message.id` and `channel.id`.
+     * @see <a href="https://discord.com/developers/docs/resources/poll#get-answer-voters">https://discord.com/developers/docs/resources/poll#get-answer-voters</a>
+     */
+    public static final Route POLL_ANSWER_VOTERS_GET = Route.get("/channels/{channel.id}/polls/{message.id}/answers/{answer_id}");
+
+    /**
+     * Request to end a poll early. This will end the poll and return the final results.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/poll#end-poll">https://discord.com/developers/docs/resources/poll#end-poll</a>
+     */
+    public static final Route END_POLL = Route.post("/channels/{channel.id}/polls/{message.id}/expire");
+
     ////////////////////////////////////////////
     ////////////// Sticker Resource //////////////
     ////////////////////////////////////////////
@@ -421,12 +445,12 @@ public abstract class Routes {
     public static final Route STICKER_GET = Route.get("/stickers/{sticker.id}");
 
     /**
-     * Returns the list of sticker packs available to Nitro subscribers.
+     * Returns the list of available sticker packs.
      *
-     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs">
-     * https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs</a>
+     * @see <a href="https://discord.com/developers/docs/resources/sticker#list-sticker-packs">
+     * https://discord.com/developers/docs/resources/sticker#list-sticker-packs</a>
      */
-    public static final Route NITRO_STICKER_PACKS_GET = Route.get("/sticker-packs");
+    public static final Route STICKER_PACKS_GET = Route.get("/sticker-packs");
 
     /**
      * Returns an array of sticker objects for the given guild. Includes user fields if the bot has the MANAGE_EMOJIS_AND_STICKERS permission.
@@ -623,17 +647,6 @@ public abstract class Routes {
     public static final Route GUILD_MEMBER_MODIFY = Route.patch("/guilds/{guild.id}/members/{user.id}");
 
     /**
-     * Modifies the nickname of the current user in a guild. Returns a 200 with the nickname on success. Fires a Guild
-     * Member Update Gateway event.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-current-user-nick">
-     * https://discord.com/developers/docs/resources/guild#modify-current-user-nick</a>
-     * @deprecated use
-     */
-    @Deprecated
-    public static final Route NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick");
-
-    /**
      * Modifies the current member in a guild. Returns a 200 with the updated member on success. Fires a Guild
      * Member Update Gateway event.
      *
@@ -702,6 +715,16 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#remove-guild-ban</a>
      */
     public static final Route GUILD_BAN_REMOVE = Route.delete("/guilds/{guild.id}/bans/{user.id}");
+
+    /**
+     * Ban up to 200 users from a guild, and optionally delete previous messages sent by the banned users.
+     * Requires both the `BAN_MEMBERS` and `MANAGE_GUILD` permissions.
+     * Returns a 200 response on success, including the fields banned_users with the IDs of the banned users and failed_users with IDs that could not be banned or were already banned.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#bulk-guild-ban">
+     * https://discord.com/developers/docs/resources/guild#bulk-guild-ban</a>
+     */
+    public static final Route GUILD_BAN_BULK = Route.post("/guilds/{guild.id}/bulk-ban");
 
     /**
      * Returns a list of role objects for the guild. Requires the 'MANAGE_ROLES' permission.
@@ -866,6 +889,8 @@ public abstract class Routes {
      * https://discord.com/developers/docs/resources/guild#update-others-voice-state</a>
      */
     public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
+
+    public static final Route LIST_ACTIVE_GUILD_THREADS = Route.get("/guilds/{guild.id}/threads/active");
 
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
@@ -1034,6 +1059,22 @@ public abstract class Routes {
      */
     public static final Route USER_CONNECTIONS_GET = Route.get("/users/@me/connections");
 
+    /**
+     * Returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#get-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_GET = Route.get("/users/@me/applications/{application.id}/role-connection");
+
+    /**
+     * Updates and returns the application role connection for the user. Requires an OAuth2 access token with role_connections.write scope for the application specified in the path.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection">
+     * https://discord.com/developers/docs/resources/user#update-current-user-application-role-connection</a>
+     */
+    public static final Route USER_APPLICATIONS_ROLE_CONNECTION_MODIFY = Route.put("/users/@me/applications/{application.id}/role-connection");
+
     ////////////////////////////////////////////
     ////////////// Voice Resource //////////////
     ////////////////////////////////////////////
@@ -1177,6 +1218,8 @@ public abstract class Routes {
      */
     public static final Route APPLICATION_INFO_GET = Route.get("/oauth2/applications/@me");
 
+    public static final Route APPLICATION_INFO_MODIFY = Route.patch("/applications/@me");
+
     public static final Route GLOBAL_APPLICATION_COMMANDS_GET = Route.get("/applications/{application.id}/commands");
 
     public static final Route GLOBAL_APPLICATION_COMMANDS_CREATE = Route.post("/applications/{application.id}/commands");
@@ -1209,11 +1252,42 @@ public abstract class Routes {
 
     public static final Route APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/permissions");
 
+    ///////////////////////////////////////////////////
+    // Application Role Connection Metadata Resource //
+    ///////////////////////////////////////////////////
+
+    /**
+     * Returns a list of application role connection metadata objects for the given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records">https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_GET = Route.get("/applications/{application.id}/role-connections/metadata");
+
+    /**
+     * Updates and returns a list of application role connection metadata objects for the given application.
+     * An application can have a maximum of 5 metadata records.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata">https://discord.com/developers/docs/resources/application-role-connection-metadata#modify-application-role-connection-metadata</a>
+     */
+    public static final Route APPLICATION_ROLE_CONNECTION_METADATA_MODIFY = Route.put("/applications/{application.id}/role-connections/metadata");
+
     ///////////////////////////////////////////
     ////////// Interaction Resource ///////////
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    //////// Stage Instance Resource /////////
+    ///////////////////////////////////////////
+
+    public static final Route CREATE_STAGE_INSTANCE = Route.post("/stage-instances");
+
+    public static final Route GET_STAGE_INSTANCE = Route.get("/stage-instances/{channel.id}");
+
+    public static final Route MODIFY_STAGE_INSTANCE = Route.patch("/stage-instances/{channel.id}");
+
+    public static final Route DELETE_STAGE_INSTANCE = Route.delete("/stage-instances/{channel.id}");
 
     /////////////////////////////////////////////////////
     ////////// Guild Scheduled Event Resource ///////////
@@ -1269,6 +1343,25 @@ public abstract class Routes {
     public static final Route GUILD_SCHEDULED_EVENT_USERS_GET = Route.get("/guilds/{guild.id}/scheduled-events/{event.id}/users");
 
     ///////////////////////////////////////////
+    ////// Onboarding and welcome screen //////
+    ///////////////////////////////////////////
+
+    /**
+     * Returns the Onboarding object for the guild.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-onboarding">https://discord.com/developers/docs/resources/guild#get-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_GET = Route.get("/guilds/{guild.id}/onboarding");
+
+    /**
+     * Modifies the onboarding configuration of the guild. Returns a 200 with the Onboarding object for the guild. Requires the MANAGE_GUILD and MANAGE_ROLES permissions.
+     * This endpoint supports the X-Audit-Log-Reason header.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-onboarding">https://discord.com/developers/docs/resources/guild#modify-guild-onboarding</a>
+     */
+    public static final Route GUILD_ONBOARDING_MODIFY = Route.put("/guilds/{guild.id}/onboarding");
+
+    ///////////////////////////////////////////
     ///////////// OAuth2 Resource /////////////
     ///////////////////////////////////////////
 
@@ -1277,4 +1370,45 @@ public abstract class Routes {
     public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
 
     public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
+
+
+    ////////////////////////////////////////
+    ///////////// Monetization /////////////
+    ////////////////////////////////////////
+
+    /**
+     * Returns a list of SKUs for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/skus#list-skus">Docs</a>
+     */
+    public static final Route LIST_SKUS = Route.get("/applications/{application.id}/skus");
+
+    /**
+     * Returns a list of entitlements for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#list-entitlements">Docs</a>
+     */
+    public static final Route LIST_ENTITLEMENTS = Route.get("/applications/{application.id}/entitlements");
+
+    /**
+     * Creates a test entitlement for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement">Docs</a>
+     */
+    public static final Route CREATE_TEST_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements");
+
+    /**
+     * Deletes a test entitlement for a given application.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement">Docs</a>
+     */
+    public static final Route DELETE_TEST_ENTITLEMENT = Route.delete("/applications/{application.id}/entitlements/{entitlement.id}");
+
+    /**
+     * For One-Time Purchase consumable SKUs, marks a given entitlement for the user as consumed. The entitlement will have consumed=true when using {@link Routes#LIST_ENTITLEMENTS}.
+     *
+     * @see <a href="https://discord.com/developers/docs/monetization/entitlements#consume-an-entitlement">Docs</a>
+     */
+    public static final Route CONSUME_ENTITLEMENT = Route.post("/applications/{application.id}/entitlements/{entitlement.id}/consume");
+
 }

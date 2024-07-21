@@ -25,6 +25,7 @@ import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.possible.Possible;
@@ -294,9 +295,9 @@ public final class Role implements Entity {
      */
     public String getMention() {
         if (isEveryone()) {
-            return "@everyone";
+            return MentionUtil.EVERYONE;
         }
-        return "<@&" + getId().asString() + ">";
+        return MentionUtil.forRole(getId());
     }
 
     /**
@@ -394,12 +395,24 @@ public final class Role implements Entity {
      * Requests to change this role's position.
      *
      * @param position The position to change for this role.
+     * @param reason The reason, if present.
+     * @return A {@link Flux} that continually emits all the {@link Role roles} associated to this role's
+     * {@link #getGuild() guild}. If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Role> changePosition(final int position, @Nullable final String reason) {
+        return rest.changePosition(position, reason)
+            .map(data -> new Role(gateway, data, getGuildId().asLong()));
+    }
+
+    /**
+     * Requests to change this role's position.
+     *
+     * @param position The position to change for this role.
      * @return A {@link Flux} that continually emits all the {@link Role roles} associated to this role's
      * {@link #getGuild() guild}. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> changePosition(final int position) {
-        return rest.changePosition(position)
-                .map(data -> new Role(gateway, data, getGuildId().asLong()));
+        return this.changePosition(position, null);
     }
 
     @Override

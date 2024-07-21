@@ -52,6 +52,12 @@ final class InternalSpecUtils {
         }
     }
 
+    static void setIfPresent(Multimap<String, Object> map, String key, Possible<?> value) {
+        if (!value.isAbsent()) {
+            map.set(key, value.get());
+        }
+    }
+
     static void addAllIfNotNull(Multimap<String, Object> map, String key, @Nullable List<Object> values) {
         if (values != null) {
             map.addAll(key, values);
@@ -60,6 +66,10 @@ final class InternalSpecUtils {
 
     static <T, R> Possible<R> mapPossible(Possible<T> value, Function<? super T, ? extends R> mapper) {
         return value.isAbsent() ? Possible.absent() : Possible.of(mapper.apply(value.get()));
+    }
+
+    static <T, R> Possible<R> flatMapPossible(Possible<T> value, Function<? super T, ? extends Possible<R>> mapper) {
+        return value.isAbsent() ? Possible.absent() : mapper.apply(value.get());
     }
 
     static <T, R> Possible<Optional<R>> mapPossibleOptional(Possible<Optional<T>> value,

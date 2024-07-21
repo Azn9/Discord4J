@@ -122,7 +122,7 @@ See [our docs](https://docs.discord4j.com/versions) for more details about compa
 
 We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like to give a special shoutout to these wonderful individuals:
 
-* [decyg](https://github.com/decyg)
+* [decyg](https://github.com/d-g-n)
 * [nikammerlaan](https://github.com/nikammerlaan)
 * [ByteAlex](https://github.com/ByteAlex)
 * [Shadorc](https://github.com/Shadorc)
@@ -208,6 +208,20 @@ client.withGateway {
 .block()
 ```
 
+## 🐛 Common mistakes
+
+### Calling Message#getContent without enabling the Message Content intent
+Starting from September 1, 2022, Discord requires bots to enable the "MESSAGE_CONTENT" intent to access the content of messages.
+To enable the intent, go to the [Discord Developer Portal](https://discord.com/developers/applications) and select your bot. Then, go to the "Bot" tab and enable the "Message Content" intent.
+Then, add the intent to your bot when creating the DiscordClient:
+```java
+GatewayDiscordClient client = DiscordClient.create(token)
+  .gateway()
+  .setEnabledIntents(IntentSet.nonPrivileged().and(IntentSet.of(Intent.MESSAGE_CONTENT)))
+  .login()
+  .block();
+```
+
 ## 📚 Examples
 
 ### 📑 Message Embeds
@@ -267,7 +281,11 @@ return guild.getMembers()
 
 ### 🎵 Voice and Music
 
-Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with LavaPlayer being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+
+> [!WARNING]  
+> The original LavaPlayer is no longer maintained. A new maintained version can be found [here](https://github.com/lavalink-devs/lavaplayer).
+> If you need Java 8 support, you can use [Walkyst's LavaPlayer fork](https://github.com/Walkyst/lavaplayer-fork), but it is also no longer maintained!
 
 To get started, you will first need to instantiate and configure an, conventionally global, `AudioPlayerManager`.
 

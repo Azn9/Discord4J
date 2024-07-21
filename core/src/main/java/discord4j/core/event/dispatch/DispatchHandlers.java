@@ -54,6 +54,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
@@ -113,10 +114,24 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
         addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
         addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);
+        addHandler(ThreadCreate.class, ThreadDispatchHandlers::threadCreate);
+        addHandler(ThreadUpdate.class, ThreadDispatchHandlers::threadUpdate);
+        addHandler(ThreadDelete.class, ThreadDispatchHandlers::threadDelete);
+        addHandler(ThreadListSync.class, ThreadDispatchHandlers::threadListSync);
+        addHandler(ThreadMemberUpdate.class, ThreadDispatchHandlers::threadMemberUpdate);
+        addHandler(ThreadMembersUpdate.class, ThreadDispatchHandlers::threadMembersUpdate);
+        addHandler(StageInstanceCreate.class, StageInstanceDispatchHandlers::stageInstanceCreate);
+        addHandler(StageInstanceUpdate.class, StageInstanceDispatchHandlers::stageInstanceUpdate);
+        addHandler(StageInstanceDelete.class, StageInstanceDispatchHandlers::stageInstanceDelete);
         addHandler(AutoModRuleCreate.class, DispatchHandlers::autoModRuleCreate);
         addHandler(AutoModRuleUpdate.class, DispatchHandlers::autoModRuleUpdate);
         addHandler(AutoModRuleDelete.class, DispatchHandlers::autoModRuleDelete);
         addHandler(AutoModActionExecution.class, DispatchHandlers::autoModActionExecute);
+        addHandler(PollVoteAdd.class, PollDispatchHandlers::pollVoteAddHandler);
+        addHandler(PollVoteRemove.class, PollDispatchHandlers::pollVoteRemoveHandler);
+        addHandler(EntitlementCreate.class, MonetizationDispatchHandlers::entitlementCreate);
+        addHandler(EntitlementUpdate.class, MonetizationDispatchHandlers::entitlementUpdate);
+        addHandler(EntitlementDelete.class, MonetizationDispatchHandlers::entitlementDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -218,12 +233,23 @@ public class DispatchHandlers implements DispatchEventMapper {
 
     private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch, VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        VoiceStateData voiceStateData = context.getDispatch().voiceState();
-
+        Optional<VoiceStateData> oldVoiceStateData = context.getOldState();
+        VoiceStateUpdateDispatch voiceStateUpdate = context.getDispatch();
+        VoiceStateData voiceStateData = voiceStateUpdate.voiceState();
         VoiceState current = new VoiceState(gateway, voiceStateData);
 
-        return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
-                                .map(old -> new VoiceState(gateway, old)).orElse(null)));
+        if (oldVoiceStateData.isPresent()
+                && voiceStateData.channelId().isPresent()
+                && !voiceStateData.guildId().isAbsent()
+                && voiceStateData.suppress()
+                && voiceStateData.requestToSpeakTimestamp().isPresent()
+                && !oldVoiceStateData.flatMap(VoiceStateData::requestToSpeakTimestamp).isPresent()) {
+            return Mono.just(new StageRequestToSpeakEvent(gateway, context.getShardInfo(), current,
+                    oldVoiceStateData.map(old -> new VoiceState(gateway, old)).orElse(null)));
+        } else {
+            return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
+                    .map(old -> new VoiceState(gateway, old)).orElse(null)));
+        }
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate, Void> context) {

@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
@@ -34,11 +35,16 @@ import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.monetization.Entitlement;
+import discord4j.core.object.monetization.SKU;
+import discord4j.core.object.entity.channel.StageChannel;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
+import discord4j.core.spec.CreateTestEntitlementMono;
+import discord4j.core.spec.EntitlementListRequestFlux;
 import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditMono;
@@ -50,6 +56,7 @@ import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.UpdateCurrentUserVoiceStateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
@@ -467,6 +474,61 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @param retrievalStrategy The retreival strategy to use
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId, EntityRetrievalStrategy retrievalStrategy) {
+        Objects.requireNonNull(channelId);
+        Objects.requireNonNull(retrievalStrategy);
+        return withRetrievalStrategy(retrievalStrategy).getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Requests to retrieve a {@link StageInstance}.
+     *
+     * @param channelId The channel ID associated to the {@link StageInstance}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstance} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Override
+    public Mono<StageInstance> getStageInstanceByChannelId(Snowflake channelId) {
+        Objects.requireNonNull(channelId);
+        return entityRetriever.getStageInstanceByChannelId(channelId);
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage speakers.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage speakers.
+     */
+    public Mono<Void> joinStageSpeakers(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService()
+                .modifySelfVoiceState(guildId.asLong(),
+                        UpdateCurrentUserVoiceStateRequest.builder().suppress(false).build()));
+    }
+
+    /**
+     * Move the {@link Member} represented by this {@link GatewayDiscordClient} to the stage audience.
+     * Requires the {@link Member} to be connected to a {@link StageChannel}
+     *
+     * @return A {@link Mono} that upon subscription, will move the {@link Member} represented by this
+     * {@link GatewayDiscordClient} to the stage audience.
+     */
+    public Mono<Void> joinStageAudience(Snowflake guildId) {
+        Objects.requireNonNull(guildId);
+        return Mono.defer(() -> getRestClient().getGuildService()
+                .modifySelfVoiceState(guildId.asLong(),
+                        UpdateCurrentUserVoiceStateRequest.builder().suppress(true).build()));
+    }
+
+    /**
      * Disconnects this {@link GatewayDiscordClient} from Discord upon subscribing. All {@link GatewayClient}
      * instances in this shard group will attempt to close their current Gateway session and complete this
      * {@link Mono} after all of them have disconnected.
@@ -795,6 +857,16 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
+    public Mono<ThreadMember> getThreadMemberById(Snowflake threadId, Snowflake userId) {
+        return entityRetriever.getThreadMemberById(threadId, userId);
+    }
+
+    @Override
+    public Flux<ThreadMember> getThreadMembers(Snowflake threadId) {
+        return entityRetriever.getThreadMembers(threadId);
+    }
+
+    @Override
     public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
         return entityRetriever.getGuildAutoModRules(guildId);
     }
@@ -812,6 +884,88 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<ScheduledEventUser> getScheduledEventUsers(Snowflake guildId, Snowflake eventId) {
         return entityRetriever.getScheduledEventUsers(guildId, eventId);
+    }
+
+    /**
+     * Request to retrieve all the {@link SKU SKUs} for the current application.
+     *
+     * @return A {@link Flux} that emits the {@link SKU SKUs} for the application upon successful completion. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Flux<SKU> getSKUs() {
+        return getApplicationInfo().flatMapMany(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .getAllSkus(applicationInfo.getId().asLong())
+                .map(data -> new SKU(this, data));
+        });
+    }
+
+    /**
+     * Request to retrieve the {@link SKU SKU} for the application with the given ID.
+     *
+     * @param applicationId The ID of the application.
+     * @return A {@link Mono} that emits the {@link SKU SKU} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Flux<SKU> getSKUs(long applicationId) {
+        return getRestClient().getMonetizationService()
+            .getAllSkus(applicationId)
+            .map(data -> new SKU(this, data));
+    }
+
+    /**
+     * Request to retrieve all the {@link Entitlement} for the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} that emits the {@link Entitlement} for the application with the given ID upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public EntitlementListRequestFlux getEntitlements() {
+        return EntitlementListRequestFlux.of(this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and guild ID.
+     *
+     * @param skuId   The ID of the SKU.
+     * @param guildId The ID of the guild.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlementForGuild(Snowflake skuId, Snowflake guildId) {
+        return CreateTestEntitlementMono.of(skuId, guildId, Entitlement.OwnerType.GUILD, this, discordClient);
+    }
+
+    /**
+     * Create a test entitlement for the given {@link SKU} and user ID.
+     *
+     * @param skuId  The ID of the SKU.
+     * @param userId The ID of the user.
+     * @return A {@link CreateTestEntitlementMono} that emits the created {@link Entitlement} upon successful
+     * completion. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlementForUser(Snowflake skuId, Snowflake userId) {
+        return CreateTestEntitlementMono.of(skuId, userId, Entitlement.OwnerType.USER, this, discordClient);
+    }
+
+    /**
+     * Delete a test entitlement with the given ID.
+     *
+     * @param entitlementId The ID of the entitlement.
+     * @return A {@link Mono} that completes upon successful deletion.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public Mono<Void> deleteTestEntitlement(Snowflake entitlementId) {
+        return getApplicationInfo().flatMap(applicationInfo -> {
+            return getRestClient().getMonetizationService()
+                .deleteTestEntitlement(applicationInfo.getId().asLong(), entitlementId.asLong());
+        });
     }
 
 }

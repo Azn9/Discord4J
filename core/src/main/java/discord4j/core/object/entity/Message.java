@@ -26,17 +26,23 @@ import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.ThreadChannel;
+import discord4j.core.object.entity.poll.Poll;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.StartThreadFromMessageMono;
+import discord4j.core.spec.StartThreadFromMessageSpec;
 import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.SuppressEmbedsRequest;
+import discord4j.discordjson.json.PollData;
+import discord4j.discordjson.json.StartThreadFromMessageRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.intent.Intent;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.MultipartRequest;
@@ -207,10 +213,27 @@ public final class Message implements Entity {
     /**
      * Gets the contents of the message, if present.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return The contents of the message, if present.
      */
     public String getContent() {
-        return data.content();
+        String content = data.content();
+
+        // No need to check for intents if the content is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!content.isEmpty()) {
+            return content;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return content;
     }
 
     /**
@@ -338,23 +361,57 @@ public final class Message implements Entity {
     /**
      * Gets any attached files, with the same order as in the message.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return Any attached files, with the same order as in the message.
      */
     public List<Attachment> getAttachments() {
-        return data.attachments().stream()
+        List<Attachment> attachments = data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
                 .collect(Collectors.toList());
+
+        // No need to check for intents if the attachments is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!attachments.isEmpty()) {
+            return attachments;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the attachments, but it's actually empty
+        return attachments;
     }
 
     /**
      * Gets any embedded content.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return Any embedded content.
      */
     public List<Embed> getEmbeds() {
-        return data.embeds().stream()
+        List<Embed> embeds = data.embeds().stream()
                 .map(data -> new Embed(gateway, data))
                 .collect(Collectors.toList());
+
+        // No need to check for intents if the embeds is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!embeds.isEmpty()) {
+            return embeds;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the embeds, but it's actually empty
+        return embeds;
     }
 
     /**
@@ -521,17 +578,34 @@ public final class Message implements Entity {
     /**
      * Gets the components on the message.
      *
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
      * @return The components on the message.
      */
     public List<LayoutComponent> getComponents() {
-        return data.components().toOptional()
-                .map(components -> components.stream()
+        List<LayoutComponent> components = data.components().toOptional()
+                .map(componentList -> componentList.stream()
                         .map(MessageComponent::fromData)
                         // top level message components should only be LayoutComponents
                         .filter(component -> component instanceof LayoutComponent)
                         .map(component -> (LayoutComponent) component)
                         .collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
+
+        // No need to check for intents if the components is not empty
+        // This can happen without the intent in the following cases:
+        // - DMs
+        // - Interactions
+        // - A message in which the bot is mentioned
+        // - A message sent by the bot
+        if (!components.isEmpty()) {
+            return components;
+        }
+
+        checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the components, but it's actually empty
+        return components;
     }
 
     /**
@@ -654,24 +728,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
-     * can undo the suppressed embeds.
-     *
-     * @deprecated - As of April 28, 2021, Discord removed the suppress-embeds route in API v9. This method will be
-     * removed in a future update. <a href="https://discord.com/developers/docs/change-log#april-28-2021">
-     * https://discord.com/developers/docs/change-log#april-28-2021</a>
-     * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
-     * completed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Void> suppressEmbeds(final boolean suppress) {
-        return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        SuppressEmbedsRequest.builder().suppress(suppress).build());
-    }
-
-    /**
      * Requests to add a reaction on this message.
      *
      * @param emoji The reaction to add on this message.
@@ -766,6 +822,109 @@ public final class Message implements Entity {
         return gateway.getRestClient().getChannelService()
                 .publishMessage(getChannelId().asLong(), getId().asLong())
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Creates a new thread from an existing message.
+     *
+     * @param spec an immutable object that specifies how to create the thread
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> startThread(StartThreadFromMessageSpec spec) {
+        return gateway.getRestClient().getChannelService()
+                .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
+                .map(data -> new ThreadChannel(gateway, data));
+    }
+
+    /**
+     * Get the poll in the current message.
+     *
+     * @return An {@link Optional} containing the {@link Poll} if present, otherwise {@link Optional#empty()}.
+     * @throws java.lang.UnsupportedOperationException if the {@link Intent#MESSAGE_CONTENT} intent is not enabled and
+     * the content cannot be accessed
+     */
+    public Optional<Poll> getPoll() {
+        Optional<PollData> pollData = this.data.poll().toOptional();
+
+        // If we already have the poll data, we can create the Poll object
+        if (pollData.isPresent()) {
+            return pollData.map(data -> new Poll(this.gateway, data, this.data.channelId().asLong(), this.data.id().asLong()));
+        }
+
+        // We need the MESSAGE_CONTENT intent to access the poll
+        this.checkIfMessageContentAccessIsAllowed();
+
+        // Well, we should have access to the content, but it's actually empty
+        return Optional.empty();
+    }
+
+    /**
+     * Checks if the MESSAGE_CONTENT intent is enabled and if the content is accessible.
+     *
+     * @throws UnsupportedOperationException if the MESSAGE_CONTENT intent is not enabled and the content is empty
+     */
+    private void checkIfMessageContentAccessIsAllowed() {
+        // DMs always have the content
+        if (data.guildId().isAbsent()) {
+            return;
+        }
+
+        // Messages sent by the bot always have the content
+        if (data.author().id().asLong() == gateway.getSelfId().asLong()) {
+            return;
+        }
+
+        // Sticker messages can only have stickers
+        if (!data.stickerItems().toOptional().orElse(Collections.emptyList()).isEmpty()) {
+            return;
+        }
+
+        // If we have access to one of these fields, we can read the content
+        // This assume that one of these fields is not empty when the bot has access to the content
+        if (!data.content().isEmpty()
+                || !data.embeds().isEmpty()
+                || !data.attachments().isEmpty()
+                || !data.components().toOptional().orElse(Collections.emptyList()).isEmpty()) {
+            return;
+        }
+
+        // Check if the MESSAGE_CONTENT intent is enabled
+        if (!this.gateway.getGatewayResources().getIntents().contains(Intent.MESSAGE_CONTENT)) {
+            throw new UnsupportedOperationException("The MESSAGE_CONTENT intent is required to access message content!" +
+                    "\nSee https://github.com/Discord4J/Discord4J?tab=readme-ov-file#calling-messagegetcontent-without-enabling-the-message-content-intent" +
+                    " for more information.");
+        }
+
+        // If we are here, then the MESSAGE_CONTENT intent is enabled, but we still don't have access to the content
+        // This can happen in the following cases:
+        // - The message is a notification message (ex. message pin), and thus don't have neither content nor embeds, etc.
+        // - Discord broke their API :'(
+    }
+
+    /**
+     * Request to create a thread from the current message with the given specification.
+     *
+     * @param spec The specification for the thread.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ThreadChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ThreadChannel> createPublicThread(StartThreadFromMessageRequest spec) {
+        return gateway.getRestClient().getChannelService()
+                .startThreadWithMessage(getChannelId().asLong(), getId().asLong(), spec)
+                .map(data -> new ThreadChannel(gateway, data));
+    }
+
+    /**
+     * Request to create a thread from the current message with the given name. The thread can be configured further
+     * by calling the "withXxx" methods on the returned {@link StartThreadFromMessageMono}.
+     *
+     * @param threadName The name of the thread.
+     * @return A {@link StartThreadFromMessageMono} where, upon successful completion, emits the created {@link ThreadChannel}. If
+     * an error is received, it is emitted through the {@link Mono}.
+     */
+    public StartThreadFromMessageMono createPublicThread(String threadName) {
+        return StartThreadFromMessageMono.of(threadName, this);
     }
 
     @Override
@@ -879,7 +1038,7 @@ public final class Message implements Entity {
         /**
          * Unknown type.
          */
-        UNKNOWN(-1),
+        UNKNOWN(-1, false),
 
         /**
          * A message created by a user.
@@ -887,29 +1046,29 @@ public final class Message implements Entity {
         DEFAULT(0),
 
         /**
-         * A message created when a recipient was added to a DM.
+         * A message created when a recipient was added to a DM or a thread.
          */
-        RECIPIENT_ADD(1),
+        RECIPIENT_ADD(1, false),
 
         /**
-         * A message created when a recipient left a DM.
+         * A message created when a recipient left a DM or a thread.
          */
-        RECIPIENT_REMOVE(2),
+        RECIPIENT_REMOVE(2, false),
 
         /**
          * A message created when a call was started.
          */
-        CALL(3),
+        CALL(3, false),
 
         /**
-         * A message created when a channel's name changed.
+         * A message created when a thread's name changed.
          */
-        CHANNEL_NAME_CHANGE(4),
+        CHANNEL_NAME_CHANGE(4, false),
 
         /**
          * A message created when a channel's icon changed.
          */
-        CHANNEL_ICON_CHANGE(5),
+        CHANNEL_ICON_CHANGE(5, false),
 
         /**
          * A message created when a message was pinned.
@@ -917,33 +1076,34 @@ public final class Message implements Entity {
         CHANNEL_PINNED_MESSAGE(6),
 
         /**
-         * A message created when an user joins a guild.
+         * A message created when a user joins a guild.
          */
         GUILD_MEMBER_JOIN(7),
 
         /**
-         * A message created when an user boost a guild.
+         * A message created when a user boost a guild.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION(8),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 1.
+         * A message created when a user boost a guild and the guild reach the tier 1.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 2.
+         * A message created when a user boost a guild and the guild reach the tier 2.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
 
         /**
-         * A message created when an user boost a guild and the guild reach the tier 3.
+         * A message created when a user boost a guild and the guild reach the tier 3.
          */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
 
         /**
-         * A message created when a user follows a channel from another guild into specific channel (
-         * <a href="https://support.discord.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
+         * A message created when a user follows a channel from another guild into specific channel.
+         *
+         * @see <a href="https://support.discord.com/hc/en-us/articles/360028384531-Channel-Following-FAQ">Channel Following</a>
          */
         CHANNEL_FOLLOW_ADD(12),
 
@@ -973,7 +1133,7 @@ public final class Message implements Entity {
         /**
          * The first message in a thread pointing to a related message in the parent channel from which the thread was started
          * <br>
-         * <b>Note: </b> Only supported from v9 of API
+         * <b>Note:</b> Only supported from v9 of API
         **/
         THREAD_STARTER_MESSAGE(21),
 
@@ -982,6 +1142,11 @@ public final class Message implements Entity {
 
         CONTEXT_MENU_COMMAND(23),
 
+        /**
+         * A message created by AutoMod.
+         * <br>
+         * <b>Note:</b> For remove this type of message you need {@link discord4j.rest.util.Permission#MANAGE_MESSAGES}
+         */
         AUTO_MODERATION_ACTION(24),
 
         ROLE_SUBSCRIPTION_PURCHASE(25),
@@ -996,7 +1161,17 @@ public final class Message implements Entity {
 
         STAGE_TOPIC(31),
 
-        GUILD_APPLICATION_PREMIUM_SUBSCRIPTION(32);
+        GUILD_APPLICATION_PREMIUM_SUBSCRIPTION(32),
+
+        GUILD_INCIDENT_ALERT_MODE_ENABLED(36),
+
+        GUILD_INCIDENT_ALERT_MODE_DISABLED(37),
+
+        GUILD_INCIDENT_REPORT_RAID(38),
+
+        GUILD_INCIDENT_REPORT_FALSE_ALARM(39),
+
+        PURCHASE_NOTIFICATION(40);
 
         /**
          * The underlying value as represented by Discord.
@@ -1004,12 +1179,28 @@ public final class Message implements Entity {
         private final int value;
 
         /**
+         * Define if this type of message are deletable
+         */
+        private final boolean deletable;
+
+        /**
          * Constructs a {@code Message.Type}.
          *
          * @param value The underlying value as represented by Discord.
          */
         Type(final int value) {
+            this(value, true);
+        }
+
+        /**
+         * Constructs a {@code Message.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @param deletable If this type of message is deletable.
+         */
+        Type(final int value, final boolean deletable) {
             this.value = value;
+            this.deletable = deletable;
         }
 
         /**
@@ -1019,6 +1210,15 @@ public final class Message implements Entity {
          */
         public int getValue() {
             return value;
+        }
+
+        /**
+         * Gets if this type of Message can be deleted.
+         *
+         * @return {@code true} if this type of message can be deleted.
+         */
+        public boolean isDeletable() {
+            return deletable;
         }
 
         /**
@@ -1061,6 +1261,11 @@ public final class Message implements Entity {
                 case 29: return STAGE_SPEAKER;
                 case 31: return STAGE_TOPIC;
                 case 32: return GUILD_APPLICATION_PREMIUM_SUBSCRIPTION;
+                case 36: return GUILD_INCIDENT_ALERT_MODE_ENABLED;
+                case 37: return GUILD_INCIDENT_ALERT_MODE_DISABLED;
+                case 38: return GUILD_INCIDENT_REPORT_RAID;
+                case 39: return GUILD_INCIDENT_REPORT_FALSE_ALARM;
+                case 44: return PURCHASE_NOTIFICATION;
                 default: return UNKNOWN;
             }
         }

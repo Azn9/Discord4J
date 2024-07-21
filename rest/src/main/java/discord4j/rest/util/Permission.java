@@ -140,12 +140,15 @@ public enum Permission {
     @Deprecated
     MANAGE_EMOJIS_AND_STICKERS(0x40000000, true),
 
-    /** Allows management and editing of emojis, stickers, and soundboard sounds. */
+    /** Allows for editing and deleting emojis, stickers, and soundboard sounds created by all users. */
     MANAGE_GUILD_EXPRESSIONS(0x40000000, true),
+
+    /** Allows for creating emojis, stickers, and soundboard sounds, and editing and deleting those created by the current user. **/
+    CREATE_GUILD_EXPRESSIONS(0x0000080000000000L, false),
 
     /** Allows members to use slash commands in text channels.
      *
-     *  @deprecated Deprecated in favor of {@link Permission#USE_APPLICATION_COMMANDS}
+     *  @deprecated use the official permission name: {@link #USE_APPLICATION_COMMANDS}
      */
     @Deprecated
     USE_SLASH_COMMANDS(0x80000000L, false),
@@ -154,13 +157,17 @@ public enum Permission {
     USE_APPLICATION_COMMANDS(0x80000000L, false),
 
     /**
-     * Allows for requesting to speak in stage channels.
+     * Allows for requesting to speak in stage channels. Marked as experimental since Discord treats this feature as
+     * "under active development and may be changed or removed"
      */
     @Experimental
     REQUEST_TO_SPEAK(0x0000000100000000L, false),
 
-    /** Allows for creating, editing, and deleting scheduled events. */
+    /** Allows for editing and deleting scheduled events created by all users. */
     MANAGE_EVENTS(0x0000000200000000L, false),
+
+    /** Allows for creating scheduled events, and editing and deleting those created by the current user. */
+    CREATE_EVENTS(0x0000100000000000L, false),
 
     /** Allows for deleting and archiving threads, and viewing all private threads. */
     MANAGE_THREADS(0x0000000400000000L, true),
@@ -168,8 +175,24 @@ public enum Permission {
     /** Allows for creating public and announcement threads. */
     CREATE_PUBLIC_THREADS(0x0000000800000000L, false),
 
+    /**
+     * Allows for creating and participating in threads.
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PUBLIC_THREADS}
+     */
+    @Deprecated
+    USE_PUBLIC_THREADS(0x0000000800000000L, false),
+
     /** Allows for creating private threads. */
     CREATE_PRIVATE_THREADS(0x0000001000000000L, false),
+
+    /**
+     * Allows for creating and participating in private threads
+     *
+     * @deprecated use the official permission name: {@link #CREATE_PRIVATE_THREADS}
+     */
+    @Deprecated
+    USE_PRIVATE_THREADS(0x0000001000000000L, false),
 
     /** Allows the usage of custom stickers from other servers. */
     USE_EXTERNAL_STICKERS(0x0000002000000000L, false),
@@ -181,7 +204,8 @@ public enum Permission {
     USE_EMBEDDED_ACTIVITIES(0x0000008000000000L, false),
 
     /**
-     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels.
+     * Allows for timing out users to prevent them from sending or reacting to messages in chat and threads,
+     * and from speaking in voice and stage channels.
      */
     MODERATE_MEMBERS(0x0000010000000000L, false),
 
@@ -195,7 +219,18 @@ public enum Permission {
     USE_EXTERNAL_SOUNDS(0x0000200000000000L, false),
 
     /** Allows sending voice messages. */
-    SEND_VOICE_MESSAGES(0x0000400000000000L, false);
+    SEND_VOICE_MESSAGES(0x0000400000000000L, false),
+
+    /** Allows creating polls */
+    SEND_POLLS(0x0002000000000000L, false),
+
+    /** Allows user-installed apps to send public responses.
+     * <br>
+     * When disabled, users will still be allowed to use their apps but the responses will be ephemeral.
+     * <br>
+     * <b>Note:</b> This only applies to apps not also installed to the server.
+     * */
+    USE_EXTERNAL_APPS(0x0004000000000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;

@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.PartialMemberData;
+import discord4j.discordjson.json.UpdateUserVoiceStateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
@@ -201,6 +202,17 @@ public class PartialMember extends User {
     }
 
     /**
+     * Gets the user avatar decoration, if present.
+     *
+     * @return The user avatar decoration, if present.
+     */
+    @Override
+    public Optional<AvatarDecoration> getAvatarDecoration() {
+        return Possible.flatOpt(data.avatarDecoration())
+            .map(data -> new AvatarDecoration(this.getClient(), data));
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
@@ -253,7 +265,9 @@ public class PartialMember extends User {
      * user exists in context of the mention).
      *
      * @return The <i>raw</i> nickname mention.
+     * @deprecated This type of ping has been deprecated in the Discord API.
      */
+    @Deprecated
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
     }
@@ -276,7 +290,7 @@ public class PartialMember extends User {
      */
     public final Optional<String> getGuildAvatarUrl(final Image.Format format) {
         return data.avatar().map(avatar -> ImageUtil.getUrl(
-                String.format(AVATAR_IMAGE_PATH, guildId, getId().asString(), avatar), format));
+            String.format(AVATAR_IMAGE_PATH, guildId, getId().asString(), avatar), format));
     }
 
     /**
@@ -350,7 +364,8 @@ public class PartialMember extends User {
                         .flatMapIterable(list -> list)
                         .next()
                         .map(Presence::new))
-                    // IllegalArgumentException can be thrown during request validation if intents are not matching the request
+                    // IllegalArgumentException can be thrown during request validation if intents are not matching
+                        // the request
                     .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
             });
         }
@@ -675,6 +690,54 @@ public class PartialMember extends User {
                 .map(data -> new Member(getClient(), data, getGuildId().asLong())));
     }
 
+    /**
+     * Requests to invite this member to the stage speakers. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been invited to the speakers. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> inviteToStageSpeakers() {
+        return getVoiceState().flatMap(voiceState ->
+                Mono.defer(() -> getClient().getRestClient().getGuildService()
+                        .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(),
+                                UpdateUserVoiceStateRequest.builder()
+                                        .channelId(voiceState.getChannelId()
+                                                .orElseThrow(IllegalStateException::new)
+                                                .asString())
+                                        .suppress(false)
+                                        .build())));
+    }
+
+    /**
+     * Requests to move this member to the stage audience. Require this user to be connected to
+     * a stage channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member
+     *         has been moved to the audience. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> moveToStageAudience() {
+        return getVoiceState().flatMap(voiceState ->
+                Mono.defer(() -> getClient().getRestClient().getGuildService()
+                        .modifyOthersVoiceState(getGuildId().asLong(), getUserData().id().asLong(),
+                                UpdateUserVoiceStateRequest.builder()
+                                        .channelId(voiceState.getChannelId()
+                                                .orElseThrow(IllegalStateException::new)
+                                                .asString())
+                                        .suppress(true)
+                                        .build())));
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object object) {
+        if (object instanceof PartialMember) {
+            PartialMember other = (PartialMember) object;
+            return guildId == other.guildId && getId().equals(other.getId());
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public String toString() {
         return "PartialMember{" +
@@ -683,8 +746,11 @@ public class PartialMember extends User {
             "} " + super.toString();
     }
 
-    /** Describes the flags of a member in a guild.
-     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
+    /**
+     * Describes the flags of a member in a guild.
+     *
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags">Discord Docs - Guild Member Flags</a>
      **/
     public enum Flag {
         /**
@@ -698,7 +764,8 @@ public class PartialMember extends User {
         /**
          * Member has completed onboarding
          * <br>
-         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a server.
+         * <b>Note:</b> this flag allows a member who does not meet verification requirements to participate in a
+         * server.
          */
         BYPASSES_VERIFICATION(2),
         /**

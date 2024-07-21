@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.AvatarDecoration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ResolvedMemberData;
@@ -94,6 +95,15 @@ public class ResolvedMember implements DiscordObject {
     }
 
     /**
+     * Gets the avatar hash of this member, if provided.
+     *
+     * @return The avatar hash, if present.
+     */
+    public Optional<String> getAvatar() {
+        return Possible.flatOpt(data.avatar());
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
@@ -155,7 +165,9 @@ public class ResolvedMember implements DiscordObject {
      * user exists in context of the mention).
      *
      * @return The <i>raw</i> nickname mention.
+     * @deprecated This type of ping has been deprecated in the Discord API.
      */
+    @Deprecated
     public String getNicknameMention() {
         return "<@!" + getId().asString() + ">";
     }
@@ -188,6 +200,16 @@ public class ResolvedMember implements DiscordObject {
      */
     public Mono<Member> asFullMember(EntityRetrievalStrategy retrievalStrategy) {
         return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(getGuildId(), getId());
+    }
+
+    /**
+     * Gets the user avatar decoration, if present.
+     *
+     * @return The user avatar decoration, if present.
+     */
+    public Optional<AvatarDecoration> getAvatarDecoration() {
+        return Possible.flatOpt(data.avatarDecoration())
+            .map(data -> new AvatarDecoration(this.getClient(), data));
     }
 
     @Override

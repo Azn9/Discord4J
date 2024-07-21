@@ -48,12 +48,15 @@ public class RestClient {
     private final GuildService guildService;
     private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final StageInstanceService stageInstanceService;
     private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
     private final Mono<Long> applicationIdMono;
     private final AutoModService autoModService;
+    private final PollService pollService;
+    private final MonetizationService monetizationService;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -93,11 +96,14 @@ public class RestClient {
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.stageInstanceService = new StageInstanceService(router);
         this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
         this.autoModService = new AutoModService(router);
+        this.pollService = new PollService(router);
+        this.monetizationService = new MonetizationService(router);
 
         this.applicationIdMono = getApplicationInfo()
                 .map(app -> Snowflake.asLong(app.id()))
@@ -451,6 +457,17 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve a stage instance.
+     *
+     * @param channelId The channel id associated to the stage instance.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link StageInstanceData} associated to the
+     * supplied channel ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<StageInstanceData> getStageInstance(final Snowflake channelId) {
+        return stageInstanceService.getStageInstance(channelId.asLong());
+    }
+
+    /**
      * Access a low-level representation of the API endpoints for the Application resource.
      *
      * @return a handle to perform low-level requests to the API
@@ -540,6 +557,16 @@ public class RestClient {
     }
 
     /**
+     * Access a low-level representation of the API endpoints for the Stage Instance resource. It is recommended you use
+     * the {@link #getStageInstance(Snowflake)} method.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public StageInstanceService getStageInstanceService() {
+        return this.stageInstanceService;
+    }
+
+    /**
      * Access a low-level representation of the API endpoints for the Template resource. It is recommended you use
      * methods like {@link #getTemplate(String)}, or {@link RestGuildTemplate#create(RestClient, String)}.
      *
@@ -589,7 +616,19 @@ public class RestClient {
         return autoModService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Monetization resource.
+     * @return a handle to perform low-level requests to the API
+     */
+    public MonetizationService getMonetizationService() {
+        return monetizationService;
+    }
+
     public Mono<Long> getApplicationId() {
         return applicationIdMono;
+    }
+
+    public PollService getPollService() {
+        return this.pollService;
     }
 }

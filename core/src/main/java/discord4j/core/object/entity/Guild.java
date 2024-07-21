@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -23,12 +24,14 @@ import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.channel.*;
+import discord4j.core.object.onboarding.Onboarding;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.*;
 import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.MentionUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
@@ -550,9 +553,26 @@ public final class Guild implements Entity {
      * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
+     * @deprecated Use {@code Guild#getGuildFeatures} instead
      */
+    @Deprecated
     public Set<String> getFeatures() {
         return new HashSet<>(data.features());
+    }
+
+    /**
+     * Gets the enabled features of this {@link Guild}.
+     * If the EnumSet contains an UNKNOWN value, it means that one or more values are not implemented yet
+     * or did not match the Discord Guild Features.
+     * <br>
+     * Raw data features are still available with {@link #getData} using {@link GuildData#features}.
+     *
+     * @return A {@code EnumSet} with the enabled guild features.
+     */
+    public EnumSet<GuildFeature> getGuildFeatures() {
+        return data.features().stream()
+            .map(GuildFeature::of)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(GuildFeature.class)));
     }
 
     /**
@@ -1026,6 +1046,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the mention for the given {@link ResourceNavigation} channel.
+     *
+     * @param resourceNavigation The {@link ResourceNavigation} to get the mention for.
+     * @return The mention for the given {@link ResourceNavigation} channel.
+     */
+    public String getResourceNavigationMention(ResourceNavigation resourceNavigation) {
+        return resourceNavigation.getMention();
+    }
+
+    /**
      * Gets the maximum amount of members of the guild, if present.
      *
      * @return The maximum amount of members for the guild, if present.
@@ -1446,6 +1476,39 @@ public final class Guild implements Entity {
                 .cast(VoiceChannel.class);
     }
 
+
+    /**
+     * Requests to create a stage channel.
+     *
+     * @param spec an immutable object that specifies how to create the stage channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link StageChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> createStageChannel(StageChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                        () -> gateway.getRestClient().getGuildService()
+                                .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to create a forum channel.
+     *
+     * @param spec an immutable object that specifies how to create the forum channel
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ForumChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ForumChannel> createForumChannel(ForumChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
+        return Mono.defer(
+                () -> gateway.getRestClient().getGuildService()
+                    .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
+            .map(data -> EntityUtil.getChannel(gateway, data))
+            .cast(ForumChannel.class);
+    }
+
     /**
      * Requests to create an automod rule. Properties specifying how to create the rule can be set via the
      * {@code withXxx} methods of the returned {@link AutoModRuleCreateMono}.
@@ -1606,6 +1669,38 @@ public final class Guild implements Entity {
     public Mono<Void> unban(final Snowflake userId, @Nullable final String reason) {
         return gateway.getRestClient().getGuildService()
                 .removeGuildBan(getId().asLong(), userId.asLong(), reason);
+    }
+
+    /**
+     * Requests to ban the specified users. Properties specifying how to ban the user can be set via the {@code withXxx}
+     * methods of the returned {@link BulkBanRequestMono}.
+     *
+     * @param userIds The list of IDs of the users to ban.
+     * @return A {@link BulkBanRequestMono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     *      * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public BulkBanRequestMono bulkBan(List<Snowflake> userIds) {
+        return BulkBanRequestMono.of(this).withUserIds(userIds);
+    }
+
+    /**
+     * Request a Bulk Ban to a specific list of users.
+     * <br>
+     * <b>Things considered error for this request</b>
+     * <ul>
+     *   <li>The list of users is over 200</li>
+     *   <li>None of the list of users can be banned</li>
+     * </ul>
+     *
+     * @param spec an immutable object that specifies how to bulk ban in the guild
+     * @return A {@link Mono} where, upon successful completion, emits an {@link BulkBan} with the results.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<BulkBan> bulkBan(BulkBanRequestSpec spec) {
+        Objects.requireNonNull(spec);
+        return gateway.getRestClient().getGuildService()
+            .bulkGuildBan(getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new BulkBan(gateway, data));
     }
 
     /**
@@ -1891,6 +1986,27 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the active threads of the guild.
+     * <p>
+     * The audit log parts can be {@link ThreadListPart#combine(ThreadListPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getActiveThreads()
+     *     .take(10)
+     *     .reduce(ThreadListPart::combine)
+     * }
+     * </pre>
+     *
+     * @return A {@link Flux} that continually emits the {@link ThreadListPart threads} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Mono<ThreadListPart> getActiveThreads() {
+        return gateway.getRestClient().getGuildService()
+                .listActiveGuildThreads(data.id().asLong())
+                .map(data -> new ThreadListPart(gateway, data));
+    }
+
+    /**
      * Requests to retrieve the automod rules of the guild. Requires the MANAGE_GUILD permission.
      *
      * @return A {@link Flux} that continually emits the {@link AutoModRule automod rules} of the guild. If an error is
@@ -1949,6 +2065,67 @@ public final class Guild implements Entity {
     public Mono<ScheduledEvent> createScheduledEvent(ScheduledEventCreateSpec spec) {
         return gateway.getRestClient().getGuildService().createScheduledEvent(getId().asLong(), spec.asRequest())
             .map(data -> new ScheduledEvent(gateway, data));
+    }
+
+    /**
+     * Request the guild's entitlements associated with the current application.
+     * The request can be filtered using the "withXXX" methods of the returned {@link EntitlementListRequestFlux}.
+     *
+     * @return A {@link EntitlementListRequestFlux} which emits {@link discord4j.core.object.monetization.Entitlement} objects.
+     * If an error is received, it is emitted through the {@link Flux}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public EntitlementListRequestFlux getEntitlements() {
+        return gateway.getEntitlements().withGuildId(getId());
+    }
+
+    /**
+     * Request to create a test entitlement for the guild with the provided SKU ID.
+     *
+     * @return A {@link CreateTestEntitlementMono} which emits the created {@link discord4j.core.object.monetization.Entitlement}.
+     * If an error is received, it is emitted through the {@link Mono}.
+     */
+    @Experimental // This method could not be tested due to the lack of a Discord verified application
+    public CreateTestEntitlementMono createTestEntitlement(Snowflake skuId) {
+        return gateway.createTestEntitlementForGuild(skuId, getId());
+    }
+
+    /**
+     * Get the onboarding of the guild.
+     *
+     * @return A {@link Mono} which, upon completion, emits the {@link Onboarding} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<Onboarding> getOnboarding() {
+        return this.gateway.getRestClient()
+            .getGuildService()
+            .getOnboarding(this.getId().asLong())
+            .map(data -> new Onboarding(this.gateway, data));
+    }
+
+    /**
+     * Request to edit the onboarding of the guild with the provided spec.
+     *
+     * @param spec spec specifying how to edit the onboarding
+     * @return A {@link Mono} which, upon completion, emits the edited {@link Onboarding} object. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public Mono<Onboarding> modifyOnboarding(OnboardingEditSpec spec) {
+        return this.gateway.getRestClient()
+            .getGuildService()
+            .modifyOnboarding(this.getId().asLong(), spec.asRequest(), spec.reason())
+            .map(data -> new Onboarding(this.gateway, data));
+    }
+
+    /**
+     * Requests to edit the onboarding of the guild. Properties specifying how to edit the onboarding can be set via the
+     * {@code withXxx} methods of the returned {@link OnboardingEditMono}.
+     *
+     * @return A {@link Mono} which, upon completion, emits nothing. Any error, if occurs,
+     * is emitted through the {@link Mono}.
+     */
+    public OnboardingEditMono modifyOnboarding() {
+        return OnboardingEditMono.of(this);
     }
 
     @Override
@@ -2366,6 +2543,152 @@ public final class Guild implements Entity {
                 case 3: return AGE_RESTRICTED;
                 default: return UNKNOWN;
             }
+        }
+    }
+
+    /**
+     * Describes the features of a guild.
+     * <br>
+     * You can see the available
+     * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">Guild Features</a>
+     */
+    public enum GuildFeature {
+
+        /* indicates that the value is not implemented yet or does not match any of the Discord Guild Features */
+        UNKNOWN("UNKNOWN", false),
+        /* guild has access to set an animated guild banner image */
+        ANIMATED_BANNER("ANIMATED_BANNER", false),
+        /* guild has access to set an animated guild icon */
+        ANIMATED_ICON("ANIMATED_ICON", false),
+        /* guild is using the old permissions configuration behavior */
+        APPLICATION_COMMAND_PERMISSIONS_V2("APPLICATION_COMMAND_PERMISSIONS_V2", false),
+        /* guild has set up auto moderation rules */
+        AUTO_MODERATION("AUTO_MODERATION", false),
+        /* guild has access to set a guild banner image */
+        BANNER("BANNER", false),
+        /* guild can enable welcome screen, Membership Screening, stage channels and discovery, and receives community updates */
+        COMMUNITY("COMMUNITY", true),
+        /* guild has enabled monetization */
+        CREATOR_MONETIZABLE_PROVISIONAL("CREATOR_MONETIZABLE_PROVISIONAL", false),
+        /* guild has enabled the role subscription promo page */
+        CREATOR_STORE_PAGE("CREATOR_STORE_PAGE", false),
+        /* guild has been set as a support server on the App Directory */
+        DEVELOPER_SUPPORT_SERVER("DEVELOPER_SUPPORT_SERVER", false),
+        /* guild is able to be discovered in the directory */
+        DISCOVERABLE("DISCOVERABLE", true),
+        /* guild is able to be featured in the directory */
+        FEATURABLE("FEATURABLE", false),
+        /* guild has paused invites, preventing new users from joining */
+        INVITES_DISABLED("INVITES_DISABLED", true),
+        /* guild has access to set an invite splash background */
+        INVITE_SPLASH("INVITE_SPLASH", false),
+        /* guild has enabled Membership Screening */
+        MEMBER_VERIFICATION_GATE_ENABLED("MEMBER_VERIFICATION_GATE_ENABLED", false),
+        /* guild has increased custom sticker slots */
+        MORE_STICKERS("MORE_STICKERS", false),
+        /* guild has access to create announcement channels */
+        NEWS("NEWS", false),
+        /* guild is partnered */
+        PARTNERED("PARTNERED", false),
+        /* guild can be previewed before joining via Membership Screening or the directory */
+        PREVIEW_ENABLED("PREVIEW_ENABLED", false),
+        /* guild has disabled alerts for join raids in the configured safety alerts channel */
+        RAID_ALERTS_DISABLED("RAID_ALERTS_DISABLED", true),
+        /* guild is able to set role icons */
+        ROLE_ICONS("ROLE_ICONS", false),
+        /* guild has role subscriptions that can be purchased */
+        ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE("ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", false),
+        /* guild has enabled role subscriptions */
+        ROLE_SUBSCRIPTIONS_ENABLED("ROLE_SUBSCRIPTIONS_ENABLED", false),
+        /* guild has enabled ticketed events */
+        TICKETED_EVENTS_ENABLED("TICKETED_EVENTS_ENABLED", false),
+        /* guild has access to set a vanity URL */
+        VANITY_URL("VANITY_URL", false),
+        /* guild is verified */
+        VERIFIED("VERIFIED", false),
+        /* guild has access to set 384kbps bitrate in voice (previously VIP voice servers) */
+        VIP_REGIONS("VIP_REGIONS", false),
+        /* guild has enabled the welcome screen */
+        WELCOME_SCREEN_ENABLED("WELCOME_SCREEN_ENABLED", false);
+
+        private final String value;
+
+        private final boolean mutable;
+
+        GuildFeature(String value, boolean mutable) {
+            this.value = value;
+            this.mutable = mutable;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * @see <a href="https://discord.com/developers/docs/resources/guild#guild-object-mutable-guild-features">Mutable Guild Features</a>
+         * @return a boolean indicating if the guild feature is mutable or not
+         */
+        public boolean isMutable() {
+            return mutable;
+        }
+
+        /**
+         * Gets the enabled guild features.
+         * For internal use, we set unknown values to UNKNOWN.
+         * @param value The value as represented by Discord.
+         * @return The {@link EnumSet} of enabled features.
+         */
+        public static GuildFeature of(final String value) {
+            return Arrays.stream(GuildFeature.values())
+                .filter(guildFeature -> guildFeature.getValue().equals(value))
+                .findAny()
+                .orElse(GuildFeature.UNKNOWN);
+        }
+
+    }
+
+    /**
+     * Describes guild navigation types.
+     *
+     * @see <a href="https://discord.com/developers/docs/reference#message-formatting-guild-navigation-types">Discord Docs</a>
+     */
+    public enum ResourceNavigation {
+        /** Customize tab with the server's onboarding prompts */
+        CUSTOMIZE("customize"),
+        /** Browse Channels tab */
+        BROWSE("browse"),
+        /** Server Guide */
+        GUIDE("guide"),
+        ;
+
+        /** The underlying value as represented by Discord. */
+        private final String value;
+
+        /**
+         * Constructs an {@code Guild.ResourceNavigation}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ResourceNavigation(final String value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public String getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the <i>raw</i> mention. This is the format utilized to directly mention guild resource.
+         *
+         * @return The <i>raw</i> mention.
+         */
+        public String getMention() {
+            return MentionUtil.forGuildResourceNavigation(this);
         }
     }
 
